@@ -1,9 +1,7 @@
-#include "StdAfx.h"
-
 #include <mersenne.h>
 extern MTRand mrand;
 
-#include ".\gacar.h"
+#include "GaCar.h"
 namespace GA
 {
 
@@ -39,8 +37,8 @@ double DecodeGen(int nLen, const char *genes, double nMin, double nMax, size_t& 
 	}
 
 
-//	1 dígito: A - Z ou 0 à 25, ou seja, d26[1]-1
-//	2 dígitos: Máximo: ZZ que é 25*26 + 25 = 675, ou seja, d26[2]-1
+//	1 dï¿½gito: A - Z ou 0 ï¿½ 25, ou seja, d26[1]-1
+//	2 dï¿½gitos: Mï¿½ximo: ZZ que ï¿½ 25*26 + 25 = 675, ou seja, d26[2]-1
 
 	return (double)map_values(0,d26[nLen]-1,nMin,nMax,dVal);
 }
@@ -96,16 +94,6 @@ string CGaCar::getGenesString(void)
 	return string(_genes);
 }
 
-void CGaCar::getGenes(CString& genes)
-{
-	genes = CString(_genes.c_str());
-}
-
-CString CGaCar::getGenesCString(void)
-{
-	return CString(_genes.c_str());
-}
-
 void CGaCar::setGenes(const char *genes)
 {
 	if(genes == NULL || strlen(genes) != GENES)
@@ -143,7 +131,7 @@ void CGaCar::_decode(void)
 		_carro._damp[i] = DecodeGen(nLen,_genes.c_str(),dMinDamp,dMaxDamp,nPos);
 	}
 
-//	TRACE1("\r\nTamanho da sequência genética: %d", nPos);_asm int 3;
+//	TRACE1("\r\nTamanho da sequï¿½ncia genï¿½tica: %d", nPos);_asm int 3;
 
 	return;
 }

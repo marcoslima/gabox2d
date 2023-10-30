@@ -1,0 +1,5 @@
+/home/marcos/projects/GaBox2d-2022/GaBox2d/build/CMakeFiles/imgui.dir
+/home/marcos/projects/GaBox2d-2022/GaBox2d/build/CMakeFiles/imgui-sfml.dir
+/home/marcos/projects/GaBox2d-2022/GaBox2d/build/CMakeFiles/GaBox2d.dir
+/home/marcos/projects/GaBox2d-2022/GaBox2d/build/CMakeFiles/edit_cache.dir
+/home/marcos/projects/GaBox2d-2022/GaBox2d/build/CMakeFiles/rebuild_cache.dir

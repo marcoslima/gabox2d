@@ -1,4 +1,3 @@
-#include <stdafx.h>
 #include <algorithm>
 using namespace std;
 #include <mersenne.h>
@@ -56,7 +55,7 @@ void CGa::setParams(	size_t	nPopulacao	,
 
 void CGa::BeginEvolve(void)
 {
-	// Cria a população:
+	// Cria a populaï¿½ï¿½o:
 	_cria_populacao();
 
 	_bMassExtintion = false;
@@ -79,7 +78,7 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 
 	double pts;
 
-	// Ordenamos (medições)
+	// Ordenamos (mediï¿½ï¿½es)
 	lst_car_t::iterator it;
 	for(it = m_populacao.begin();
 		it!= m_populacao.end();
@@ -104,36 +103,36 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 		t  = it->getT()			; 
 
 		/*
-			A pontuação é meio difícil por que, para ser absoluta, não pode
-			depender da população.
-			Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t)
-			Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
-			será mais importante que os outros parâmetros de avaliação.
+			A pontuaï¿½ï¿½o ï¿½ meio difï¿½cil por que, para ser absoluta, nï¿½o pode
+			depender da populaï¿½ï¿½o.
+			Mas se nï¿½o depender, ï¿½ muito difï¿½cil normalizar as partes (c1, c2, v, d e t)
+			Sem normalizar, a distï¿½ncia, por exemplo, que pode ter valores grandes,
+			serï¿½ mais importante que os outros parï¿½metros de avaliaï¿½ï¿½o.
 
-			Para resolver isso, vamos fazer o fitness como sendo a distância
-			euclidiana de um vetor composto pelos parâmetros de avaliação à um 
+			Para resolver isso, vamos fazer o fitness como sendo a distï¿½ncia
+			euclidiana de um vetor composto pelos parï¿½metros de avaliaï¿½ï¿½o ï¿½ um 
 			vetor constante ideal.
 			
-			O vetor será (c1, c2, v, d, t).
-			O vetor objetivo ideal será: (t_max,t_max,1000,1000,0).
+			O vetor serï¿½ (c1, c2, v, d, t).
+			O vetor objetivo ideal serï¿½: (t_max,t_max,1000,1000,0).
 			Ou seja, 
-				. o tempo de contato das rodas é o máximo possível
-				. A velocidade é a máxima possível
-				. A distância percorrida é a máxima possível
-				. O tempo gasto é o mínimo. no caso nem é possível, pois é zero.
+				. o tempo de contato das rodas ï¿½ o mï¿½ximo possï¿½vel
+				. A velocidade ï¿½ a mï¿½xima possï¿½vel
+				. A distï¿½ncia percorrida ï¿½ a mï¿½xima possï¿½vel
+				. O tempo gasto ï¿½ o mï¿½nimo. no caso nem ï¿½ possï¿½vel, pois ï¿½ zero.
 
-			Para não gastar um sqrt à toa, faremos o quadrado da distância.
+			Para nï¿½o gastar um sqrt ï¿½ toa, faremos o quadrado da distï¿½ncia.
 		*/
 
 		p1 = _max_t - c1;
 		p2 = _max_t - c2;
 		p3 = 1000 - v;
 		p4 = 1000 - d;
-		p5 = t; // 0 - t = -t, mas como será ao quadrado, deixa t mesmo.
+		p5 = t; // 0 - t = -t, mas como serï¿½ ao quadrado, deixa t mesmo.
 
 		pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
 		
-		// Se quebrou, vale um décimo de um que não quebrou:
+		// Se quebrou, vale um dï¿½cimo de um que nï¿½o quebrou:
 		if(it->m_bDead) pts *= 10;
 
 		it->setPontos(pts);
@@ -161,7 +160,7 @@ void CGa::_1Select(void)
 {
 	size_t i;
 
-	// A população já está ordenada.
+	// A populaï¿½ï¿½o jï¿½ estï¿½ ordenada.
 	// Elitismo:
 	lst_car_t::iterator it;
 	for(it = m_populacao.begin(),i = 0;
@@ -177,7 +176,7 @@ void CGa::_1Select(void)
 		m_nova.push_back(CString("__")+(CCar()).getGenesCString());
 	}
 
-	// Inclusão arbitrária:
+	// Inclusï¿½o arbitrï¿½ria:
 	if(!_strId2Include.IsEmpty())
 	{
 		m_nova.push_back(_strId2Include);
@@ -241,13 +240,13 @@ void CGa::_3Mutate(void)
 	{
 		if(mrand.rand(100.0) < _mutacao)
 		{
-			// Mutação:
-			// Ponto da mutação:
+			// Mutaï¿½ï¿½o:
+			// Ponto da mutaï¿½ï¿½o:
 			nMut = mrand.randInt(GENES-1);
 
 			VERIFY(m_nova[i].Left(2) != "__");
 
-			// Intensidade e direção da mutação:
+			// Intensidade e direï¿½ï¿½o da mutaï¿½ï¿½o:
 			g = (char)(m_nova[i].GetAt(nMut) + mrand.randInt((MTRand::uint32)_mut_int) * (mrand.randInt(1)?(1):(-1)));
 
 			if(g < 'A') g = 'A';
@@ -260,10 +259,10 @@ void CGa::_3Mutate(void)
 
 void CGa::_4AdvanceGeneration(void)
 {
-	// Nova geração:
+	// Nova geraï¿½ï¿½o:
 	m_populacao.clear();
 
-	// Se for para fazer extinção em massa, criamos aleatórios no lugar:
+	// Se for para fazer extinï¿½ï¿½o em massa, criamos aleatï¿½rios no lugar:
 	if(_bMassExtintion)
 	{
 		_cria_populacao();
@@ -326,28 +325,28 @@ void CGa::Step(void)
 	s = StdDev<double,double>(_vec_select);
 	Significativos(m,s);
 
-	strPart.Format("%f ± %f, ",m,s);
+	strPart.Format("%f ï¿½ %f, ",m,s);
 	strLine += strPart;
 
 	m = Media<double,double>(_vec_crossover);
 	s = StdDev<double,double>(_vec_crossover);
 	Significativos(m,s);
 
-	strPart.Format("%f ± %f, ",m,s);
+	strPart.Format("%f ï¿½ %f, ",m,s);
 	strLine += strPart;
 
 	m = Media<double,double>(_vec_mutate);
 	s = StdDev<double,double>(_vec_mutate);
 	Significativos(m,s);
 
-	strPart.Format("%f ± %f, ",m,s);
+	strPart.Format("%f ï¿½ %f, ",m,s);
 	strLine += strPart;
 
 	m = Media<double,double>(_vec_advance);
 	s = StdDev<double,double>(_vec_advance);
 	Significativos(m,s);
 
-	strPart.Format("%f ± %f\r\n",m,s);
+	strPart.Format("%f ï¿½ %f\r\n",m,s);
 	strLine += strPart;
 
 	_fileLog1.Write(strLine,strLine.GetLength());
@@ -360,7 +359,7 @@ void CGa::CopyPopulacao(lst_car_t *pTarget)
 }
 
 
-// TODO: Mover esta função para um lugar mais apropriado
+// TODO: Mover esta funï¿½ï¿½o para um lugar mais apropriado
 /*
 bool CGa::OpenLogFile(void)
 {
@@ -382,8 +381,8 @@ bool CGa::OpenLogFile(void)
 							"set terminal jpeg font arial 26 size 1400,750;\n"
 							"set grid xtics x2tics ytics y2tics;\n"
 							"show label;\n"
-							"set xlabel \"Geração\";\n"
-							"set ylabel \"Pontuação\";\n"
+							"set xlabel \"Geraï¿½ï¿½o\";\n"
+							"set ylabel \"Pontuaï¿½ï¿½o\";\n"
 							"set output \"%s.jpg\";\n"
 							"plot	\"%s\" with lines title  \"fit\";\n"
 							, strFile,strDat);

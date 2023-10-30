@@ -1,7 +1,7 @@
 #ifndef __PHYSCAR_H__
 #define __PHYSCAR_H__
 
-#include <box2d.h>
+#include <box2d/box2d.h>
 #include "CarDef.h"
 #include "env.h"
 using namespace MODEL;
@@ -31,9 +31,9 @@ typedef struct tagCarParams
 
 	double	torque[4];
 
-	// Para que os distance joints façam parte do genoma,
+	// Para que os distance joints faï¿½am parte do genoma,
 	// teremos a frequencia de resposta e o damp deles codificados
-	// também.
+	// tambï¿½m.
 	double	freq[6];
 	double damp[6];	
 } car_t;
@@ -61,7 +61,7 @@ public:
 	~CPhysCar(void);
 
 public:
-// Definições do carro (decodificados dos genes)
+// Definiï¿½ï¿½es do carro (decodificados dos genes)
 	car_t	_car_def;
 
 // Instanciamento do carro no box2d
@@ -87,7 +87,7 @@ protected:
 	double _timeStep;
 	int32   _iterations;
 
-	// Temporárias durante simulação:
+	// Temporï¿½rias durante simulaï¿½ï¿½o:
 	b2Vec2	_x0	;
 	double	_t;
 	bool	m_bContactR1;
@@ -99,7 +99,7 @@ protected:
 	b2Vec2 _cVel;
 	b2Vec2 _cPos;
 
-// Dados efêmeros. Só existem durante a medição/simulação do carro.
+// Dados efï¿½meros. Sï¿½ existem durante a mediï¿½ï¿½o/simulaï¿½ï¿½o do carro.
 public:
 	double _trqA;
 	double _trqB;
@@ -117,7 +117,7 @@ private:
 protected:
 	void _init(void);
 
-	// Usa as definições decodificadas para criar o objeto em si no box2d
+	// Usa as definiï¿½ï¿½es decodificadas para criar o objeto em si no box2d
 	void _create				(b2World* pWorld, CCarDef carro);
 	void _destroy				(void			);
 	void _phys_begin_simulate	(void			);
@@ -125,7 +125,7 @@ protected:
 	bool _simulation_step		(void			);
 
 
-// Suporte à simulação no Box2d
+// Suporte ï¿½ simulaï¿½ï¿½o no Box2d
 public:
 	b2Vec2 getCenter(void);
 	// Queries

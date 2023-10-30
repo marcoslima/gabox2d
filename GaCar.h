@@ -26,7 +26,7 @@ public:
 	// Decodificado
 	CCarDef	_carro;
 
-// Suporte ao algoritmo genético:
+// Suporte ao algoritmo genï¿½tico:
 public:
 	double	_pontos				;
 
@@ -34,7 +34,7 @@ public:
 protected:
 	void _generate_random_genes(void);
 
-	// Decodifica o carro dos genes criando-o nas definições
+	// Decodifica o carro dos genes criando-o nas definiï¿½ï¿½es
 	void _decode(void);
 
 public:
@@ -42,12 +42,10 @@ public:
 	CGaCar(const char* szGenes);
 	~CGaCar(void);
 	void getGenes(string& genes);
-	void getGenes(CString& genes);
 	inline const char *getGenes(void){return _genes.c_str();}
 	inline char getGene(size_t nIndex){return _genes[nIndex];}
 	inline void setGene(size_t nIndex, char gen){_genes[nIndex] = gen;}
 	string getGenesString(void);
-	CString getGenesCString(void);
 	double getPontuacao(void) const {return _pontos;}
 	void setGenes(const char *genes);
 	void setPontos(double pontos){_pontos = pontos;}

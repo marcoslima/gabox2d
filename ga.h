@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 #include <pcrecpp.h>
-#include <lmFisica.h>
+#include "lmFisica.h"
 using namespace pcrecpp;
 using namespace std;
 using namespace LmFisica;
@@ -25,35 +25,35 @@ typedef vector<melhor_t> vec_melhores_t;
 
 class CGa
 {
-// Parâmetros para o algoritmo genético
+// Parï¿½metros para o algoritmo genï¿½tico
 private:
-	double	_max_t		;	// Tempo máximo de simulação
-	size_t	_populacao	;	// Número de indivíduos por geração
-	size_t	_elitismo	;	// Quantos indivíduos vão para geração seguinte inalterados
-	size_t	_alienismo	;	// Número de indivíuos randômicos inseridos à cada geração
-	size_t	_mut_int	;	// A mutação será +/- _mut_int numa letra
+	double	_max_t		;	// Tempo mï¿½ximo de simulaï¿½ï¿½o
+	size_t	_populacao	;	// Nï¿½mero de indivï¿½duos por geraï¿½ï¿½o
+	size_t	_elitismo	;	// Quantos indivï¿½duos vï¿½o para geraï¿½ï¿½o seguinte inalterados
+	size_t	_alienismo	;	// Nï¿½mero de indivï¿½uos randï¿½micos inseridos ï¿½ cada geraï¿½ï¿½o
+	size_t	_mut_int	;	// A mutaï¿½ï¿½o serï¿½ +/- _mut_int numa letra
 	double	_crossover	;	// Percentual de probabilidade de ocorrer crossover
-	double	_mutacao	;	// Percentual de probabilidade de ocorrer mutação
-	CCar	m_carWinner ;	// Indivíduo mais adaptado da geração atual (Objeto CCar)
+	double	_mutacao	;	// Percentual de probabilidade de ocorrer mutaï¿½ï¿½o
+	CCar	m_carWinner ;	// Indivï¿½duo mais adaptado da geraï¿½ï¿½o atual (Objeto CCar)
 
 // Acumuladores do algoritmo
-	size_t  _geracao	 ;	// Geração atual
+	size_t  _geracao	 ;	// Geraï¿½ï¿½o atual
 
-	// Sinalização de extinção em massa:
+	// Sinalizaï¿½ï¿½o de extinï¿½ï¿½o em massa:
 	bool	_bMassExtintion;
 
-	// Individuo para ser incluido na próxima geração:
+	// Individuo para ser incluido na prï¿½xima geraï¿½ï¿½o:
 	CString	_strId2Include;
 
-	// Controle de acesso à estruturas internas da classe
+	// Controle de acesso ï¿½ estruturas internas da classe
 	CRITICAL_SECTION	m_cs;
 
-// Armazenamento dos indivíduos
+// Armazenamento dos indivï¿½duos
 private:
-	// População (objetos CCar)
+	// Populaï¿½ï¿½o (objetos CCar)
 	lst_car_t	m_populacao;
 
-	// Nova população (sequências de genes)
+	// Nova populaï¿½ï¿½o (sequï¿½ncias de genes)
 	vec_cstr_t	m_nova;
 
 	vec_double_t	_vec_select,
@@ -64,10 +64,10 @@ private:
 	size_t _nCount;
 	bool _bLogOpenned;
 public:
-	// Histórico de melhoramentos
+	// Histï¿½rico de melhoramentos
 	vec_melhores_t	m_melhores;
 
-// Funções internas
+// Funï¿½ï¿½es internas
 private:
 	void _cria_populacao(void);
 	void _1Select(void);
@@ -81,7 +81,7 @@ public:
 	CGa();
 	~CGa();
 
-	// Especificação dos parãmetros do GA
+	// Especificaï¿½ï¿½o dos parï¿½metros do GA
 	void setParams(	size_t	nPopulacao	= 90 , 
 					size_t	nElitismo	=  1 , 
 					double	crossover	= 70 , 
@@ -93,19 +93,19 @@ public:
 	// Inicia o algoritmo
 	void BeginEvolve(void);
 
-	// Testa e ordena os indivíduos
+	// Testa e ordena os indivï¿½duos
 	void Ordena(b2World *pWorld, HANDLE hStop);
 
-	// Seleciona, cruza, muta e passa para geração seguinte
+	// Seleciona, cruza, muta e passa para geraï¿½ï¿½o seguinte
 	void Step(void);
 
-	// Comanda a extinção em massa para a próxima geração
+	// Comanda a extinï¿½ï¿½o em massa para a prï¿½xima geraï¿½ï¿½o
 	void MassExtinctionEvent(void);
 
-	// Inclui um indivíduo na próxima geração
+	// Inclui um indivï¿½duo na prï¿½xima geraï¿½ï¿½o
 	void IncludeId(CString strGenes);
 
-	// Copia a população para um vector
+	// Copia a populaï¿½ï¿½o para um vector
 	void	CopyPopulacao(lst_car_t *pTarget);
 	
 	// Queries

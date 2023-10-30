@@ -3,10 +3,6 @@
 
 #include "CarDef.h"
 
-#include <atlimage.h>
-#include <gdiplus.h>
-using namespace Gdiplus;
-
 namespace GUI
 {
 static CImage	g_imgRoda;
@@ -24,7 +20,7 @@ public:
 	// Draw
 	void Draw(Graphics *pGr);
 
-	// Draw offline (carro não criado, apenas com os def's)
+	// Draw offline (carro nï¿½o criado, apenas com os def's)
 	void DrawOffline(Graphics *pGr);
 public:
 	typedef struct tagCircle
