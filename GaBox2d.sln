@@ -1,46 +1,41 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GaBox2d", "GaBox2d.vcxproj", "{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}"
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GaBox2d", "GaBox2d.vcproj", "{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A} = {7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}
+		{5DD4BD75-746A-402C-B708-E6E110334B87} = {5DD4BD75-746A-402C-B708-E6E110334B87}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Box2D", "..\..\Library\Cpp\3rdparty\Box2D\Build\VC8\Box2D.vcxproj", "{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Box2D", "..\Library\Cpp\3rdparty\Box2D\Build\VC8\Box2D.vcproj", "{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibMarcos", "..\..\Library\Cpp\LibMarcos\msvc2003\LibMarcos.vcxproj", "{5DD4BD75-746A-402C-B708-E6E110334B87}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcrecpp", "..\..\Library\Cpp\3rdparty\pcre-7.9\msvc_2003_mfc_static\pcrecpp.vcxproj", "{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibMarcos", "..\Library\Cpp\LibMarcos\msvc2003\LibMarcos.vcproj", "{5DD4BD75-746A-402C-B708-E6E110334B87}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Release|Win32 = Release|Win32
-		Template|Win32 = Template|Win32
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Debug|Win32.Build.0 = Debug|Win32
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Release|Win32.ActiveCfg = Release|Win32
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Release|Win32.Build.0 = Release|Win32
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Template|Win32.ActiveCfg = Template|Win32
-		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Template|Win32.Build.0 = Template|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Debug|Win32.Build.0 = Debug|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Release|Win32.ActiveCfg = Release|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Release|Win32.Build.0 = Release|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Template|Win32.ActiveCfg = Release|Win32
-		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Template|Win32.Build.0 = Release|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Debug|Win32.Build.0 = Debug|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Release|Win32.ActiveCfg = Release|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Release|Win32.Build.0 = Release|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Template|Win32.ActiveCfg = Template|Win32
-		{5DD4BD75-746A-402C-B708-E6E110334B87}.Template|Win32.Build.0 = Template|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Debug|Win32.Build.0 = Debug|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Release|Win32.ActiveCfg = Release|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Release|Win32.Build.0 = Release|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Template|Win32.ActiveCfg = Release|Win32
-		{C9ECBB4B-22EE-40AC-9196-FE86AF02B203}.Template|Win32.Build.0 = Release|Win32
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+	GlobalSection(ProjectConfiguration) = postSolution
+		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Debug.ActiveCfg = Debug|Win32
+		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Debug.Build.0 = Debug|Win32
+		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Release.ActiveCfg = Release|Win32
+		{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}.Release.Build.0 = Release|Win32
+		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Debug.ActiveCfg = Debug|Win32
+		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Debug.Build.0 = Debug|Win32
+		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Release.ActiveCfg = Release|Win32
+		{7A2DFC3D-516A-471D-A215-BD40E5E5AD9A}.Release.Build.0 = Release|Win32
+		{5DD4BD75-746A-402C-B708-E6E110334B87}.Debug.ActiveCfg = Debug|Win32
+		{5DD4BD75-746A-402C-B708-E6E110334B87}.Debug.Build.0 = Debug|Win32
+		{5DD4BD75-746A-402C-B708-E6E110334B87}.Release.ActiveCfg = Release|Win32
+		{5DD4BD75-746A-402C-B708-E6E110334B87}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection
 EndGlobal

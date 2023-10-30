@@ -1,9 +1,8 @@
-#ifndef __CPUINFODLG_H__
-#define __CPUINFODLG_H__
+#pragma once
+
 
 // CCpuInfoDlg dialog
-namespace GUI
-{
+
 class CCpuInfoDlg : public CDialog
 {
 	DECLARE_DYNAMIC(CCpuInfoDlg)
@@ -23,5 +22,3 @@ public:
 	CString m_strInfo;
 	virtual BOOL OnInitDialog();
 };
-};//namespace GUI
-#endif //__CPUINFODLG_H__

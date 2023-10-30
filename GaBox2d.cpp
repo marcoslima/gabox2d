@@ -8,14 +8,12 @@
 #include "ChildFrm.h"
 #include "GaBox2dDoc.h"
 #include "GaBox2dView.h"
-#include ".\gabox2d.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-namespace GUI
-{
+
 // CGaBox2dApp
 
 BEGIN_MESSAGE_MAP(CGaBox2dApp, CWinApp)
@@ -32,6 +30,8 @@ END_MESSAGE_MAP()
 
 CGaBox2dApp::CGaBox2dApp()
 {
+	// TODO: add construction code here,
+	// Place all significant initialization in InitInstance
 }
 
 
@@ -43,17 +43,12 @@ CGaBox2dApp theApp;
 
 BOOL CGaBox2dApp::InitInstance()
 {
-	srand(time(NULL));
 	// InitCommonControls() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
 	InitCommonControls();
 
 	CWinApp::InitInstance();
-
-	// Initialize GDI+.
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-   
 
 	// Initialize OLE libraries
 	if (!AfxOleInit())
@@ -102,7 +97,9 @@ BOOL CGaBox2dApp::InitInstance()
 }
 
 
+
 // CAboutDlg dialog used for App About
+
 class CAboutDlg : public CDialog
 {
 public:
@@ -131,8 +128,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
-
-
 // App command to run the dialog
 void CGaBox2dApp::OnAppAbout()
 {
@@ -143,12 +138,3 @@ void CGaBox2dApp::OnAppAbout()
 
 // CGaBox2dApp message handlers
 
-
-int CGaBox2dApp::ExitInstance()
-{
-	GdiplusShutdown(gdiplusToken);
-
-	return CWinApp::ExitInstance();
-}
-
-};//namespace GUI

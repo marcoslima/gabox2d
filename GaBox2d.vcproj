@@ -4,7 +4,6 @@
 	Version="7.10"
 	Name="GaBox2d"
 	ProjectGUID="{3307DEBB-CAA5-4B3B-8048-0758DCE789BF}"
-	RootNamespace="GaBox2d"
 	Keyword="MFCProj">
 	<Platforms>
 		<Platform
@@ -21,8 +20,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Include;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\include;&quot;C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\pcre-7.9&quot;"
-				PreprocessorDefinitions="PCRE_STATIC"
+				AdditionalIncludeDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Include;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -35,9 +34,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="box2d.lib Mersenne.lib pcrecpp.lib pcre.lib"
+				AdditionalDependencies="box2d.lib Mersenne.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Library;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\lib;&quot;C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\pcre-7.9\lib\release&quot;"
+				AdditionalLibraryDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Library;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -46,11 +45,7 @@
 				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy res\cracked.png $(OutDir)
-copy res\crystal.png $(OutDir)
-copy res\roda.png $(OutDir)
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -80,8 +75,8 @@ copy res\roda.png $(OutDir)
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Include;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\include;&quot;C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\pcre-7.9&quot;"
-				PreprocessorDefinitions="PCRE_STATIC"
+				AdditionalIncludeDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Include;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="TRUE"
@@ -93,9 +88,9 @@ copy res\roda.png $(OutDir)
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="box2d.lib Mersenne.lib pcrecpp.lib pcre.lib"
+				AdditionalDependencies="box2d.lib Mersenne.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Library;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\lib;&quot;C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\pcre-7.9\lib\release&quot;"
+				AdditionalLibraryDirectories="C:\data\svnwork_mmb\Informatica\Library\Cpp\3rdparty\Box2D\Library;C:\data\svnwork_mmb\Informatica\Library\Cpp\Mersenne\lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -107,12 +102,8 @@ copy res\roda.png $(OutDir)
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy res\cracked.png $(OutDir)
-copy res\crystal.png $(OutDir)
-copy res\roda.png $(OutDir)
-echo:upx -9  --compress-icons=0 $(TargetPath)
-upx -9  --compress-icons=0 $(TargetPath)
-"/>
+				CommandLine="C:\data\svnwork_mmb\Informatica\GaBox2d_neuro&gt;echo:upx -9  --compress-icons=0 $(TargetPath) 
+upx -9  --compress-icons=0 $(TargetPath)"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -157,34 +148,10 @@ upx -9  --compress-icons=0 $(TargetPath)
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CarDef.cpp">
-			</File>
-			<File
 				RelativePath=".\ChildFrm.cpp">
 			</File>
 			<File
 				RelativePath=".\CpuInfoDlg.cpp">
-			</File>
-			<File
-				RelativePath=".\EditorChaoDlg.cpp">
-			</File>
-			<File
-				RelativePath=".\env.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\EvolucaoDlg.cpp">
 			</File>
 			<File
 				RelativePath=".\ga.cpp">
@@ -199,25 +166,13 @@ upx -9  --compress-icons=0 $(TargetPath)
 				RelativePath=".\GaBox2dView.cpp">
 			</File>
 			<File
-				RelativePath=".\GaCar.cpp">
-			</File>
-			<File
-				RelativePath=".\GaInfoDlg.cpp">
-			</File>
-			<File
 				RelativePath=".\GaParamsDlg.cpp">
-			</File>
-			<File
-				RelativePath=".\GrCar.cpp">
-			</File>
-			<File
-				RelativePath=".\IdInfoDlg.cpp">
 			</File>
 			<File
 				RelativePath=".\MainFrm.cpp">
 			</File>
 			<File
-				RelativePath=".\PhysCar.cpp">
+				RelativePath=".\Neuro.cpp">
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp">
@@ -234,12 +189,6 @@ upx -9  --compress-icons=0 $(TargetPath)
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\WndPreviewChao.cpp">
-			</File>
-			<File
-				RelativePath=".\WndShowCarro.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -249,22 +198,10 @@ upx -9  --compress-icons=0 $(TargetPath)
 				RelativePath=".\car.h">
 			</File>
 			<File
-				RelativePath=".\CarDef.h">
-			</File>
-			<File
 				RelativePath=".\ChildFrm.h">
 			</File>
 			<File
 				RelativePath=".\CpuInfoDlg.h">
-			</File>
-			<File
-				RelativePath=".\EditorChaoDlg.h">
-			</File>
-			<File
-				RelativePath=".\env.h">
-			</File>
-			<File
-				RelativePath=".\EvolucaoDlg.h">
 			</File>
 			<File
 				RelativePath=".\ga.h">
@@ -279,25 +216,13 @@ upx -9  --compress-icons=0 $(TargetPath)
 				RelativePath=".\GaBox2dView.h">
 			</File>
 			<File
-				RelativePath=".\GaCar.h">
-			</File>
-			<File
-				RelativePath=".\GaInfoDlg.h">
-			</File>
-			<File
 				RelativePath=".\GaParamsDlg.h">
-			</File>
-			<File
-				RelativePath=".\GrCar.h">
-			</File>
-			<File
-				RelativePath=".\IdInfoDlg.h">
 			</File>
 			<File
 				RelativePath=".\MainFrm.h">
 			</File>
 			<File
-				RelativePath=".\PhysCar.h">
+				RelativePath=".\Neuro.h">
 			</File>
 			<File
 				RelativePath=".\Resource.h">
@@ -305,20 +230,11 @@ upx -9  --compress-icons=0 $(TargetPath)
 			<File
 				RelativePath=".\stdafx.h">
 			</File>
-			<File
-				RelativePath=".\WndPreviewChao.h">
-			</File>
-			<File
-				RelativePath=".\WndShowCarro.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
-			<File
-				RelativePath=".\res\DNA.ico">
-			</File>
 			<File
 				RelativePath=".\res\GaBox2d.ico">
 			</File>
