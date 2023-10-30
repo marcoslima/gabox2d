@@ -1,10 +1,13 @@
-#pragma once
+#ifndef __EDITORCHAODLG_H__
+#define __EDITORCHAODLG_H__
+
 #include "ga.h"
 #include "WndPreviewChao.h"
 #include "afxcmn.h"
 
+namespace GUI
+{
 // CEditorChaoDlg dialog
-
 class CEditorChaoDlg : public CDialog
 {
 	DECLARE_DYNAMIC(CEditorChaoDlg)
@@ -25,6 +28,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	CEnv	m_World;
 	CString m_strDxMedia;
 	CString m_strDxStdev;
 	CString m_strDxOffset;
@@ -43,10 +47,36 @@ public:
 	CString m_strBry;
 	UINT m_nSeed;
 	CSpinButtonCtrl m_cSpinSeed;
+	CSpinButtonCtrl m_cSpinPhi;
+	CSpinButtonCtrl m_cSpinOmega;
+	CSpinButtonCtrl m_cSpinA;
+	CSpinButtonCtrl m_cSpinDxm;
+	CSpinButtonCtrl m_cSpinDxs;
+	CSpinButtonCtrl m_cSpinDxo;
+	CSpinButtonCtrl m_cSpinDym;
+	CSpinButtonCtrl m_cSpinDys;
+	CSpinButtonCtrl m_cSpinDyo;
+
 	virtual BOOL OnInitDialog();
 	afx_msg void OnEnChangeSeed();
 	BOOL m_bAutoUpdate;
 	CSliderCtrl m_cSldVert;
 	CSliderCtrl m_cSldHorz;
 	afx_msg void OnEnChangeDxMedia();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnBnClickedZoomIn();
+	afx_msg void OnBnClickedZoomOut();
+	afx_msg void OnBnClickedAutoUpdate();
+	afx_msg void OnEnChangeSinPhi();
+	afx_msg void OnEnChangeSinOmega();
+	afx_msg void OnEnChangeSinA();
+	afx_msg void OnEnChangeDxStdev();
+	afx_msg void OnEnChangeDxOffset();
+	afx_msg void OnEnChangeDyMedia();
+	afx_msg void OnEnChangeDyStdev();
+	afx_msg void OnEnChangeDyOffset();
+	afx_msg void OnBnClickedOk();
 };
+};//namespace GUI
+#endif //__EDITORCHAODLG_H__

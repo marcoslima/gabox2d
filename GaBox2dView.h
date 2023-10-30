@@ -2,14 +2,22 @@
 #define __GABOX2DVIEW_H__
 
 #include "ga.h"
-
-typedef struct tagIdInfo
+#include "GaParamsDlg.h"
+#include "IdInfoDlg.h"
+#include "GaInfoDlg.h"
+namespace GUI
 {
-	CString		strGenes;
-	double		dPoints;
-} id_info_t;
-
-typedef vector<id_info_t> vec_info_ids;
+// Paramstros para o thread:
+class CThreadParams
+{
+public:
+	HANDLE			m_hStopGa	;
+	HANDLE			m_hGaStopped;
+	HWND			m_wndNotify	;
+	ga_params_t		m_Params	;
+	CGaInfo*		m_pGaInfo	;
+	CEnv			m_env		;
+};
 
 
 // GaBox2dView.h : interface of the CGaBox2dView class
@@ -20,36 +28,37 @@ protected: // create from serialization only
 	DECLARE_DYNCREATE(CGaBox2dView)
 
 // Attributes
-public:
-	CGaBox2dDoc* GetDocument() const;
-	UINT	m_nSimTimer;
-
-	CBitmap	m_bmpBack;
-
-	UINT	m_nVelocidade;
+private:
+	// UI
 	CFont	m_fntSmall;
 	CFont	m_fntSupersmall;
 
-	CGa		m_ga;
+	// Outros
+	UINT	m_nSimTimer;
+	CBitmap	m_bmpBack;
+	UINT	m_nVelocidade;
 	bool	m_bGaRunning;
 	bool	m_bGaExited;
 
-	CString	m_strMelhor;
-	CString	m_strQualquer;
-	int		m_nGeracao;
-
-	vec_info_ids m_vecInfoIds;
-	CRITICAL_SECTION	m_csInfoIds;
-
 	bool	m_bShowInfoId;
 	bool	m_bShowInfoGaGenes;
+	CThreadParams	_thread_params;
+	CGaInfo	m_GaInfo;
+	bool			m_bWaitingEvolucao;
 
-
-// Operations
 public:
+	CGaBox2dDoc* GetDocument() const;
+
+	CGa*		getGa(void);
+	void releaseGa(void);
+
+// GUI
+public:
+	CIdInfoDlg*	m_pdlgIdInfo;
+	CGaInfoDlg*	m_pdlgGaInfo;
 
 // Overrides
-	public:
+public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
@@ -57,6 +66,8 @@ protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	afx_msg	LRESULT OnGaInfo(WPARAM wParma, LPARAM lParam);
+	afx_msg	LRESULT OnSimularGene(WPARAM wParma, LPARAM lParam);
 
 // Implementation
 public:
@@ -110,7 +121,10 @@ public:
 	afx_msg void OnGaColar();
 	afx_msg void OnUpdateGaExtins(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateGaColar(CCmdUI *pCmdUI);
-	afx_msg void OnEditEditarch();
+	afx_msg void OnUpdateEditEditarch(CCmdUI *pCmdUI);
+	afx_msg void OnInformaEvolu();
+	afx_msg void OnUpdateInformaEvolu(CCmdUI *pCmdUI);
+	afx_msg void OnGaMudarpar();
 };
 
 #ifndef _DEBUG  // debug version in GaBox2dView.cpp
@@ -118,5 +132,6 @@ inline CGaBox2dDoc* CGaBox2dView::GetDocument() const
    { return reinterpret_cast<CGaBox2dDoc*>(m_pDocument); }
 #endif
 
+};//namespace GUI
 
 #endif //__GABOX2DVIEW_H__

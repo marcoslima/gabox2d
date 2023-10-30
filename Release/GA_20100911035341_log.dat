@@ -1,0 +1,9 @@
+
+2	0.000024	#melhores.size-1=1/0.002714
+4	0.000029	#melhores.size-1=2/0.000024
+8	0.003613	#melhores.size-1=4/0.000029
+18	0.005192	#melhores.size-1=8/0.003613
+19	0.003613	#melhores.size-1=18/0.005192
+24	0.005168	#melhores.size-1=19/0.003613
+30	0.011971	#melhores.size-1=24/0.005168
+49	0.012164	#melhores.size-1=30/0.011971

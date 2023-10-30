@@ -1,0 +1,23 @@
+
+4	0.105965	#melhores.size-1=1/0.057144
+5	0.151853	#melhores.size-1=4/0.105965
+10	0.185661	#melhores.size-1=5/0.151853
+19	0.192301	#melhores.size-1=10/0.185661
+22	0.217643	#melhores.size-1=19/0.192301
+23	0.220051	#melhores.size-1=22/0.217643
+27	0.220066	#melhores.size-1=23/0.220051
+45	0.220068	#melhores.size-1=27/0.220066
+47	0.220836	#melhores.size-1=45/0.220068
+49	0.220852	#melhores.size-1=47/0.220836
+62	0.226680	#melhores.size-1=49/0.220852
+63	0.226788	#melhores.size-1=62/0.226680
+64	0.246228	#melhores.size-1=63/0.226788
+66	0.540277	#melhores.size-1=64/0.246228
+67	0.638700	#melhores.size-1=66/0.540277
+72	0.963547	#melhores.size-1=67/0.638700
+76	0.963602	#melhores.size-1=72/0.963547
+77	0.974629	#melhores.size-1=76/0.963602
+81	1.082099	#melhores.size-1=77/0.974629
+82	1.225521	#melhores.size-1=81/1.082099
+89	1.225538	#melhores.size-1=82/1.225521
+90	1.272774	#melhores.size-1=89/1.225538

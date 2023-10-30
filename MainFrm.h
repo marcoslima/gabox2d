@@ -1,8 +1,10 @@
+#ifndef __MAINFRM_H__
+#define __MAINFRM_H__
+
+namespace GUI
+{
 // MainFrm.h : interface of the CMainFrame class
 //
-
-
-#pragma once
 class CMainFrame : public CMDIFrameWnd
 {
 	DECLARE_DYNAMIC(CMainFrame)
@@ -37,4 +39,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
+};//namespace GUI
 
+#endif //__MAINFRM_H__

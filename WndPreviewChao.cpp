@@ -6,13 +6,20 @@
 #include "WndPreviewChao.h"
 #include <float.h>
 #include <DcIntegrity.h>
-
-
+#include <lmmath.h>
+using namespace lmmath;
+using namespace Gdiplus;
+namespace GUI
+{
 // CWndPreviewChao
 
 IMPLEMENT_DYNAMIC(CWndPreviewChao, CWnd)
 CWndPreviewChao::CWndPreviewChao()
 {
+	m_ptCenter = CPoint(0,0);
+	m_vecTl = b2Vec2(-1,-1);
+	m_vecBr = b2Vec2( 1, 1);
+	m_zoom = 1.0;
 }
 
 CWndPreviewChao::~CWndPreviewChao()
@@ -28,62 +35,143 @@ END_MESSAGE_MAP()
 
 // CWndPreviewChao message handlers
 
+#define sign(a) ((a >= 0)?(1):(-1))
+
+/*
+	Por exemplo, um espaço orientado com y positivo para cima e x positivo para a direita
+
+	Um retângulo de altura negativa seria:
+
+	-100,100
+
+				100,-100
+	x,y = (-100, 100)
+	w,h = ( 200,-200)
+
+	Para normalizar o retângulo ele deve ser descrito posicionado nas coordenadas
+	menores, e ter largura e altura positivas.
+
+	Assim, o correto é posicioná-lo em -100,-100 com 200,200
+	Então o y do exemplo deve ser adicionado da altura negativa
+	e então a altura passa à ser positiva
+*/
+void NormalizeRect(Rect& rc)
+{
+	if(rc.Width < 0)
+	{
+		rc.X += rc.Width;
+		rc.Width *= -1.0;
+	}
+	if(rc.Height < 0)
+	{
+		rc.Y += rc.Height;
+		rc.Height *= -1.0;
+	}
+}
+
+Point CenterPoint(const Rect& rc)
+{
+	return Point(rc.GetLeft() + rc.Width  / 2.0,
+				 rc.GetTop()  + rc.Height / 2.0);
+}
 
 void CWndPreviewChao::OnPaint()
 {
 	CPaintDC dc(this);
 	CDcIntegrity dci(&dc);
 
-	CRect rcClient;
-	GetClientRect(rcClient);
+	Graphics gr(dc.m_hDC);
 
-	CBrush bshSky;
-	bshSky.CreateSolidBrush(RGB(100,100,255));
-	dc.SelectObject(&bshSky);
+	Rect rcClient;
+	Point ptScrCenter; 
+	{
+		CRect rcc;
+		CPoint ptc;
+		GetClientRect(rcc);
+		ptc = rcc.CenterPoint();
 
-	dc.Rectangle(rcClient);
+		rcClient = Rect(rcc.left,rcc.top,rcc.right,rcc.bottom);
+		ptScrCenter = Point(ptc.x,ptc.y);
+	}
+	Rect rcWorld(m_vecTl.x,m_vecBr.y,m_vecBr.x-m_vecTl.x,m_vecTl.y-m_vecBr.y);
 
-	CRect rcClip(rcClient);
-	rcClip.DeflateRect(1,1);
-	dc.BeginPath();
-	dc.MoveTo(rcClip.TopLeft());
-	dc.LineTo(rcClip.right,rcClip.top);
-	dc.LineTo(rcClip.right,rcClip.bottom);
-	dc.LineTo(rcClip.left,rcClip.bottom);
-	dc.LineTo(rcClip.TopLeft());
-	dc.EndPath();
-	dc.SelectClipPath(RGN_COPY);
+	gr.SetClip(rcClient,CombineModeReplace);
 
-	dc.SetMapMode(MM_ISOTROPIC);
+	gr.FillRectangle(&SolidBrush(Color(0,0,0)),rcClient);
 
-	dc.SetViewportExt(rcClient.Size());
-	dc.SetWindowExt(6000,-6000);
-	dc.SetWindowOrg(0,0);
-	dc.SetViewportOrg(rcClient.CenterPoint());
+	// Ajustamos a transformação:
+	// A transformação será tal que
+	// T(x,y) = (a.x + b, c.y + d)
+	// onde (x,y) está em world coordinates (wc) e
+	// T(x,y) está em device coordinates (dc)
+	//
+	// sabemos as transformações dos seguintes pontos:
+	// T(0,0) = (pc.x,pc.y) -> b = pc.x, d = pc.y
+	// T(tl.x,tl.y) = (rc.l,rc.t)
+	// T(br.x,br.y) = (rc.r,rc.b)
+	//
+	// a.tl_x + pc_x = rc_l
+	// a.br_x + pc_x = rc.r
+	//-----------------------
+	// a(tl_x-br_x) = (rc_l-rc.r)
+	//
+	//      (rc_l-rc_r)
+	// a = -------------
+	//      (tl_x-br_x)
+	//
+	//      (rc_t-rc_b)
+	// b = -------------
+	//      (tl_y-br_y)
+	////////////////////////////////////////////////////////////
 
+	double dZoom = pow(1.3,(double)m_zoom);
 
-	size_t i,nSize = m_vecGround.size();
+	// De -100 à 100 (do slider ctrl) a vizualização
+	// deverá ir de -width à width
+	int cx,cy;
+	cx = ptScrCenter.X - m_ptCenter.x * rcWorld.Width / 1000.0;
+	cy = ptScrCenter.Y - m_ptCenter.y * rcWorld.Height / 1000.0;
+	cx *= dZoom;
+	cy *= dZoom;
+	
+	Matrix mt( dZoom	,	0		,
+		       0		,	-dZoom	,
+			   cx		,	cy		);
+	gr.SetTransform(&mt);
+
+	// World na cor de céu
+	SolidBrush bshSky(Color(100,100,255));
+	gr.FillRectangle(&bshSky,rcWorld);
+
+	vec_vecs_t vecGround = m_env.get_vecs();
+	size_t i,nSize = vecGround.size();
 	if(nSize == 0)
 		return;
-	int fx,fy;
-	fx = 100;
-	fy = 100;
 
-	CPoint *pPoints = new CPoint[nSize+2];
+	PointF *pPoints = new PointF[nSize];
 	for(i = 0; i < nSize; i++)
 	{
-		pPoints[i+2].x = (LONG)(m_vecGround[i].x*fx);
-		pPoints[i+2].y = (LONG)(m_vecGround[i].y*fy);
+		pPoints[i].X = vecGround[i].x;
+		pPoints[i].Y = vecGround[i].y;
 	}
 
-	pPoints[0] = CPoint((int)(m_vecGround[nSize-1].x*fx),-200*fy);
-	pPoints[1] = CPoint((int)(m_vecGround[      0].x*fx),-200*fy);
-
-	CBrush bshGround;
-	bshGround.CreateSolidBrush(RGB(200,255,200));
-	dc.SelectObject(&bshGround);
-
-	dc.Polygon(pPoints,(int)nSize+2);
-
+	Pen penGround(Color(0,0,0));
+	SolidBrush bshGround(Color(32,128,32));
+	gr.FillPolygon(&bshGround,pPoints,nSize);
+	gr.DrawPolygon(&penGround,pPoints,nSize);
 	delete pPoints;
+
+	Pen penBorder(Color(255,0,0),5);
+	gr.DrawRectangle(&penBorder,rcWorld);
+
+	Pen penAxis(Color(255,0,0),0);
+	gr.DrawLine(&penAxis,0,-10,0,10);
+	gr.DrawLine(&penAxis,-10,0,10,0);
 }
+
+void CWndPreviewChao::SetCenter(int x, int y)
+{
+	m_ptCenter = CPoint(x,y);
+}
+
+};//namespace GUI

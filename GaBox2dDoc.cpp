@@ -5,8 +5,11 @@
 #include "GaBox2d.h"
 
 #include "GaBox2dDoc.h"
+#include "EditorChaoDlg.h"
+#include ".\gabox2ddoc.h"
 
-vec_vecs_t	g_vecGroundPoints;
+namespace GUI
+{
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,6 +20,7 @@ IMPLEMENT_DYNCREATE(CGaBox2dDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CGaBox2dDoc, CDocument)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
+	ON_COMMAND(ID_EDIT_EDITARCH, OnEditEditarch)
 END_MESSAGE_MAP()
 
 
@@ -25,7 +29,6 @@ END_MESSAGE_MAP()
 CGaBox2dDoc::CGaBox2dDoc()
 {
 	m_pWorld = NULL;
-	g_vecGroundPoints = CreateGround();
 }
 
 CGaBox2dDoc::~CGaBox2dDoc()
@@ -46,20 +49,23 @@ BOOL CGaBox2dDoc::OnNewDocument()
 
 	srand((unsigned)time(NULL));
 
-	m_pWorld = CreateWorld(g_vecGroundPoints);
+	CEditorChaoDlg dlgChao;
+	if(dlgChao.DoModal() == IDCANCEL)
+	{
+		return FALSE;
+	}
 
-	/////////////////////////////////////////////
+	m_env = dlgChao.m_World;
+
+	m_pWorld = PHYS::buildWorld(&m_env);
+	m_vecGround = m_env.get_vecs();
 
 	m_car.beginSimulate(m_pWorld);
 
 	return TRUE;
 }
 
-
-
-
 // CGaBox2dDoc serialization
-
 void CGaBox2dDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
@@ -103,3 +109,38 @@ void CGaBox2dDoc::OnEditCopy()
 	pSource->CacheGlobalData(CF_TEXT, hMem);
 	pSource->SetClipboard();
 }
+
+void CGaBox2dDoc::OnEditEditarch()
+{
+	CEditorChaoDlg dlg;
+	if(dlg.DoModal() != IDOK)
+		return;
+	
+	m_car.Destroy();
+	delete m_pWorld;
+
+	m_env = dlg.m_World;
+	m_pWorld = PHYS::buildWorld(&m_env);
+	m_vecGround = m_env.get_vecs();
+	m_car.beginSimulate(m_pWorld);
+
+	POSITION pos = GetFirstViewPosition();
+	GetNextView(pos)->Invalidate();
+}
+
+void CGaBox2dDoc::BeginSimulation(void)
+{
+	m_car.beginSimulate(m_pWorld);
+}
+void CGaBox2dDoc::EndSimulation(void)
+{
+	m_car.endSimulate();
+}
+
+PointF	CGaBox2dDoc::GetCenter(void)
+{
+	b2Vec2 pos = m_car.getCenter();
+	return PointF(pos.x,pos.y);
+}
+
+};//namespace GUI

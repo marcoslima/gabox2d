@@ -48,19 +48,13 @@ restitution: entre 0 e 1 -> 4 casas
 Torque: entre 1 e 20 -> 1 casa: 10 - 200 = 190
 */
 
-
+namespace GUI
+{
 // CGaParamsDlg dialog
-
 IMPLEMENT_DYNAMIC(CGaParamsDlg, CDialog)
 CGaParamsDlg::CGaParamsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGaParamsDlg::IDD, pParent)
-	, m_nPopulacao(60)
-	, m_strCrossover("75")
-	, m_nElitismo(2)
-	, m_strMutacao("65")
-	, m_nAlienismo(0)
-	, m_nMutInt(10)
-	, m_dMaxT(60.0)
+	, ga_params_t(60,"75",2,"65",0,10,60.0)
 {
 }
 
@@ -86,3 +80,4 @@ END_MESSAGE_MAP()
 
 
 // CGaParamsDlg message handlers
+};//namespace GUI

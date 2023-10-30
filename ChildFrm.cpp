@@ -9,7 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
-
+namespace GUI
+{
 // CChildFrame
 
 IMPLEMENT_DYNCREATE(CChildFrame, CMDIChildWnd)
@@ -22,7 +23,6 @@ END_MESSAGE_MAP()
 
 CChildFrame::CChildFrame()
 {
-	// TODO: add member initialization code here
 }
 
 CChildFrame::~CChildFrame()
@@ -57,3 +57,4 @@ void CChildFrame::Dump(CDumpContext& dc) const
 
 
 // CChildFrame message handlers
+};//namespace GUI

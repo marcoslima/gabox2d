@@ -42,3 +42,4 @@
 
 #include <afxole.h>
 #include <afxadv.h>
+#include <math.h>

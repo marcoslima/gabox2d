@@ -1,10 +1,10 @@
+#ifndef __CHILDFRM_H__
+#define __CHILDFRM_H__
+
+namespace GUI
+{
 // ChildFrm.h : interface of the CChildFrame class
 //
-
-
-#pragma once
-
-
 class CChildFrame : public CMDIChildWnd
 {
 	DECLARE_DYNCREATE(CChildFrame)
@@ -32,3 +32,6 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 };
+
+};//namespace GUI
+#endif //__CHILDFRM_H__

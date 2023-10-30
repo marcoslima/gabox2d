@@ -8,7 +8,8 @@
 
 
 // CCpuInfoDlg dialog
-
+namespace GUI
+{
 IMPLEMENT_DYNAMIC(CCpuInfoDlg, CDialog)
 CCpuInfoDlg::CCpuInfoDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CCpuInfoDlg::IDD, pParent)
@@ -94,3 +95,4 @@ BOOL CCpuInfoDlg::OnInitDialog()
 	UpdateData(FALSE);
 	return TRUE;
 }
+};//namespace GUI

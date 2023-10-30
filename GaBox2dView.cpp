@@ -8,11 +8,15 @@
 #include "GaBox2dView.h"
 #include ".\gabox2dview.h"
 #include <DcIntegrity.h>
-#include "GaParamsDlg.h"
 #include "CpuInfoDlg.h"
 #include <cronometro.h>
 #include "EditorChaoDlg.h"
-
+#include <MessageDlg.h>
+#include "EvolucaoDlg.h"
+#include <devutils.h>
+using namespace DevUtils;
+namespace GUI
+{
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -64,7 +68,12 @@ BEGIN_MESSAGE_MAP(CGaBox2dView, CScrollView)
 	ON_COMMAND(ID_GA_COLAR, OnGaColar)
 	ON_UPDATE_COMMAND_UI(ID_GA_EXTINS, OnUpdateGaExtins)
 	ON_UPDATE_COMMAND_UI(ID_GA_COLAR, OnUpdateGaColar)
-	ON_COMMAND(ID_EDIT_EDITARCH, OnEditEditarch)
+	ON_MESSAGE(IDM_GA_INFO,OnGaInfo)
+	ON_MESSAGE(IDM_SIMULAR_GENE,OnSimularGene)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_EDITARCH, OnUpdateEditEditarch)
+	ON_COMMAND(ID_INFORMA_EVOLU, OnInformaEvolu)
+	ON_UPDATE_COMMAND_UI(ID_INFORMA_EVOLU, OnUpdateInformaEvolu)
+	ON_COMMAND(ID_GA_MUDARPAR, OnGaMudarpar)
 END_MESSAGE_MAP()
 
 // CGaBox2dView construction/destruction
@@ -78,26 +87,28 @@ CGaBox2dView::CGaBox2dView()
 	m_nVelocidade = 1	 ;
 	m_bGaRunning  = false;
 
-	InitializeCriticalSection(&m_csInfoIds);
-
 	m_bShowInfoId = true;
 	m_bShowInfoGaGenes = false;
+	m_bWaitingEvolucao = false;
+	m_pdlgIdInfo = NULL;
+	m_pdlgGaInfo = NULL;
 }
 
 CGaBox2dView::~CGaBox2dView()
 {
 	m_bGaRunning = false;
-	while(!m_bGaExited)
-		Sleep(10);
+	SetEvent(_thread_params.m_hStopGa);
+	WaitForSingleObject(_thread_params.m_hGaStopped,INFINITE);
 
-	DeleteCriticalSection(&m_csInfoIds);
+	if(m_pdlgGaInfo != NULL)
+		delete m_pdlgGaInfo;
+
+	if(m_pdlgIdInfo != NULL)
+		delete m_pdlgIdInfo;
 }
 
 BOOL CGaBox2dView::PreCreateWindow(CREATESTRUCT& cs)
 {
-	// TODO: Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
-
 	return CScrollView::PreCreateWindow(cs);
 }
 
@@ -193,6 +204,7 @@ void CGaBox2dView::OnDraw(CDC* pSDc)
 	dcBmp.DeleteDC();
 }
 
+#if 0
 void CGaBox2dView::Draw(CDC *pDc)
 {
 	CDcIntegrity dci(pDc);
@@ -204,7 +216,7 @@ void CGaBox2dView::Draw(CDC *pDc)
 	CRect rcClient;
 	CPoint ptCenter;
 	GetClientRect(rcClient);
-
+	
 	pDc->SelectObject(&m_fntSmall);
 
 	CString strInfos;
@@ -213,7 +225,6 @@ void CGaBox2dView::Draw(CDC *pDc)
 
 	if(true)
 	{
-		EnterCriticalSection(&m_csInfoIds);
 		{
 			strInfos.Format(
 				"Individuo atual:\r\n"
@@ -246,11 +257,7 @@ void CGaBox2dView::Draw(CDC *pDc)
 				,pDoc->m_car._trqC
 				,pDoc->m_car._trqD
 				);
-
-//				"Geracao: %d\r\n"
-//				,m_nGeracao
 		}
-		LeaveCriticalSection(&m_csInfoIds);
 	}
 	else
 	{
@@ -268,9 +275,9 @@ void CGaBox2dView::Draw(CDC *pDc)
 	CString strAllGenes;
 	int maxLen = 0;
 	CRect rcAllGenes;
+#if 0
 	if(m_bShowInfoGaGenes)
 	{
-		EnterCriticalSection(&m_csInfoIds);
 		{
 			CString strLine;
 			size_t i,nSize = m_vecInfoIds.size();
@@ -281,12 +288,11 @@ void CGaBox2dView::Draw(CDC *pDc)
 				strAllGenes += strLine;
 			}
 		}
-		LeaveCriticalSection(&m_csInfoIds);
 		
 		rcAllGenes = CRect(rcClient.right - maxLen - 10,0,rcClient.right,1);
 		pDc->DrawText(strAllGenes,rcAllGenes,DT_CALCRECT);
 	}
-
+#endif
 	ptCenter = rcClient.CenterPoint();
 
 	int nRes = pDc->SaveDC();
@@ -310,16 +316,17 @@ void CGaBox2dView::Draw(CDC *pDc)
 	pDc->SelectObject(&bshGround);
 
 	// Chão:
-	size_t k,nSize = g_vecGroundPoints.size();
+/*
+	size_t k,nSize = pDoc->m_vecGroundPoints.size();
 	CPoint *pPoints = new CPoint[nSize+2];
 	for(k = 0; k < nSize; k++)
 	{
-		pPoints[k+2].x = (LONG)(g_vecGroundPoints[k].x*100);
-		pPoints[k+2].y = (LONG)(g_vecGroundPoints[k].y*100);
+		pPoints[k+2].x = (LONG)(pDoc->m_vecGroundPoints[k].x*100);
+		pPoints[k+2].y = (LONG)(pDoc->m_vecGroundPoints[k].y*100);
 	}
 
-	pPoints[0] = CPoint((int)(g_vecGroundPoints[nSize-1].x*100),-20000);
-	pPoints[1] = CPoint((int)(g_vecGroundPoints[0].x*100)      ,-20000);
+	pPoints[0] = CPoint((int)(pDoc->m_vecGroundPoints[nSize-1].x*100),-20000);
+	pPoints[1] = CPoint((int)(pDoc->m_vecGroundPoints[0].x*100)      ,-20000);
 
 	pDc->Polygon(pPoints,(int)nSize+2);
 
@@ -339,7 +346,7 @@ void CGaBox2dView::Draw(CDC *pDc)
 	pDc->RestoreDC(nRes);
 	pDc->SetTextColor(RGB(64,128,64));
 	pDc->SetBkMode(TRANSPARENT);
-
+*/
 	if(m_bShowInfoGaGenes)
 	{
 		pDc->DrawText(strAllGenes,rcAllGenes,0);
@@ -347,33 +354,158 @@ void CGaBox2dView::Draw(CDC *pDc)
 
 	// Informações do GA:
 	// Canto inferior esquerdo:
-	if(true && m_bGaRunning)
+	if(m_bGaRunning)
 	{
 		CRect rcGaInfo(0,0,1,1);
 		CString strGaInfo;
 		pDc->SetTextColor(RGB(0,0,0));
 		pDc->SelectObject(m_fntSmall);
+		
+		m_GaInfo.Lock();
+		if(m_GaInfo.m_populacao.size() > 0)
+		{
+			double gpspg = m_GaInfo.m_gps;
+			char *szFmt;
+			if(gpspg < 0)
+			{
+				szFmt = "Ainda não contabilizado";
+			}
+			else if(gpspg >= 1.0)
+			{
+				szFmt = "gerações por segundo";
+			}
+			else
+			{
+				gpspg = 1.0 / gpspg;
+				szFmt = "segundos por geração";
+			}
 
-		strGaInfo.Format(
-			"Geração: %d\r\n"
-			"Max(d,t,vm): (%.2f,%.2f,%.2f)\r\n"
-			"Pts = f(v,d,c1,c2,t): %.4f = f(%.2f,%.2f,%.2f,%.2f,%.2f)\r\n"
-			, m_nGeracao
-			, m_ga._maxDistancia
-			, m_ga._maxT
-			, m_ga._maxVm
-			, m_ga.m_carWinner.getPontuacao()
-			, m_ga.m_carWinner.m_vm
-			, m_ga.m_carWinner.m_distancia
-			, m_ga.m_carWinner.m_bContactR1
-			, m_ga.m_carWinner.m_bContactR2
-			, m_ga.m_carWinner.m_t
-			);
+			strGaInfo.Format(
+				"Geração: %d (%.2f %s)\r\n"
+				"Max(d,t,vm): (%.2f,%.2f,%.2f)\r\n"
+				"Pts = f(v,d,c1,c2,t): %.4f = f(%.2f,%.2f,%.2f,%.2f,%.2f)\r\n"
+				, m_GaInfo.m_geracao
+				, gpspg
+				, szFmt
+				, m_GaInfo.m_maxD
+				, m_GaInfo.m_maxT
+				, m_GaInfo.m_maxVm
+				, m_GaInfo.m_populacao[0].getPontuacao()
+				, m_GaInfo.m_populacao[0].m_vm
+				, m_GaInfo.m_populacao[0].m_distancia
+				, m_GaInfo.m_populacao[0].m_bContactR1
+				, m_GaInfo.m_populacao[0].m_bContactR2
+				, m_GaInfo.m_populacao[0].m_t
+				);
+		}
+		m_GaInfo.Release();
 		pDc->DrawText(strGaInfo,rcGaInfo,DT_CALCRECT);
 		int cy = rcGaInfo.Height();
 		rcGaInfo.OffsetRect(0,rcClient.bottom - cy);
 		pDc->DrawText(strGaInfo,rcGaInfo,0);
+
 	}
+
+}
+#endif
+
+void CGaBox2dView::Draw(CDC *pDc)
+{
+	CDcIntegrity dci(pDc);
+	CGaBox2dDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return;
+	CEnv env = pDoc->m_env;
+
+	Graphics gr(pDc->m_hDC);
+
+	Rect rcClient;
+	PointF ptScrCenter; 
+	{
+		CRect rcc;
+		CPoint ptc;
+		GetClientRect(rcc);
+		ptc = rcc.CenterPoint();
+
+		rcClient = Rect(rcc.left,rcc.top,rcc.right,rcc.bottom);
+		ptScrCenter = PointF(ptc.x,ptc.y);
+	}
+	Rect rcWorld(env._tlx,env._bry,env._brx-env._tlx,env._tly-env._bry);
+
+	gr.SetClip(rcClient,CombineModeReplace);
+
+	gr.FillRectangle(&SolidBrush(Color(0,0,0)),rcClient);
+
+	// Ajustamos a transformação:
+	// A transformação será tal que
+	// T(x,y) = (a.x + b, c.y + d)
+	// onde (x,y) está em world coordinates (wc) e
+	// T(x,y) está em device coordinates (dc)
+	//
+	// sabemos as transformações dos seguintes pontos:
+	// T(0,0) = (pc.x,pc.y) -> b = pc.x, d = pc.y
+	// T(tl.x,tl.y) = (rc.l,rc.t)
+	// T(br.x,br.y) = (rc.r,rc.b)
+	//
+	// a.tl_x + pc_x = rc_l
+	// a.br_x + pc_x = rc.r
+	//-----------------------
+	// a(tl_x-br_x) = (rc_l-rc.r)
+	//
+	//      (rc_l-rc_r)
+	// a = -------------
+	//      (tl_x-br_x)
+	//
+	//      (rc_t-rc_b)
+	// b = -------------
+	//      (tl_y-br_y)
+	////////////////////////////////////////////////////////////
+
+//	double dZoom = pow(1.3,(double)m_zoom);
+	double dZoom = 10.0;
+	int cx,cy;
+	PointF pos = pDoc->GetCenter();
+
+	cx = ptScrCenter.X - (pos.X*dZoom);
+	cy = ptScrCenter.Y + (pos.Y*dZoom);
+	
+	Matrix mt( dZoom	,	0		,
+		       0		,	-dZoom	,
+			   cx		,	cy		);
+	gr.SetTransform(&mt);
+
+	// World na cor de céu
+	SolidBrush bshSky(Color(100,100,255));
+	gr.FillRectangle(&bshSky,rcWorld);
+
+	vec_vecs_t* pVg = &pDoc->m_vecGround;
+	size_t i,nSize = pVg->size();
+	if(nSize == 0)
+		return;
+
+	PointF *pPoints = new PointF[nSize];
+	for(i = 0; i < nSize; i++)
+	{
+		pPoints[i].X = (*pVg)[i].x;
+		pPoints[i].Y = (*pVg)[i].y;
+	}
+
+	Pen penGround(Color(0,0,0),0.1);
+	SolidBrush bshGround(Color(32,128,32));
+	gr.FillPolygon(&bshGround,pPoints,nSize);
+	gr.DrawPolygon(&penGround,pPoints,nSize);
+	delete pPoints;
+
+	Pen penBorder(Color(255,0,0),5);
+	gr.DrawRectangle(&penBorder,rcWorld);
+
+	pDoc->GetCar().Draw(&gr);
+
+	m_pdlgIdInfo->set(-1,-1,
+		pDoc->GetCar().getT(),
+		pDoc->GetCar().getGenes());
+
 
 }
 
@@ -387,9 +519,19 @@ void CGaBox2dView::OnInitialUpdate()
 
 	m_fntSmall.CreateFont(-12,0,0,0,0,0,0,0,0,0,0,0,0,"Courier New");
 	m_fntSupersmall.CreateFont(-8,0,0,0,0,0,0,0,0,0,0,0,0,"small fonts");
+
+	m_pdlgIdInfo = new CIdInfoDlg(this);
+	m_pdlgIdInfo->Create(CIdInfoDlg::IDD,this);
+	m_pdlgIdInfo->ShowWindow(SW_SHOW);
+
+	m_pdlgGaInfo = new CGaInfoDlg(this);
+	m_pdlgGaInfo->m_pView = this;
+	m_pdlgGaInfo->Create(CGaInfoDlg::IDD,this);
+	m_pdlgGaInfo->ShowWindow(SW_SHOW);
+
 }
 
-
+ 
 // CGaBox2dView printing
 
 BOOL CGaBox2dView::OnPreparePrinting(CPrintInfo* pInfo)
@@ -400,12 +542,10 @@ BOOL CGaBox2dView::OnPreparePrinting(CPrintInfo* pInfo)
 
 void CGaBox2dView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	// TODO: add extra initialization before printing
 }
 
 void CGaBox2dView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	// TODO: add cleanup after printing
 }
 
 
@@ -437,14 +577,14 @@ void CGaBox2dView::OnSimulaPlay()
 	if(m_nSimTimer == 0)
 	{
 		// Ligar simulação:
-		GetDocument()->m_car.beginSimulate(GetDocument()->m_pWorld);
+		GetDocument()->BeginSimulation();
 		m_nSimTimer = (UINT)SetTimer((UINT_PTR)1001,10,NULL);
 	}
 	else
 	{
 		KillTimer(m_nSimTimer);
 		m_nSimTimer = 0;
-		GetDocument()->m_car.endSimulate();
+		GetDocument()->EndSimulation();
 	}
 }
 
@@ -466,13 +606,14 @@ void CGaBox2dView::OnTimer(UINT nIDEvent)
 	UINT k;
 	for(k = 0; k < m_nVelocidade; k++)
 	{
-		if(!pDoc->m_car.doStep())
+		if(!pDoc->GetCar().doStep())
 		{
-			OnSimulaPlay();
-			break;
+//			OnSimulaPlay();
+//			break;
 		}
 	}
 	Invalidate();
+
 	CScrollView::OnTimer(nIDEvent);
 	bWorking = false;
 }
@@ -492,7 +633,8 @@ void CGaBox2dView::OnSimulaReset()
 	if(m_nSimTimer != 0)
 		OnSimulaPlay();
 
-	pDoc->m_car.CreateCar();
+	pDoc->GetCar().CreateCar();
+	m_pdlgIdInfo->set(0,0,0,"");
 
 	if(m_nSimTimer == 0)
 		OnSimulaPlay();
@@ -546,12 +688,12 @@ void CGaBox2dView::OnSimulaRepetir()
 		return;
 
 	CString strGenes;
-	pDoc->m_car.getGenes(strGenes);
+	pDoc->GetCar().getGenes(strGenes);
 
 	if(m_nSimTimer != 0)
 		OnSimulaPlay();
 
-	pDoc->m_car.CreateCar(strGenes);
+	pDoc->GetCar().CreateCar(strGenes);
 
 	if(m_nSimTimer == 0)
 		OnSimulaPlay();
@@ -609,82 +751,126 @@ void CGaBox2dView::OnUpdateVelocidade100x(CCmdUI *pCmdUI)
 
 void fnGa(void *pParam)
 {
-	CGaBox2dView* pVw = (CGaBox2dView*)pParam;
+	CThreadParams *tp		= (CThreadParams *)pParam;
+	HANDLE hStopGA			= tp->m_hStopGa		;
+	HANDLE hGaStopped		= tp->m_hGaStopped	;
+	HWND   hWndNotify		= tp->m_wndNotify	;
+	ga_params_t gaParams	= tp->m_Params		;
+	CGaInfo*	pGaInfo		= tp->m_pGaInfo		;
+	b2World *pWorld			= PHYS::buildWorld(&tp->m_env) ;
 
-	pVw->m_bGaRunning = true;
-	pVw->m_bGaExited = false;
+	CGa ga;
+	// Preparamos os parâmetros do GA:
+	double cross,mut;
+	gaParams.m_strMutacao.Replace(",",".");
+	gaParams.m_strCrossover.Replace(",",".");
 
-	b2World *pWorld = CreateWorld(g_vecGroundPoints);
+	cross = atof(gaParams.m_strCrossover);
+	mut   = atof(gaParams.m_strMutacao);
 
+	ga.setParams	(	gaParams.m_nPopulacao	,	// Número de indivíduos
+						gaParams.m_nElitismo	,	// Tamanho do elitismo
+						cross					,	// Probabilidade de crossover
+						mut						,	// Probabilidade de mutação
+						gaParams.m_nAlienismo	,	// Tamanho do alienismo
+						gaParams.m_nMutInt		,	// Intensidade da mutação
+						gaParams.m_dMaxT		);	// Tempo máximo à ser simulado
 
-	pVw->m_ga.BeginEvolve();
-	size_t i,nSize = pVw->m_ga.m_populacao.size();
-	int nGeracao = 0;
-	CCronometro cr;
-	cr.Start();
+	ga.BeginEvolve();
+	size_t nSize = ga.getPopulacaoLen();
 
-	while(pVw->m_bGaRunning)
+	CCronometro crInfo,crGa;
+	crInfo.Start();
+	
+	// Medição da velocidade gerações por segundo:
+	double gps = -1;
+	int nCount = 0;
+	crGa.Start();
+
+	while(WaitForSingleObject(hStopGA,0) == WAIT_TIMEOUT)
 	{
-		pVw->m_ga.Ordena(pWorld);
-
-		// Alimentamos a lista de genes para ser mostradas para o usuário,
-		// mas somente à cada 200us para não perder tempo à toa.
-		if(cr.Get() > 200)
+		ga.Ordena(pWorld,hStopGA);
+		if(crInfo.Get() > 250)
 		{
-			EnterCriticalSection(&pVw->m_csInfoIds);
+			pGaInfo->Lock();
+			pGaInfo->m_geracao = ga.getGeracao();
+			pGaInfo->m_gps = gps;
+			ga.CopyPopulacao(&pGaInfo->m_populacao);
+
+			if(pGaInfo->m_reqMelhores)
 			{
-				pVw->m_ga.m_populacao[0].getGenes(pVw->m_strMelhor);
-				pVw->m_ga.m_populacao[rand()%nSize].getGenes(pVw->m_strQualquer);
-				pVw->m_nGeracao = nGeracao;
-
-				pVw->m_vecInfoIds.clear();
-				id_info_t ii;
-				for(i = 0; i < nSize; i++)
-				{
-					pVw->m_ga.m_populacao[i].getGenes(ii.strGenes);
-					ii.dPoints = pVw->m_ga.m_populacao[i].getPontuacao();
-					pVw->m_vecInfoIds.push_back(ii);
-				}
+				pGaInfo->m_reqMelhores = false;
+				pGaInfo->m_vecMelhores = ga.m_melhores;
 			}
-			LeaveCriticalSection(&pVw->m_csInfoIds);
+			if(pGaInfo->m_reqExtincao)
+			{
+				pGaInfo->m_reqExtincao = false;
+				ga.MassExtinctionEvent();
+			}
 
-			if(pVw->m_bGaRunning) pVw->Invalidate();
+			pGaInfo->Release();
+			crInfo.Start();
+			PostMessage(hWndNotify,IDM_GA_INFO,0,0);
+		}
+		ga.Step();
 
-			// Reiniciamos a contagem do tempo
-			cr.Start();
+		nCount++;
+		if(nCount == 10)
+		{
+			gps = 10.0 / crGa.Get(CCronometro::uS);
+			nCount = 0;
+			crGa.Start();
 		}
 
-		pVw->m_ga.Select();
-		pVw->m_ga.Crossover();
-		pVw->m_ga.Mutate();
-		pVw->m_ga.AdvanceGeneration();
-
-		nGeracao++;
+//		if(gaParams.m_b
 	}
 
 	delete pWorld;
-	pVw->m_bGaExited = true;
+	SetEvent(hGaStopped);
 }
 
 void CGaBox2dView::OnGaIniciarga()
 {
+	if(m_bGaRunning)
+	{
+		// Já está rodando, então é para parar:
+		if(AfxMessageBox("Tem certeza de que quer parar o GA?",MB_YESNO) == IDNO)
+			return;
+
+		// Ok, vamos parar:
+		CMessageDlg dlgMsg;
+		dlgMsg.BeginMessage("Interrompendo GA...",this);
+		SetEvent(_thread_params.m_hStopGa);
+		WaitForSingleObject(_thread_params.m_hGaStopped,INFINITE);
+		dlgMsg.EndMessage();
+
+		m_bGaRunning = false;
+
+		// Liberamos os eventos:
+		CloseHandle(_thread_params.m_hStopGa    );
+		CloseHandle(_thread_params.m_hGaStopped );
+
+		// Pronto!
+		return;
+	}
+
+
+	// Obtemos os parâmetros do GA:
 	CGaParamsDlg dlgParams;
 	if(dlgParams.DoModal() != IDOK)
 	{
 		return;
 	}
-	double cross,mut;
-	dlgParams.m_strMutacao.Replace(",",".");
-	dlgParams.m_strCrossover.Replace(",",".");
 
-	cross = atof(dlgParams.m_strCrossover);
-	mut   = atof(dlgParams.m_strMutacao);
+	_thread_params.m_Params		= dlgParams;
+	_thread_params.m_hStopGa    = CreateEvent(NULL,TRUE,FALSE,NULL);
+	_thread_params.m_hGaStopped = CreateEvent(NULL,TRUE,FALSE,NULL);
+	_thread_params.m_wndNotify  = m_hWnd;
+	_thread_params.m_pGaInfo	= &m_GaInfo;
+	_thread_params.m_env		= GetDocument()->m_env;
 
-	m_ga.setParams(dlgParams.m_nPopulacao,dlgParams.m_nElitismo,cross,mut,dlgParams.m_nAlienismo,dlgParams.m_nMutInt,dlgParams.m_dMaxT);
-
-	_beginthread(fnGa,0,(void *)this);
-
-
+	m_bGaRunning = true;
+	_beginthread(fnGa,0,(void *)&_thread_params);
 }
 
 void CGaBox2dView::OnEditPaste()
@@ -730,10 +916,11 @@ void CGaBox2dView::OnEditPaste()
 	if (!pDoc)
 		return;
 
+	m_pdlgIdInfo->set(0,0,0,"nenhum");
 	if(m_nSimTimer != 0)
 		OnSimulaPlay();
 
-	pDoc->m_car.CreateCar(buffer);
+	pDoc->GetCar().CreateCar(buffer);
 
 	if(m_nSimTimer == 0)
 		OnSimulaPlay();
@@ -741,7 +928,7 @@ void CGaBox2dView::OnEditPaste()
 
 void CGaBox2dView::OnUpdateGaIniciarga(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(!m_bGaRunning);
+	pCmdUI->SetCheck(m_bGaRunning);
 }
 
 void CGaBox2dView::OnUpdateMostrarMelhor(CCmdUI *pCmdUI)
@@ -764,11 +951,21 @@ void CGaBox2dView::OnMostrarMelhor()
 	if(m_nSimTimer != 0)
 		OnSimulaPlay();
 
-	EnterCriticalSection(&m_csInfoIds);
+	m_GaInfo.Lock();
 	{
-		pDoc->m_car.CreateCar(m_strMelhor);
+		if(m_GaInfo.m_populacao.size() == 0)
+		{
+			m_GaInfo.Release();
+			AfxMessageBox("Não há ninguém para mostrar ainda.");
+			return;
+		}
+		pDoc->GetCar().CreateCar(m_GaInfo.m_populacao[0].getGenesCString());
+		m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
+							m_GaInfo.m_populacao[0]._pontos,
+							m_GaInfo.m_populacao[0].getT(),
+							m_GaInfo.m_populacao[0].getGenes());
 	}
-	LeaveCriticalSection(&m_csInfoIds);
+	m_GaInfo.Release();
 
 
 	if(m_nSimTimer == 0)
@@ -785,12 +982,18 @@ void CGaBox2dView::OnMostrarQualquer()
 	if(m_nSimTimer != 0)
 		OnSimulaPlay();
 
-	EnterCriticalSection(&m_csInfoIds);
+	m_GaInfo.Lock();
 	{
-		pDoc->m_car.CreateCar(m_strQualquer);
-	}
-	LeaveCriticalSection(&m_csInfoIds);
+		size_t nQq = rand()%m_GaInfo.m_populacao.size();
+		pDoc->GetCar().CreateCar(m_GaInfo.m_populacao[nQq].getGenesCString());
 
+		m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
+							m_GaInfo.m_populacao[nQq]._pontos,
+							m_GaInfo.m_populacao[nQq].getT(),
+							m_GaInfo.m_populacao[nQq].getGenes());
+
+	}
+	m_GaInfo.Release();
 
 	if(m_nSimTimer == 0)
 		OnSimulaPlay();
@@ -825,7 +1028,9 @@ void CGaBox2dView::OnUpdateInformaIndividuoatual(CCmdUI *pCmdUI)
 
 void CGaBox2dView::OnGaExtins()
 {
-	m_ga.MassExtintionEvent();
+	m_GaInfo.Lock();
+	m_GaInfo.m_reqExtincao = true;
+	m_GaInfo.Release();
 }
 
 void CGaBox2dView::OnGaColar()
@@ -866,7 +1071,10 @@ void CGaBox2dView::OnGaColar()
 	}
 
 	// Ok, podemos colar:
-	m_ga.IncludeId(buffer);
+	m_GaInfo.Lock();
+	m_GaInfo.m_reqIncludeId = true;
+	m_GaInfo.m_strId2Include = buffer;
+	m_GaInfo.Release();
 }
 
 void CGaBox2dView::OnUpdateGaExtins(CCmdUI *pCmdUI)
@@ -879,8 +1087,85 @@ void CGaBox2dView::OnUpdateGaColar(CCmdUI *pCmdUI)
 	pCmdUI->Enable(m_bGaRunning);
 }
 
-void CGaBox2dView::OnEditEditarch()
+afx_msg	LRESULT CGaBox2dView::OnGaInfo(WPARAM wParma, LPARAM lParam)
 {
-	CEditorChaoDlg dlg;
-	dlg.DoModal();
+	Invalidate();
+	CGaBox2dDoc *pDoc = GetDocument();
+
+	if(m_bWaitingEvolucao)
+	{
+		m_bWaitingEvolucao = false;
+
+		CEvolucaoDlg dlgEvolucao;
+		m_GaInfo.Lock();
+		dlgEvolucao.m_vecCarros = m_GaInfo.m_vecMelhores;
+		m_GaInfo.Release();
+		dlgEvolucao.DoModal();
+	}
+
+	m_GaInfo.Lock();
+	m_pdlgGaInfo->Refresh(&m_GaInfo);
+	m_GaInfo.Release();
+
+	return 0L;
 }
+void CGaBox2dView::OnUpdateEditEditarch(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable(!m_bGaRunning);
+}
+
+void CGaBox2dView::OnInformaEvolu()
+{
+	// Marcamos o evento:
+	m_GaInfo.Lock();
+	m_GaInfo.m_reqMelhores = true;
+	m_bWaitingEvolucao = true;
+	m_GaInfo.Release();
+}
+
+void CGaBox2dView::OnUpdateInformaEvolu(CCmdUI *pCmdUI)
+{
+	if(m_bWaitingEvolucao)
+	{
+		pCmdUI->SetText("Evolução (em andamento...)");
+		pCmdUI->Enable(FALSE);
+	}
+	else
+	{
+		pCmdUI->SetText("Evolução");
+		pCmdUI->Enable(TRUE);
+	}
+}
+
+LRESULT CGaBox2dView::OnSimularGene(WPARAM wParam, LPARAM lParam)
+{
+	//TODO: Reativar função
+#if 0
+	if(m_nSimTimer != 0)
+		OnSimulaPlay();
+
+	GetDocument()->m_car.CreateCar((LPCSTR) lParam);
+	m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
+						m_GaInfo.m_populacao[0]._pontos,
+						m_GaInfo.m_populacao[0]._t,
+						m_GaInfo.m_populacao[0].getGenes());
+
+	OnSimulaPlay();
+
+#endif
+	return 0L;
+}
+
+void CGaBox2dView::OnGaMudarpar()
+{
+	CGaParamsDlg dlgParams;
+	if(dlgParams.DoModal() != IDOK)
+	{
+		return;
+	}
+// TODO: Reativar
+//	_thread_params.m_Params = dlgParams;
+//	_thread_params.bParamsChanged = true;
+}
+
+};//namespace GUI
