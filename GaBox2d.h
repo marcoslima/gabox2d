@@ -15,7 +15,7 @@ class CGaBox2dApp
 public:
 	CGaBox2dApp();
 
-    void run(void);
+    int run(void);
 };
 
 extern CGaBox2dApp theApp;

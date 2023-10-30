@@ -1,8 +1,8 @@
+#if 0
 
 #include "env.h"
 #include <sstream>
 #include <pcrecpp.h>
-#include <mersenne.h>
 
 
 extern MTRand mrand;
@@ -113,3 +113,5 @@ vec_vecs_t CEnv::get_vecs(void)
 }
 
 }; //namespace MODEL
+
+#endif

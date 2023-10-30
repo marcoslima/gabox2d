@@ -1,5 +1,4 @@
-#ifndef __DOUBLEX_H__
-#define __DOUBLEX_H__
+#pragma once
 
 #include <math.h>
 #include <float.h>
@@ -26,7 +25,7 @@ public:
 	// Copy constructor:
 	doublex(const doublex& other);
 
-// Operações
+// Operaï¿½ï¿½es
 
 	doublex operator +(doublex other) const;
 	doublex operator -(doublex other) const;
@@ -41,7 +40,7 @@ public:
 	doublex operator /=(const doublex& other);
 	doublex operator ^=(const doublex& other);
 
-// Operações com double:
+// Operaï¿½ï¿½es com double:
 	doublex operator +(const double other) const;
 	doublex operator -(const double other) const;
 	doublex operator *(const double other) const;
@@ -54,16 +53,16 @@ public:
 	doublex operator /= (const double other);
 	doublex operator ^= (const double other);
 
-// Unário:
+// Unï¿½rio:
 	doublex operator -(void);
 
-// Atribuições:
+// Atribuiï¿½ï¿½es:
 	doublex operator =(const doublex other);
 	doublex operator =(const double other);
 	doublex operator =(const long   other);
 	doublex operator =(const int    other);
 
-// Comparações:
+// Comparaï¿½ï¿½es:
 //	bool operator < (const doublex  other);
 	bool operator > (const doublex& other);
 	bool operator <=(const doublex& other);
@@ -71,9 +70,9 @@ public:
 	bool operator ==(const doublex& other);
 	bool operator !=(const doublex& other);
 
-// Conversão para double:
+// Conversï¿½o para double:
 //	operator double(){return dV;} // Melhor deixar explicito.
-// Conversão para int:
+// Conversï¿½o para int:
 	operator int(){return int(dV);}
 
 // Perfumaria:
@@ -104,7 +103,7 @@ doublex signi(const doublex& aVal);
 doublex mod(const doublex& left, const doublex& right);
 doublex log(const doublex& numero, double base = 10.0);
 
-// Operadores com double à esquerda:
+// Operadores com double ï¿½ esquerda:
 // FIXME: terminar os operadores
 doublex operator *(double left, doublex right);
 bool operator <(double left, doublex right);
@@ -113,13 +112,9 @@ bool operator >(double left, doublex right);
 bool operator <(doublex left, doublex right);
 
 
-// Funções especializadas doublex:
+// Funï¿½ï¿½es especializadas doublex:
 doublex Somatorio (const std::vector<doublex> &vecValores);
 doublex Somatorio2(const std::vector<doublex> &vecValores);
 doublex Media     (const std::vector<doublex> &vec);
 doublex StdDev	  (const std::vector<doublex> &vec);
-
-
-
 };//namespace LmFisica
-#endif //__DOUBLEX_H__

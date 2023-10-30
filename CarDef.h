@@ -1,5 +1,4 @@
-#ifndef __CARDEF_H__
-#define __CARDEF_H__
+#pragma once
 
 namespace MODEL
 {
@@ -47,5 +46,3 @@ public:
 };
 
 };//namespace MODEL
-
-#endif //__CARDEF_H__

@@ -1,5 +1,7 @@
-#ifndef __ENV_H__
-#define __ENV_H__
+#pragma once
+
+#if 0
+
 #include <vector>
 using namespace std;
 
@@ -17,11 +19,11 @@ public:
 };
 
 typedef vector<vec2_t> vec_vecs_t;
-// Classe que guarda as características do ambiente
+// Classe que guarda as caracterï¿½sticas do ambiente
 class CEnv
 {
 public:
-	// Parâmetros de criação:
+	// Parï¿½metros de criaï¿½ï¿½o:
 	int		_seed;
 	double	_dxm;
 	double	_dxs;
@@ -54,4 +56,4 @@ public:
 
 };//namespace MODEL
 
-#endif //__ENV_H__
+#endif

@@ -1,3 +1,5 @@
+#if 0
+
 #include <algorithm>
 using namespace std;
 #include <mersenne.h>
@@ -402,3 +404,5 @@ bool CGa::OpenLogFile(void)
 
 
 };//namespace GA
+
+#endif

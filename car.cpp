@@ -1,4 +1,3 @@
-#include <stdafx.h>
 #include "car.h"
 
 
@@ -25,7 +24,7 @@ void CCar::beginSimulate(b2World *pWorld)
 	// Instanciamento
 	_create(pWorld,_carro);
 
-	// Inicializamos a simulação física:
+	// Inicializamos a simulaï¿½ï¿½o fï¿½sica:
 	_phys_begin_simulate();
 }
 

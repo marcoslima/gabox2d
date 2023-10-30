@@ -1,5 +1,5 @@
 #include "doublex.h"
-#include <lmfisica.h>
+#include "lmfisica.h"
 #include <cstdio>
 #include <limits>
 
@@ -11,8 +11,8 @@ doublex::doublex()
 	dS = DBL_EPSILON;
 }
 
-// Se aS for zero, consideramos o menor valor possível para double
-// Assim a incerteza será o mais próxima possível de zero, mas não será zero.
+// Se aS for zero, consideramos o menor valor possï¿½vel para double
+// Assim a incerteza serï¿½ o mais prï¿½xima possï¿½vel de zero, mas nï¿½o serï¿½ zero.
 doublex::doublex(double aVal, double aS)
 {
 	dV = aVal;
@@ -29,19 +29,19 @@ doublex::doublex(const doublex& other)
 	dS = other.dS;
 }
 
-// Adição
+// Adiï¿½ï¿½o
 doublex doublex::operator +(doublex other) const
 {
 	return doublex(dV+other.dV,::sqrt((double)pow(dS,2)+pow(other.dS,2)));
 }
 
-// Subtração
+// Subtraï¿½ï¿½o
 doublex doublex::operator -(doublex other) const
 {
 	return doublex(dV-other.dV,::sqrt((double)pow(dS,2)+pow(other.dS,2)));
 }
 
-// Multiplicação
+// Multiplicaï¿½ï¿½o
 doublex doublex::operator *(doublex other) const
 {
 	return doublex
@@ -56,7 +56,7 @@ doublex doublex::operator *(doublex other) const
 			);
 }
 
-// Divisão
+// Divisï¿½o
 doublex doublex::operator /(doublex other) const
 {
 	return	doublex
@@ -71,7 +71,7 @@ doublex doublex::operator /(doublex other) const
 			);
 }
 
-// Potência:
+// Potï¿½ncia:
 doublex doublex::operator^(doublex other) const
 {
 	if(other.S() == 0)
@@ -117,7 +117,7 @@ doublex doublex::operator ^=(const doublex& other)
 	return *this;
 }
 
-// Operações com números sem incerteza (double)
+// Operaï¿½ï¿½es com nï¿½meros sem incerteza (double)
 doublex doublex::operator +(const double other) const
 {
 	return doublex(dV+other,dS);
@@ -179,7 +179,7 @@ doublex doublex::operator -(void)
 }
 
 ////////////////
-// Atribuições:
+// Atribuiï¿½ï¿½es:
 doublex doublex::operator =(const doublex other)
 {
 	dV = other.dV;
@@ -208,7 +208,7 @@ doublex doublex::operator =(const int    other)
 	return *this;
 }
 
-// Comparações:
+// Comparaï¿½ï¿½es:
 /*
 bool doublex::operator <(const doublex other)
 {
@@ -248,7 +248,7 @@ doublex sqrt(doublex aVal)
 	return doublex(::sqrt(aVal.V()),aVal.S()*::sqrt(1.0/aVal.V()));
 }
 
-// Trigonométricas:
+// Trigonomï¿½tricas:
 doublex sin(const doublex& aVal)
 {
 	return doublex(::sin(aVal.V()),fabs(::cos(aVal.V())*aVal.S()));
@@ -330,11 +330,11 @@ doublex log(const doublex& numero, double base)
 string doublex::str(void)
 {
 	static char szFmt[64];
-	sprintf(szFmt,"%f ± %f", dV, dS);
+	sprintf(szFmt,"%f ï¿½ %f", dV, dS);
 	return string(szFmt);
 }
 
-// Funções de estatística, copiados de lmfisica.h, adaptados do template para o doublex
+// Funï¿½ï¿½es de estatï¿½stica, copiados de lmfisica.h, adaptados do template para o doublex
 doublex Somatorio(const vector<doublex> &vecValores)
 {
 	doublex aTot(0,0);
@@ -348,7 +348,7 @@ doublex Somatorio(const vector<doublex> &vecValores)
 	return aTot;
 }
 
-// Soma dos elementos ao quadrado (cada um ao quadrado, e então somados)
+// Soma dos elementos ao quadrado (cada um ao quadrado, e entï¿½o somados)
 doublex Somatorio2(const vector<doublex> &vec)
 {
 	doublex aTot(0,0);
@@ -367,7 +367,7 @@ doublex Media(const vector<doublex> &vec)
 	return Somatorio(vec) / (double)vec.size();
 }
 
-// Desvio padrão:
+// Desvio padrï¿½o:
 doublex StdDev(const vector<doublex> &vec)
 {
 	doublex aMed = Media(vec);

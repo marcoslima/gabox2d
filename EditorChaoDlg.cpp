@@ -1,10 +1,9 @@
 // EditorChaoDlg.cpp : implementation file
 //
+#if 0
 
-#include "stdafx.h"
 #include "GaBox2d.h"
 #include "EditorChaoDlg.h"
-#include <mersenne.h>
 #include <iostream>
 #include <fstream>
 #include <devutils.h>
@@ -163,9 +162,9 @@ void CEditorChaoDlg::OnBnClickedSalvar()
 		_T("ada"), 
 		strFile, 
 		OFN_ENABLESIZING|OFN_EXPLORER|OFN_LONGNAMES|OFN_NOREADONLYRETURN|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST, 
-		_T("Arquivos de definição de ambiente (*.ada)|*.ada|Todos os arquivos (*.*)|*.*|"), 
+		_T("Arquivos de definiï¿½ï¿½o de ambiente (*.ada)|*.ada|Todos os arquivos (*.*)|*.*|"), 
 		this );
-	dlgFile.m_ofn.lpstrTitle = _T("Salvar configuração de ambiente");
+	dlgFile.m_ofn.lpstrTitle = _T("Salvar configuraï¿½ï¿½o de ambiente");
 
 	if(dlgFile.DoModal() != IDOK) 
 		return;
@@ -188,9 +187,9 @@ void CEditorChaoDlg::OnBnClickedLer()
 		_T("ada"), 
 		strFile, 
 		OFN_ENABLESIZING|OFN_EXPLORER|OFN_LONGNAMES|OFN_NOREADONLYRETURN|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST, 
-		_T("Arquivos de definição de ambiente (*.ada)|*.ada|Todos os arquivos (*.*)|*.*|"), 
+		_T("Arquivos de definiï¿½ï¿½o de ambiente (*.ada)|*.ada|Todos os arquivos (*.*)|*.*|"), 
 		this );
-	dlgFile.m_ofn.lpstrTitle = _T("Salvar configuração de ambiente");
+	dlgFile.m_ofn.lpstrTitle = _T("Salvar configuraï¿½ï¿½o de ambiente");
 
 	if(dlgFile.DoModal() != IDOK) 
 		return;
@@ -357,3 +356,5 @@ void CEditorChaoDlg::OnBnClickedOk()
 }
 
 };//namespace GUI
+
+#endif

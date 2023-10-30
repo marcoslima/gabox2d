@@ -1,9 +1,9 @@
-#ifndef __EDITORCHAODLG_H__
-#define __EDITORCHAODLG_H__
+#pragma once
+
+#if 0
 
 #include "ga.h"
 #include "WndPreviewChao.h"
-#include "afxcmn.h"
 
 namespace GUI
 {
@@ -79,4 +79,4 @@ public:
 	afx_msg void OnBnClickedOk();
 };
 };//namespace GUI
-#endif //__EDITORCHAODLG_H__
+#endif

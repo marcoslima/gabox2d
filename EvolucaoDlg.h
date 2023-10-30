@@ -1,7 +1,6 @@
-#ifndef __EVOLUCAODLG_H__
-#define __EVOLUCAODLG_H__
+#pragma once
+#if 0
 
-#include "afxcmn.h"
 #include "WndShowCarro.h"
 
 namespace GUI
@@ -34,4 +33,4 @@ public:
 };
 };//namespace GUI
 
-#endif //__EVOLUCAODLG_H__
+#endif

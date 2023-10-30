@@ -1,11 +1,9 @@
-#ifndef __GA_H__
-#define __GA_H__
+#pragma once
+#if 0
 
 #include <string>
 #include <sstream>
-#include <pcrecpp.h>
 #include "lmFisica.h"
-using namespace pcrecpp;
 using namespace std;
 using namespace LmFisica;
 
@@ -117,4 +115,4 @@ public:
 
 };//namespace GA
 
-#endif //__GA_H__
+#endif
