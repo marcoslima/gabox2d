@@ -4,6 +4,7 @@
 #include "GaBox2d.h"
 //#include "GaBox2dDoc.h"
 //#include "GaBox2dView.h"
+#include "GaParamsDlg.h"
 #include "GaBox2d.h"
 #include <iostream>
 using namespace std;
@@ -43,6 +44,7 @@ int CGaBox2dApp::run()
     sf::Clock deltaClock;
     bool bMouseDown = false;
     sf::Vector2i ptMouse, lastPtMouse;
+	CGaParamsDlg dlgParams;
     while (window.isOpen()) 
     {
 
@@ -56,9 +58,11 @@ int CGaBox2dApp::run()
         }
 
         ImGui::SFML::Update(window, deltaClock.restart());
-
+		ImGui::ShowDemoWindow();
         window.clear();
-
+		// VIEW.DRAW
+		dlgParams.draw();
+		if(ImGui::Button("Open")) dlgParams.show();
         ImGui::SFML::Render(window);
         window.display();
 

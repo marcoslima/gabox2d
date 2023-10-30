@@ -1,5 +1,7 @@
-#ifndef __GAPARAMSDLG_H__
-#define __GAPARAMSDLG_H__
+#pragma once
+
+#include <iostream>
+using namespace std;
 
 namespace GUI
 {
@@ -7,51 +9,43 @@ namespace GUI
 class ga_params_t
 {
 public:
-	UINT	m_nPopulacao	;
-	CString m_strCrossover	;
-	UINT	m_nElitismo		;
-	CString m_strMutacao	;
-	UINT	m_nAlienismo	;
-	UINT	m_nMutInt		;
-	double	m_dMaxT			;
+	uint64_t	m_nPopulacao	;
+	float		m_fCrossover	;
+	uint64_t	m_nElitismo		;
+	float 		m_fMutacao		;
+	uint64_t	m_nAlienismo	;
+	uint64_t	m_nMutInt		;
+	float		m_fMaxT			;
 
 public:
 	ga_params_t(
-		UINT	nPopulacao	,
-		CString strCrossover	,
-		UINT	nElitismo		,
-		CString strMutacao	,
-		UINT	nAlienismo	,
-		UINT	nMutInt		,
-		double	dMaxT			)
+		uint64_t	nPopulacao	,
+		float		fCrossover	,
+		uint64_t	nElitismo	,
+		float		fMutacao	,
+		uint64_t	nAlienismo	,
+		uint64_t	nMutInt		,
+		float		fMaxT		)
 	{
 		m_nPopulacao	= nPopulacao	;
-		m_strCrossover	= strCrossover	;
+		m_fCrossover	= fCrossover	;
 		m_nElitismo		= nElitismo		;
-		m_strMutacao	= strMutacao	;
+		m_fMutacao		= fMutacao	;
 		m_nAlienismo	= nAlienismo	;
 		m_nMutInt		= nMutInt		;
-		m_dMaxT			= dMaxT			;
+		m_fMaxT			= fMaxT			;
 	}
 
 	ga_params_t(){}
 };
 
-class CGaParamsDlg : public CDialog, public ga_params_t
+class CGaParamsDlg : public ga_params_t
 {
-	DECLARE_DYNAMIC(CGaParamsDlg)
-
 public:
-	CGaParamsDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CGaParamsDlg();
+	CGaParamsDlg();   // standard constructor
 
-// Dialog Data
-	enum { IDD = IDD_PARAMETROS_GA };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
+	void show(void);
+	void draw(void);
 };
+
 };//namespace GUI
-#endif //__GAPARAMSDLG_H__

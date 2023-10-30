@@ -1,83 +1,40 @@
 // GaParamsDlg.cpp : implementation file
 //
-
-#include "stdafx.h"
+#include <imgui.h>
 #include "GaBox2d.h"
 #include "GaParamsDlg.h"
 
 
-// Codificação genética do carro:
-/*
-
-Para a base 26 temos: 
-
-  dígitos	números
-	1			 26
-	2			676
-	3		 17.576
-	4		456.976
-	5	 11.881.376
-	6	308.915.776
-
-
-@@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@
---- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
- x   y   r   d   f  res  x   y   r   d   f  res  x   y   r   d   f  res  x   y   r   d   f  res TQ
-	R O D A   1			    R O D A   2			    P E S O   1			    P E S O  2			
-
-
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@
-
-78 digitos
-
-x e y da roda 1:
--5 <= x <= 5
-Precisão: 3 casas decimais: [-5000, 5000] -> 10000 unique numbers
-
-raio: entre 0.2 e 1 -> 4 casas -> 2000 - 10000 = 8000
-densidade: entre 0.1 e 1 -> 4 casas
-friction: entre 0 e 1 -> 4 casas
-restitution: entre 0 e 1 -> 4 casas
-Torque: entre 1 e 20 -> 1 casa: 10 - 200 = 190
-*/
-
 namespace GUI
 {
 // CGaParamsDlg dialog
-IMPLEMENT_DYNAMIC(CGaParamsDlg, CDialog)
-CGaParamsDlg::CGaParamsDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CGaParamsDlg::IDD, pParent)
-	, ga_params_t(60,"75",2,"65",0,10,60.0)
+CGaParamsDlg::CGaParamsDlg()
+	: ga_params_t(60, 75, 2, 65, 0, 10, 60)
 {
 }
 
-CGaParamsDlg::~CGaParamsDlg()
+void CGaParamsDlg::show()
 {
+	ImGui::OpenPopup("GA Params");
 }
 
-void CGaParamsDlg::DoDataExchange(CDataExchange* pDX)
+void CGaParamsDlg::draw()
 {
-	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_POPULACAO, m_nPopulacao);
-	DDX_Text(pDX, IDC_CROSSOVER, m_strCrossover);
-	DDX_Text(pDX, IDC_ELITISMO, m_nElitismo);
-	DDX_Text(pDX, IDC_MUTACAO, m_strMutacao);
-	DDX_Text(pDX, IDC_ALIENISMO, m_nAlienismo);
-	DDX_Text(pDX, IDC_MUT_INT, m_nMutInt);
-	DDX_Text(pDX, IDC_MAX_T, m_dMaxT);
+	if(ImGui::BeginPopupModal("GA Params", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::InputScalar("Population", ImGuiDataType_U64, &m_nPopulacao);
+		ImGui::InputFloat("Crossover", &m_fCrossover);
+		ImGui::InputScalar("Elitism", ImGuiDataType_U64, &m_nElitismo);
+		ImGui::InputFloat("Mutation", &m_fMutacao);
+		ImGui::InputScalar("Alienism", ImGuiDataType_U64, &m_nAlienismo);
+		ImGui::InputScalar("Mutation Interval", ImGuiDataType_U64, &m_nMutInt);
+		ImGui::InputFloat("Max Time", &m_fMaxT);
+		if(ImGui::Button("Close"))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 }
 
-
-BEGIN_MESSAGE_MAP(CGaParamsDlg, CDialog)
-END_MESSAGE_MAP()
-
-
-// CGaParamsDlg message handlers
 };//namespace GUI
