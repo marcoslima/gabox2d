@@ -53,6 +53,9 @@ public:
 	void setPontos(double pontos){_pontos = pontos;}
 	void CreateCar(const char *genes = NULL);
 
+	// Processo evolutivo:
+	void Crossover(CGaCar& other);
+
 };
 
 }; // namespace GA

@@ -2,7 +2,7 @@
 #include <algorithm>
 using namespace std;
 #include <mersenne.h>
-
+#include <cronometro.h>
 #include "ga.h"
 
 MTRand mrand;
@@ -19,10 +19,13 @@ float random(float aMin, float aMax)
 CGa::CGa()
 {
 	InitializeCriticalSection(&m_cs);
+	_bLogOpenned = false;
 }
 CGa::~CGa()
 {
 	DeleteCriticalSection(&m_cs);
+	if(_bLogOpenned)
+		_fileLog1.Close();
 }
 
 
@@ -59,7 +62,10 @@ void CGa::BeginEvolve(void)
 	_bMassExtintion = false;
 	_strId2Include.Empty();
 	_geracao	  = 1;
-	_alpha		  = 10;
+
+	_fileLog1.Open("log1.txt",CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite);
+	_nCount = 0;
+	_bLogOpenned = true;
 }
 
 
@@ -70,13 +76,16 @@ bool pred(const CCar& left, const CCar& right)
 
 void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 {
-	size_t i;
+
 	double pts;
 
 	// Ordenamos (medições)
-	for(i = 0; i < _populacao; i++)
+	lst_car_t::iterator it;
+	for(it = m_populacao.begin();
+		it!= m_populacao.end();
+		it++)
 	{
-		m_populacao[i].Medir(pWorld,_max_t);
+		it->Medir(pWorld,_max_t);
 
 		if(WaitForSingleObject(hStop,0) == WAIT_OBJECT_0)break;
 	}
@@ -84,16 +93,15 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 	// Ajustamos os pontos
 	double c1,c2,v,d,t;
 	double p1,p2,p3,p4,p5;
-	double	pmax	= -1,
-			pmedio	=  0;
-
-	for(i = 0; i < _populacao; i++)
+	for(it = m_populacao.begin();
+		it!= m_populacao.end();
+		it++)
 	{
-		c1 = m_populacao[i].m_contatoR1		;
-		c2 = m_populacao[i].m_contatoR2		;
-		v  = m_populacao[i].m_vm			;
-		d  = m_populacao[i].m_distancia		;
-		t  = m_populacao[i].getT()			; 
+		c1 = it->m_contatoR1	;
+		c2 = it->m_contatoR2	;
+		v  = it->m_vm			;
+		d  = it->m_distancia	;
+		t  = it->getT()			; 
 
 		/*
 			A pontuação é meio difícil por que, para ser absoluta, não pode
@@ -123,52 +131,17 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 		p4 = 1000 - d;
 		p5 = t; // 0 - t = -t, mas como será ao quadrado, deixa t mesmo.
 
-		pts = sqrt(p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
-		pmax = __max(pmax,pts);
-
-		// Se quebrou, vale um décimo de um que não quebrou:
-		if(m_populacao[i].m_bDead) pts *= 10;
+		pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
 		
-		m_populacao[i].setPontos(pts);
-		pmedio += pts;
+		// Se quebrou, vale um décimo de um que não quebrou:
+		if(it->m_bDead) pts *= 10;
+
+		it->setPontos(pts);
 	}
 
-	if(_alpha > 1.0)
-	{
-		// Normalização
-		pmedio /= pmax;
+	m_populacao.sort(pred);
 
-		// Media
-		pmedio /= _populacao;
-
-		double F,R;
-
-		for(i = 0; i < _populacao; i++)
-		{
-			// Pontos normalizado:
-			pts = m_populacao[i].getPontuacao()/pmax;
-
-			if(pts >= pmedio)
-			{
-				R = pts-pmedio;
-				F = pmedio + pow(R,_alpha);
-				m_populacao[i].setPontos(F);	
-			}
-			else
-			{
-				R = pmedio-pts;
-				F = pmedio - pow(R,_alpha);
-				m_populacao[i].setPontos(F);	
-			}
-		}
-
-		_alpha -= 0.05;
-	}
-	
-
-	sort(m_populacao.begin(), m_populacao.end(),pred);
-
-	m_carWinner = m_populacao[0];
+	m_carWinner = *(m_populacao.begin());
 	if(m_melhores.size() == 0)
 	{
 		m_melhores.push_back(melhor_t(_geracao,m_carWinner));
@@ -190,15 +163,18 @@ void CGa::_1Select(void)
 
 	// A população já está ordenada.
 	// Elitismo:
-	for(i = 0; i < _elitismo; i++)
+	lst_car_t::iterator it;
+	for(it = m_populacao.begin(),i = 0;
+		it!= m_populacao.end() && i < _elitismo;
+		it++,i++)
 	{
-		m_nova.push_back(m_populacao[i].getGenesCString());
+		m_nova.push_back(CString("__")+it->getGenesCString());
 	}
 
 	// Alienismo:
 	for(i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back((CCar()).getGenesCString());
+		m_nova.push_back(CString("__")+(CCar()).getGenesCString());
 	}
 
 	// Inclusão arbitrária:
@@ -213,9 +189,12 @@ void CGa::_1Select(void)
 
 void CGa::_2Crossover(void)
 {
-	size_t i, nId1, nId2, nSize = m_populacao.size();
+	size_t i,nId1, nId2, nSize = m_populacao.size();
 	double nStdev = nSize / 1.0;
 	size_t nMaxIndex = nSize - 1;
+	CString str1, str2, strt;
+	size_t nCross;
+	lst_car_t::iterator it;
 
 	while(m_nova.size() < _populacao)
 	{
@@ -232,24 +211,22 @@ void CGa::_2Crossover(void)
 			continue;
 		
 		// Faz crossover?
+		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
+		str1 = it->getGenesCString();
+
+		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
+		str2 = it->getGenesCString();
+
 		if(mrand.randInt(100) < _crossover)
 		{
-			// Crossover:
-			// Escolhemos um ponto aleatório para o crossover:
-			size_t nCross;
 			nCross = 1 + mrand.randInt(GENES-2);
-
-			char tmp;
-			for(i = nCross; i < GENES; i++)
-			{
-				tmp = m_populacao[nId1].getGene(i);
-				m_populacao[nId1].setGene(i,m_populacao[nId2].getGene(i));
-				m_populacao[nId2].setGene(i,tmp);
-			}
+			strt = str1.Left(nCross);
+			str1 = str2.Left(nCross) + str1.Right(GENES-nCross);
+			str2 = strt + str2.Right(GENES-nCross);
 		}
 
-		m_nova.push_back(m_populacao[nId1].getGenesCString());
-		m_nova.push_back(m_populacao[nId2].getGenesCString());
+		m_nova.push_back(str1);
+		m_nova.push_back(str2);
 	}
 
 	return;
@@ -267,6 +244,8 @@ void CGa::_3Mutate(void)
 			// Mutação:
 			// Ponto da mutação:
 			nMut = mrand.randInt(GENES-1);
+
+			VERIFY(m_nova[i].Left(2) != "__");
 
 			// Intensidade e direção da mutação:
 			g = (char)(m_nova[i].GetAt(nMut) + mrand.randInt((MTRand::uint32)_mut_int) * (mrand.randInt(1)?(1):(-1)));
@@ -296,7 +275,10 @@ void CGa::_4AdvanceGeneration(void)
 		size_t i,nSize = m_nova.size();
 		for(i = 0; i < nSize && i < _populacao; i++)
 		{
-			m_populacao.push_back(CCar(m_nova[i]));
+			if(m_nova[i].Left(2) == "__")
+				m_populacao.push_back(CCar(m_nova[i].Right(m_nova[i].GetLength()-2)));
+			else
+				m_populacao.push_back(CCar(m_nova[i]));
 		}
 		_geracao++;
 	}
@@ -317,17 +299,66 @@ void CGa::IncludeId(CString strGenes)
 
 void CGa::Step(void)
 {
+	CCronometro cr;
+
+	double select,crossover,mutate,advance;
+	cr.Start();
 	_1Select();
+	select =cr.Get();
+	cr.Start();
 	_2Crossover();
+	crossover = cr.Get();
+	cr.Start();
 	_3Mutate();
+	mutate = cr.Get();
+	cr.Start();
 	_4AdvanceGeneration();
+	advance = cr.Get();
+
+	double m,s;
+	CString strLine,strPart;
+	_vec_select.push_back(select);
+	_vec_crossover.push_back(crossover);
+	_vec_mutate.push_back(mutate);
+	_vec_advance.push_back(advance);
+
+	m = Media<double,double>(_vec_select);
+	s = StdDev<double,double>(_vec_select);
+	Significativos(m,s);
+
+	strPart.Format("%f ± %f, ",m,s);
+	strLine += strPart;
+
+	m = Media<double,double>(_vec_crossover);
+	s = StdDev<double,double>(_vec_crossover);
+	Significativos(m,s);
+
+	strPart.Format("%f ± %f, ",m,s);
+	strLine += strPart;
+
+	m = Media<double,double>(_vec_mutate);
+	s = StdDev<double,double>(_vec_mutate);
+	Significativos(m,s);
+
+	strPart.Format("%f ± %f, ",m,s);
+	strLine += strPart;
+
+	m = Media<double,double>(_vec_advance);
+	s = StdDev<double,double>(_vec_advance);
+	Significativos(m,s);
+
+	strPart.Format("%f ± %f\r\n",m,s);
+	strLine += strPart;
+
+	_fileLog1.Write(strLine,strLine.GetLength());
 }
 
-void CGa::CopyPopulacao(vec_car_t *pTarget)
+void CGa::CopyPopulacao(lst_car_t *pTarget)
 {
 	*pTarget = m_populacao;
 
 }
+
 
 // TODO: Mover esta função para um lugar mais apropriado
 /*

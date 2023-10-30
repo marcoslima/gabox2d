@@ -4,11 +4,15 @@
 #include <string>
 #include <sstream>
 #include <pcrecpp.h>
+#include <lmFisica.h>
 using namespace pcrecpp;
 using namespace std;
+using namespace LmFisica;
 
 #include "car.h"
 #include "env.h"
+
+typedef vector<double> vec_double_t;
 
 namespace GA
 {
@@ -17,6 +21,7 @@ float random(float aMin, float aMax);
 typedef vector<CString> vec_cstr_t;
 typedef pair<size_t,CCar> melhor_t;
 typedef vector<melhor_t> vec_melhores_t;
+
 
 class CGa
 {
@@ -30,7 +35,6 @@ private:
 	double	_crossover	;	// Percentual de probabilidade de ocorrer crossover
 	double	_mutacao	;	// Percentual de probabilidade de ocorrer mutação
 	CCar	m_carWinner ;	// Indivíduo mais adaptado da geração atual (Objeto CCar)
-	double	 _alpha		;	// Smother
 
 // Acumuladores do algoritmo
 	size_t  _geracao	 ;	// Geração atual
@@ -47,11 +51,18 @@ private:
 // Armazenamento dos indivíduos
 private:
 	// População (objetos CCar)
-	vec_car_t	m_populacao;
+	lst_car_t	m_populacao;
 
 	// Nova população (sequências de genes)
 	vec_cstr_t	m_nova;
 
+	vec_double_t	_vec_select,
+					_vec_crossover,
+					_vec_mutate,
+					_vec_advance;
+	CFile _fileLog1;
+	size_t _nCount;
+	bool _bLogOpenned;
 public:
 	// Histórico de melhoramentos
 	vec_melhores_t	m_melhores;
@@ -95,7 +106,7 @@ public:
 	void IncludeId(CString strGenes);
 
 	// Copia a população para um vector
-	void	CopyPopulacao(vec_car_t *pTarget);
+	void	CopyPopulacao(lst_car_t *pTarget);
 	
 	// Queries
 	CCar	getWinner()			{return m_carWinner		;}

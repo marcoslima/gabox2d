@@ -76,13 +76,16 @@ void CGaInfoDlg::Refresh(CGaInfo* pInfo)
 
 	m_lstGenes.SetRedraw(FALSE);
 	m_lstGenes.DeleteAllItems();
-	size_t i;
+
 	int iItem;
-	for(i = 0; i < m_nPopulacao; i++)
+	lst_car_t::iterator it;
+	for(it = pInfo->m_populacao.begin();
+		it!= pInfo->m_populacao.end();
+		it++)
 	{
 		iItem = m_lstGenes.InsertItem();
-		m_lstGenes.SetItemData(iItem,0,pInfo->m_populacao[i]._pontos);
-		m_lstGenes.SetItemData(iItem,1,pInfo->m_populacao[i]._genes.c_str() );
+		m_lstGenes.SetItemData(iItem,0,(int)it->_pontos);
+		m_lstGenes.SetItemData(iItem,1,it->_genes.c_str() );
 	}
 	m_lstGenes.AdjustColumns();
 	m_lstGenes.SetRedraw(TRUE);

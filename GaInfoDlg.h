@@ -12,7 +12,7 @@ namespace GUI
 class CGaInfo
 {
 public:
-	vec_car_t	m_populacao;
+	lst_car_t	m_populacao;
 	unsigned	m_geracao;
 	double		m_gps;		// Gerações por segundo
 	double		m_maxD;

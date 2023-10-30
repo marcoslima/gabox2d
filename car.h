@@ -4,6 +4,7 @@
 #include "PhysCar.h"
 #include "GrCar.h"
 #include <vector>
+#include <list>
 using namespace std;
 
 class CCar : 
@@ -27,5 +28,7 @@ public:
 };
 
 typedef vector<CCar> vec_car_t;
+typedef list<CCar> lst_car_t;
+
 
 #endif //__CAR_H__

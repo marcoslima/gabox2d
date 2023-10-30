@@ -60,7 +60,7 @@ void CIdInfoDlg::set(UINT nGeracao		,
 	if(nGeracao != -1)
 		m_nGeracao = nGeracao;
 	if(dPontuacao != -1)
-		m_strPontuacao = dbl2str(dPontuacao,"%.4f");
+		m_strPontuacao = dbl2str(dPontuacao,"%.0f");
 
 	m_strTempo = dbl2str(dTempo,"%0.02f");
 	m_strGenes = strGenes.c_str();

@@ -1,4 +1,8 @@
 #include "StdAfx.h"
+
+#include <mersenne.h>
+extern MTRand mrand;
+
 #include ".\gacar.h"
 namespace GA
 {
@@ -70,9 +74,12 @@ void CGaCar::_generate_random_genes(void)
 {
 	int i;
 	_genes.clear();
+
+	mrand.seed();
+
 	for(i = 0; i < GENES; i++)
 	{
-		_genes.push_back('A' + rand()%26);
+		_genes.push_back('A' + mrand.randInt(26));
 	}
 
 	return;
@@ -139,6 +146,20 @@ void CGaCar::_decode(void)
 //	TRACE1("\r\nTamanho da sequência genética: %d", nPos);_asm int 3;
 
 	return;
+}
+
+void CGaCar::Crossover(CGaCar& other)
+{
+	size_t i,nCross;
+	nCross = 1 + mrand.randInt(GENES-2);
+
+	char tmp;
+	for(i = nCross; i < GENES; i++)
+	{
+		tmp = getGene(i);
+		setGene(i,other.getGene(i));
+		other.setGene(i,tmp);
+	}
 }
 
 }; // namespace GA

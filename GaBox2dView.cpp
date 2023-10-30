@@ -204,211 +204,6 @@ void CGaBox2dView::OnDraw(CDC* pSDc)
 	dcBmp.DeleteDC();
 }
 
-#if 0
-void CGaBox2dView::Draw(CDC *pDc)
-{
-	CDcIntegrity dci(pDc);
-	CGaBox2dDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-		return;
-
-	CRect rcClient;
-	CPoint ptCenter;
-	GetClientRect(rcClient);
-	
-	pDc->SelectObject(&m_fntSmall);
-
-	CString strInfos;
-	string sGenes;
-	pDoc->m_car.getGenes(sGenes);
-
-	if(true)
-	{
-		{
-			strInfos.Format(
-				"Individuo atual:\r\n"
-				"Genes: %s\r\n"
-				"R1(m,f,r): (%.2f,%.2f,%.2f)\r\n"
-				"R2(m,f,r): (%.2f,%.2f,%.2f)\r\n"
-				"m(P1,P2): (%.2f,%.2f)\r\n"
-				"torq: %g\r\n"
-				"contato(R1,R2): (%.2f,%.2f)\r\n"
-				"(d, t, vm): (%.2f, %.2f, %.2f)\r\n"
-				"trq(angulo,a,b,c,d): (%.2f,%.2f,%.2f,%.2f,%.2f)\r\n"
-				,sGenes.c_str()
-				,pDoc->m_car.getR1()->GetMass()
-				,pDoc->m_car.getR1()->GetShapeList()->GetFriction()
-				,pDoc->m_car.getR1()->GetShapeList()->GetRestitution()
-				,pDoc->m_car.getR2()->GetMass()
-				,pDoc->m_car.getR2()->GetShapeList()->GetFriction()
-				,pDoc->m_car.getR2()->GetShapeList()->GetRestitution()
-				,pDoc->m_car.getP1()->GetMass()
-				,pDoc->m_car.getP2()->GetMass()
-				,pDoc->m_car.getTorque()
-				,pDoc->m_car.m_contatoR1
-				,pDoc->m_car.m_contatoR2
-				,pDoc->m_car.m_distancia
-				,pDoc->m_car._t
-				,pDoc->m_car.m_vm
-				,pDoc->m_car._angle
-				,pDoc->m_car._trqA
-				,pDoc->m_car._trqB
-				,pDoc->m_car._trqC
-				,pDoc->m_car._trqD
-				);
-		}
-	}
-	else
-	{
-		strInfos.Format("Velocidade: %dx\r\n",m_nVelocidade);
-	}
-
-	CRect rcInfo(0,0,1,1);
-	if(m_bShowInfoId)
-	{
-		pDc->DrawText(strInfos,rcInfo,DT_CALCRECT);
-		pDc->DrawText(strInfos,rcInfo,0);
-	}
-
-	pDc->SelectObject(&m_fntSupersmall);
-	CString strAllGenes;
-	int maxLen = 0;
-	CRect rcAllGenes;
-#if 0
-	if(m_bShowInfoGaGenes)
-	{
-		{
-			CString strLine;
-			size_t i,nSize = m_vecInfoIds.size();
-			for(i = 0; i < nSize; i++)
-			{
-				strLine.Format("%.4f|%s\r\n",m_vecInfoIds[i].dPoints, m_vecInfoIds[i].strGenes);
-				maxLen = __max(maxLen, pDc->GetTextExtent(strLine).cx);
-				strAllGenes += strLine;
-			}
-		}
-		
-		rcAllGenes = CRect(rcClient.right - maxLen - 10,0,rcClient.right,1);
-		pDc->DrawText(strAllGenes,rcAllGenes,DT_CALCRECT);
-	}
-#endif
-	ptCenter = rcClient.CenterPoint();
-
-	int nRes = pDc->SaveDC();
-	pDc->SetMapMode(MM_ISOTROPIC);
-
-	pDc->SetViewportExt(rcClient.Size());
-	pDc->SetWindowExt(6000,-6000);
-
-	b2Vec2 pos = pDoc->m_car.getCenter();
-	pos *= 100;
-	pDc->SetWindowOrg((int)pos.x,(int)pos.y);
-	pDc->SetViewportOrg(ptCenter.x,ptCenter.y);
-
-
-	pDoc->m_car.Draw(pDc);
-
-	CPen penGround(PS_SOLID,10,RGB(0,100,0));
-	CBrush bshGround;
-	bshGround.CreateSolidBrush(RGB(160,160,100));
-	pDc->SelectObject(&penGround);
-	pDc->SelectObject(&bshGround);
-
-	// Chão:
-/*
-	size_t k,nSize = pDoc->m_vecGroundPoints.size();
-	CPoint *pPoints = new CPoint[nSize+2];
-	for(k = 0; k < nSize; k++)
-	{
-		pPoints[k+2].x = (LONG)(pDoc->m_vecGroundPoints[k].x*100);
-		pPoints[k+2].y = (LONG)(pDoc->m_vecGroundPoints[k].y*100);
-	}
-
-	pPoints[0] = CPoint((int)(pDoc->m_vecGroundPoints[nSize-1].x*100),-20000);
-	pPoints[1] = CPoint((int)(pDoc->m_vecGroundPoints[0].x*100)      ,-20000);
-
-	pDc->Polygon(pPoints,(int)nSize+2);
-
-	delete pPoints;
-
-	pDc->FrameRect(CRect(-9900,-9900,9900,9900),&CBrush(RGB(255,0,0)));
-
-	if(false)
-	{
-		pDc->MoveTo(0,-10000);
-		pDc->LineTo(0, 10000);
-
-		pDc->MoveTo(-10000,0);
-		pDc->LineTo( 10000,0);
-	}
-
-	pDc->RestoreDC(nRes);
-	pDc->SetTextColor(RGB(64,128,64));
-	pDc->SetBkMode(TRANSPARENT);
-*/
-	if(m_bShowInfoGaGenes)
-	{
-		pDc->DrawText(strAllGenes,rcAllGenes,0);
-	}
-
-	// Informações do GA:
-	// Canto inferior esquerdo:
-	if(m_bGaRunning)
-	{
-		CRect rcGaInfo(0,0,1,1);
-		CString strGaInfo;
-		pDc->SetTextColor(RGB(0,0,0));
-		pDc->SelectObject(m_fntSmall);
-		
-		m_GaInfo.Lock();
-		if(m_GaInfo.m_populacao.size() > 0)
-		{
-			double gpspg = m_GaInfo.m_gps;
-			char *szFmt;
-			if(gpspg < 0)
-			{
-				szFmt = "Ainda não contabilizado";
-			}
-			else if(gpspg >= 1.0)
-			{
-				szFmt = "gerações por segundo";
-			}
-			else
-			{
-				gpspg = 1.0 / gpspg;
-				szFmt = "segundos por geração";
-			}
-
-			strGaInfo.Format(
-				"Geração: %d (%.2f %s)\r\n"
-				"Max(d,t,vm): (%.2f,%.2f,%.2f)\r\n"
-				"Pts = f(v,d,c1,c2,t): %.4f = f(%.2f,%.2f,%.2f,%.2f,%.2f)\r\n"
-				, m_GaInfo.m_geracao
-				, gpspg
-				, szFmt
-				, m_GaInfo.m_maxD
-				, m_GaInfo.m_maxT
-				, m_GaInfo.m_maxVm
-				, m_GaInfo.m_populacao[0].getPontuacao()
-				, m_GaInfo.m_populacao[0].m_vm
-				, m_GaInfo.m_populacao[0].m_distancia
-				, m_GaInfo.m_populacao[0].m_bContactR1
-				, m_GaInfo.m_populacao[0].m_bContactR2
-				, m_GaInfo.m_populacao[0].m_t
-				);
-		}
-		m_GaInfo.Release();
-		pDc->DrawText(strGaInfo,rcGaInfo,DT_CALCRECT);
-		int cy = rcGaInfo.Height();
-		rcGaInfo.OffsetRect(0,rcClient.bottom - cy);
-		pDc->DrawText(strGaInfo,rcGaInfo,0);
-
-	}
-
-}
-#endif
-
 void CGaBox2dView::Draw(CDC *pDc)
 {
 	CDcIntegrity dci(pDc);
@@ -959,11 +754,11 @@ void CGaBox2dView::OnMostrarMelhor()
 			AfxMessageBox("Não há ninguém para mostrar ainda.");
 			return;
 		}
-		pDoc->GetCar().CreateCar(m_GaInfo.m_populacao[0].getGenesCString());
+		pDoc->GetCar().CreateCar(m_GaInfo.m_populacao.begin()->getGenesCString());
 		m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
-							m_GaInfo.m_populacao[0]._pontos,
-							m_GaInfo.m_populacao[0].getT(),
-							m_GaInfo.m_populacao[0].getGenes());
+							m_GaInfo.m_populacao.begin()->_pontos,
+							m_GaInfo.m_populacao.begin()->getT(),
+							m_GaInfo.m_populacao.begin()->getGenes());
 	}
 	m_GaInfo.Release();
 
@@ -985,12 +780,15 @@ void CGaBox2dView::OnMostrarQualquer()
 	m_GaInfo.Lock();
 	{
 		size_t nQq = rand()%m_GaInfo.m_populacao.size();
-		pDoc->GetCar().CreateCar(m_GaInfo.m_populacao[nQq].getGenesCString());
+		lst_car_t::iterator it;
+		for(int i = 0; i < nQq; i++) it++;
+
+		pDoc->GetCar().CreateCar(it->getGenesCString());
 
 		m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
-							m_GaInfo.m_populacao[nQq]._pontos,
-							m_GaInfo.m_populacao[nQq].getT(),
-							m_GaInfo.m_populacao[nQq].getGenes());
+							it->_pontos,
+							it->getT(),
+							it->getGenes());
 
 	}
 	m_GaInfo.Release();
