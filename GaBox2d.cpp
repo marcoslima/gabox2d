@@ -27,6 +27,48 @@ CGaBox2dApp::CGaBox2dApp()
 {
 }
 
+void DrawMenu()
+{
+    ImGui::BeginMainMenuBar();
+    if (ImGui::BeginMenu("Edit")) 
+    {
+        if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
+        if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+        if (ImGui::MenuItem("Ambiente")) {}
+        ImGui::EndMenu();
+    }
+
+    if(ImGui::BeginMenu("Simulação"))
+    {
+        if(ImGui::MenuItem("Play")) {}
+        if(ImGui::MenuItem("Reset")) {}
+        if(ImGui::BeginMenu("Velocidade")) 
+        {
+            if(ImGui::MenuItem("1x")) {}
+            if(ImGui::MenuItem("2x")) {}
+            if(ImGui::MenuItem("4x")) {}
+            if(ImGui::MenuItem("10x")) {}
+            if(ImGui::MenuItem("100x")) {}
+            ImGui::EndMenu();
+        }
+        if(ImGui::MenuItem("Repetir")) {}
+        ImGui::EndMenu();
+    }
+
+    if(ImGui::BeginMenu("GA"))
+    {
+        if(ImGui::MenuItem("Iniciar GA...")) {}
+        if(ImGui::BeginMenu("Mostrar atual")) 
+        {
+            if(ImGui::MenuItem("Melhor")) {}
+            if(ImGui::MenuItem("Qualquer")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+}
+
 int CGaBox2dApp::run()
 {
     uint64_t screenWidth = 1920;
@@ -60,15 +102,20 @@ int CGaBox2dApp::run()
         ImGui::SFML::Update(window, deltaClock.restart());
 		ImGui::ShowDemoWindow();
         window.clear();
-		// VIEW.DRAW
-		dlgParams.draw();
-		if(ImGui::Button("Open")) dlgParams.show();
+
+        // VIEW.DRAW
+        DrawMenu();
+		// dlgParams.draw();
+		// if(ImGui::Button("Open")) dlgParams.show();
+
         ImGui::SFML::Render(window);
         window.display();
 
     }
 
     ImGui::SFML::Shutdown();
+    
+    return 0;
 }
 
 
