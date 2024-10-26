@@ -9,23 +9,23 @@ namespace GUI
 class ga_params_t
 {
 public:
-	uint64_t	m_nPopulacao	;
+	uint8_t		m_nPopulacao	;
 	float		m_fCrossover	;
-	uint64_t	m_nElitismo		;
+	uint8_t		m_nElitismo		;
 	float 		m_fMutacao		;
-	uint64_t	m_nAlienismo	;
-	uint64_t	m_nMutInt		;
+	uint8_t		m_nAlienismo	;
+	uint8_t		m_nMutInt		;
 	float		m_fMaxT			;
 
 public:
 	ga_params_t(
-		uint64_t	nPopulacao	,
-		float		fCrossover	,
-		uint64_t	nElitismo	,
-		float		fMutacao	,
-		uint64_t	nAlienismo	,
-		uint64_t	nMutInt		,
-		float		fMaxT		)
+		uint8_t	nPopulacao	,
+		float	fCrossover	,
+		uint8_t	nElitismo	,
+		float	fMutacao	,
+		uint8_t	nAlienismo	,
+		uint8_t	nMutInt		,
+		float	fMaxT		)
 	{
 		m_nPopulacao	= nPopulacao	;
 		m_fCrossover	= fCrossover	;

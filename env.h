@@ -1,8 +1,7 @@
 #pragma once
 
-#if 0
-
 #include <vector>
+#include <string>
 using namespace std;
 
 #define ENV_HEADER "1.0"
@@ -19,11 +18,11 @@ public:
 };
 
 typedef vector<vec2_t> vec_vecs_t;
-// Classe que guarda as caracter�sticas do ambiente
+// Classe que guarda as características do ambiente
 class CEnv
 {
 public:
-	// Par�metros de cria��o:
+	// Parâmetros de criação:
 	int		_seed;
 	double	_dxm;
 	double	_dxs;
@@ -55,5 +54,3 @@ public:
 };
 
 };//namespace MODEL
-
-#endif

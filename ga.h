@@ -1,5 +1,4 @@
 #pragma once
-#if 0
 
 #include <string>
 #include <sstream>
@@ -10,13 +9,15 @@ using namespace LmFisica;
 #include "car.h"
 #include "env.h"
 
+#define HANDLE void*
+
 typedef vector<double> vec_double_t;
 
 namespace GA
 {
 
 float random(float aMin, float aMax);
-typedef vector<CString> vec_cstr_t;
+typedef vector<string> vec_cstr_t;
 typedef pair<size_t,CCar> melhor_t;
 typedef vector<melhor_t> vec_melhores_t;
 
@@ -41,10 +42,10 @@ private:
 	bool	_bMassExtintion;
 
 	// Individuo para ser incluido na pr�xima gera��o:
-	CString	_strId2Include;
+	string	_strId2Include;
 
 	// Controle de acesso � estruturas internas da classe
-	CRITICAL_SECTION	m_cs;
+	// CRITICAL_SECTION	m_cs;
 
 // Armazenamento dos indiv�duos
 private:
@@ -58,7 +59,7 @@ private:
 					_vec_crossover,
 					_vec_mutate,
 					_vec_advance;
-	CFile _fileLog1;
+	// CFile _fileLog1;
 	size_t _nCount;
 	bool _bLogOpenned;
 public:
@@ -101,7 +102,7 @@ public:
 	void MassExtinctionEvent(void);
 
 	// Inclui um indiv�duo na pr�xima gera��o
-	void IncludeId(CString strGenes);
+	void IncludeId(string strGenes);
 
 	// Copia a popula��o para um vector
 	void	CopyPopulacao(lst_car_t *pTarget);
@@ -115,4 +116,3 @@ public:
 
 };//namespace GA
 
-#endif

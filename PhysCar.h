@@ -11,7 +11,7 @@ namespace PHYS
 
 typedef struct tagB2Def
 {
-	b2CircleDef sd;
+	b2CircleShape sd;
 	b2BodyDef	bd;
 } b2_def_t;
 
@@ -42,8 +42,8 @@ class CPhysCar;
 class CContactListener : public b2ContactListener
 {
 public:
-	void Add(const b2ContactPoint* point);
-	void Persist(const b2ContactPoint* point);
+	void Add(const b2Contact* point);
+	void Persist(const b2Contact* point);
 
 public:
 	bool		m_bDead		;

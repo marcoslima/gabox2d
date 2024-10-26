@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include "GaBox2d.h"
 #include "GaParamsDlg.h"
-
+#include "imgui_input8.h"
 
 namespace GUI
 {
@@ -15,26 +15,34 @@ CGaParamsDlg::CGaParamsDlg()
 
 void CGaParamsDlg::show()
 {
-	ImGui::OpenPopup("GA Params");
+	ImGui::OpenPopup("Parâmetros para o GA");
 }
 
 void CGaParamsDlg::draw()
 {
-	if(ImGui::BeginPopupModal("GA Params", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		ImGui::InputScalar("Population", ImGuiDataType_U64, &m_nPopulacao);
-		ImGui::InputFloat("Crossover", &m_fCrossover);
-		ImGui::InputScalar("Elitism", ImGuiDataType_U64, &m_nElitismo);
-		ImGui::InputFloat("Mutation", &m_fMutacao);
-		ImGui::InputScalar("Alienism", ImGuiDataType_U64, &m_nAlienismo);
-		ImGui::InputScalar("Mutation Interval", ImGuiDataType_U64, &m_nMutInt);
+	ImGui::BeginPopupModal("Parâmetros para o GA", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::BeginGroup();
+		InputUint8("Population", &m_nPopulacao);
+		ImGui::SliderFloat("Crossover (%)", &m_fCrossover, 0.0f, 100.0f);
+		InputUint8("Elitism", &m_nElitismo);
+		ImGui::SliderFloat("Mutation (%)", &m_fMutacao, 0.0f, 100.0f);
+	ImGui::EndGroup();
+	ImGui::SameLine();
+	ImGui::BeginGroup();
+		InputUint8("Alienism", &m_nAlienismo);
+		InputUint8("Mutation Interval", &m_nMutInt);
 		ImGui::InputFloat("Max Time", &m_fMaxT);
-		if(ImGui::Button("Close"))
-		{
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
+	ImGui::EndGroup();
+	if(ImGui::Button("Cancelar"))
+	{
+		ImGui::CloseCurrentPopup();
 	}
+	ImGui::SameLine();
+	if(ImGui::Button("Iniciar"))
+	{
+		ImGui::CloseCurrentPopup();
+	}
+	// ImGui::EndPopup();
 }
 
 };//namespace GUI

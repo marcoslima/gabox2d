@@ -96,6 +96,10 @@ link_directories(${BOX2D_PATH}/build/bin)
 add_executable(GaBox2d 
     GaBox2d.cpp
     GaParamsDlg.cpp
+    EditorChaoDlg.cpp
+    WndPreviewChao.cpp
+    env.cpp
+    imgui_input_uint8.cpp
 )
 
 

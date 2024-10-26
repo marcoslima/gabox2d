@@ -3,6 +3,10 @@
 
 #include "CarDef.h"
 
+#define CImage int
+#define Graphics int
+#define PointF int
+
 namespace GUI
 {
 static CImage	g_imgRoda;

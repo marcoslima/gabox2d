@@ -1,14 +1,10 @@
-#if 0
-
 #include "env.h"
 #include <sstream>
-#include <pcrecpp.h>
+#include <cmath>
 
-
-extern MTRand mrand;
+// extern MTRand mrand;
 
 using namespace std;
-using namespace pcrecpp;
 
 namespace MODEL
 {
@@ -60,25 +56,25 @@ string	CEnv::get(void)
 
 void CEnv::set(string sParams)
 {
-	RE re("environment_definition_(?P<ver>\\d+\\.\\d+){\\s*(?P<seed>\\d+),\\s*(?P<dxm>-*\\d*\\.*\\d*),\\s*(?P<dxs>-*\\d*\\.*\\d*),\\s*(?P<dxo>-*\\d*\\.*\\d*),\\s*(?P<dym>-*\\d*\\.*\\d*),\\s*(?P<dys>-*\\d*\\.*\\d*),\\s*(?P<dyo>-*\\d*\\.*\\d*),\\s*(?P<phi>-*\\d*\\.*\\d*),\\s*(?P<omega>-*\\d*\\.*\\d*),\\s*(?P<a>-*\\d*\\.*\\d*),\\s*(?P<tlx>-*\\d*\\.*\\d*),\\s*(?P<tly>-*\\d*\\.*\\d*),\\s*(?P<brx>-*\\d*\\.*\\d*),\\s*(?P<bry>-*\\d*\\.*\\d*)\\s*}");
+	// RE re("environment_definition_(?P<ver>\\d+\\.\\d+){\\s*(?P<seed>\\d+),\\s*(?P<dxm>-*\\d*\\.*\\d*),\\s*(?P<dxs>-*\\d*\\.*\\d*),\\s*(?P<dxo>-*\\d*\\.*\\d*),\\s*(?P<dym>-*\\d*\\.*\\d*),\\s*(?P<dys>-*\\d*\\.*\\d*),\\s*(?P<dyo>-*\\d*\\.*\\d*),\\s*(?P<phi>-*\\d*\\.*\\d*),\\s*(?P<omega>-*\\d*\\.*\\d*),\\s*(?P<a>-*\\d*\\.*\\d*),\\s*(?P<tlx>-*\\d*\\.*\\d*),\\s*(?P<tly>-*\\d*\\.*\\d*),\\s*(?P<brx>-*\\d*\\.*\\d*),\\s*(?P<bry>-*\\d*\\.*\\d*)\\s*}");
 
 	double dVer;
-	re.FullMatch(StringPiece(sParams),
-		&dVer,
-		&_seed,
-		&_dxm,
-		&_dxs,
-		&_dxo,
-		&_dym	,
-		&_dys	,
-		&_dyo	,
-		&_phi	,
-		&_omega,
-		&_a	,
-		&_tlx,	
-		&_tly,	
-		&_brx,	
-		&_bry);
+	// re.FullMatch(StringPiece(sParams),
+	// 	&dVer,
+	// 	&_seed,
+	// 	&_dxm,
+	// 	&_dxs,
+	// 	&_dxo,
+	// 	&_dym	,
+	// 	&_dys	,
+	// 	&_dyo	,
+	// 	&_phi	,
+	// 	&_omega,
+	// 	&_a	,
+	// 	&_tlx,	
+	// 	&_tly,	
+	// 	&_brx,	
+	// 	&_bry);
 }
 
 vec_vecs_t CEnv::get_vecs(void)
@@ -95,11 +91,11 @@ vec_vecs_t CEnv::get_vecs(void)
 	
 	double dx,dy,ldy = 0;
 	double m,lm = 0;
-	mrand.seed(_seed);
+	// mrand.seed(_seed);
 	for(double i = 10.0f; i < _brx;i+=0)
 	{
-		dx = mrand.randNorm(_dxm,_dxs)+_dxo;
-		m  = mrand.randNorm(_dym,_dys)+_dyo;
+		// dx = mrand.randNorm(_dxm,_dxs)+_dxo;
+		// m  = mrand.randNorm(_dym,_dys)+_dyo;
 		dy = ldy + (dx * (lm + m));
 		
 		GroundPoly.push_back(vec2_t(i,dy + _a*sin(_omega * i + _phi)));
@@ -114,4 +110,3 @@ vec_vecs_t CEnv::get_vecs(void)
 
 }; //namespace MODEL
 
-#endif

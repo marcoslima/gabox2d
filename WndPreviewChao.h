@@ -4,16 +4,27 @@
 // CWndPreviewChao
 #include "ga.h"
 #include "env.h"
+class CPoint
+{
+public:
+	CPoint(int x, int y): X(0), Y(0) {X = x; Y = y;}
+	CPoint(): X(0), Y(0) {}
+	int X;
+	int Y;
+};
+
 namespace GUI
 {
-class CWndPreviewChao : public CWnd
+
+class CWndPreviewChao
 {
-	DECLARE_DYNAMIC(CWndPreviewChao)
 
 public:
 	CWndPreviewChao();
 	virtual ~CWndPreviewChao();
 	void SetCenter(int x, int y);
+
+	void Invalidate(){}
 
 	CEnv		m_env;
 	b2Vec2		m_vecTl;
@@ -21,10 +32,9 @@ public:
 	CPoint		m_ptCenter;
 	int			m_zoom;
 
-protected:
-	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnPaint();
+	void OnPaint();
+
 };
 
 

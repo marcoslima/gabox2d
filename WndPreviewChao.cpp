@@ -1,19 +1,17 @@
 // WndPreviewChao.cpp : implementation file
 //
 
-#include "stdafx.h"
 #include "GaBox2d.h"
 #include "WndPreviewChao.h"
 #include <float.h>
-#include <DcIntegrity.h>
-#include <lmmath.h>
+#include "lmmath.h"
 using namespace lmmath;
-using namespace Gdiplus;
+
 namespace GUI
 {
 // CWndPreviewChao
 
-IMPLEMENT_DYNAMIC(CWndPreviewChao, CWnd)
+
 CWndPreviewChao::CWndPreviewChao()
 {
 	m_ptCenter = CPoint(0,0);
@@ -27,20 +25,15 @@ CWndPreviewChao::~CWndPreviewChao()
 }
 
 
-BEGIN_MESSAGE_MAP(CWndPreviewChao, CWnd)
-	ON_WM_PAINT()
-END_MESSAGE_MAP()
-
-
 
 // CWndPreviewChao message handlers
 
 #define sign(a) ((a >= 0)?(1):(-1))
 
 /*
-	Por exemplo, um espaço orientado com y positivo para cima e x positivo para a direita
+	Por exemplo, um espaï¿½o orientado com y positivo para cima e x positivo para a direita
 
-	Um retângulo de altura negativa seria:
+	Um retï¿½ngulo de altura negativa seria:
 
 	-100,100
 
@@ -48,13 +41,14 @@ END_MESSAGE_MAP()
 	x,y = (-100, 100)
 	w,h = ( 200,-200)
 
-	Para normalizar o retângulo ele deve ser descrito posicionado nas coordenadas
+	Para normalizar o retï¿½ngulo ele deve ser descrito posicionado nas coordenadas
 	menores, e ter largura e altura positivas.
 
-	Assim, o correto é posicioná-lo em -100,-100 com 200,200
-	Então o y do exemplo deve ser adicionado da altura negativa
-	e então a altura passa à ser positiva
+	Assim, o correto ï¿½ posicionï¿½-lo em -100,-100 com 200,200
+	Entï¿½o o y do exemplo deve ser adicionado da altura negativa
+	e entï¿½o a altura passa ï¿½ ser positiva
 */
+#if 0
 void NormalizeRect(Rect& rc)
 {
 	if(rc.Width < 0)
@@ -99,13 +93,13 @@ void CWndPreviewChao::OnPaint()
 
 	gr.FillRectangle(&SolidBrush(Color(0,0,0)),rcClient);
 
-	// Ajustamos a transformação:
-	// A transformação será tal que
+	// Ajustamos a transformaï¿½ï¿½o:
+	// A transformaï¿½ï¿½o serï¿½ tal que
 	// T(x,y) = (a.x + b, c.y + d)
-	// onde (x,y) está em world coordinates (wc) e
-	// T(x,y) está em device coordinates (dc)
+	// onde (x,y) estï¿½ em world coordinates (wc) e
+	// T(x,y) estï¿½ em device coordinates (dc)
 	//
-	// sabemos as transformações dos seguintes pontos:
+	// sabemos as transformaï¿½ï¿½es dos seguintes pontos:
 	// T(0,0) = (pc.x,pc.y) -> b = pc.x, d = pc.y
 	// T(tl.x,tl.y) = (rc.l,rc.t)
 	// T(br.x,br.y) = (rc.r,rc.b)
@@ -126,8 +120,8 @@ void CWndPreviewChao::OnPaint()
 
 	double dZoom = pow(1.3,(double)m_zoom);
 
-	// De -100 à 100 (do slider ctrl) a vizualização
-	// deverá ir de -width à width
+	// De -100 ï¿½ 100 (do slider ctrl) a vizualizaï¿½ï¿½o
+	// deverï¿½ ir de -width ï¿½ width
 	int cx,cy;
 	cx = ptScrCenter.X - m_ptCenter.x * rcWorld.Width / 1000.0;
 	cy = ptScrCenter.Y - m_ptCenter.y * rcWorld.Height / 1000.0;
@@ -139,7 +133,7 @@ void CWndPreviewChao::OnPaint()
 			   cx		,	cy		);
 	gr.SetTransform(&mt);
 
-	// World na cor de céu
+	// World na cor de cï¿½u
 	SolidBrush bshSky(Color(100,100,255));
 	gr.FillRectangle(&bshSky,rcWorld);
 
@@ -173,5 +167,6 @@ void CWndPreviewChao::SetCenter(int x, int y)
 {
 	m_ptCenter = CPoint(x,y);
 }
+#endif
 
 };//namespace GUI

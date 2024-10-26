@@ -6,6 +6,7 @@
 //#include "GaBox2dView.h"
 #include "GaParamsDlg.h"
 #include "GaBox2d.h"
+#include "EditorChaoDlg.h"
 #include <iostream>
 using namespace std;
 
@@ -27,14 +28,31 @@ CGaBox2dApp::CGaBox2dApp()
 {
 }
 
-void DrawMenu()
+void DrawMenu(CGaParamsDlg& dlgParams,
+              CEditorChaoDlg& dlgEditorChao)
 {
     ImGui::BeginMainMenuBar();
+    dlgEditorChao.OnInitDialog();
+    bool bShowEditor = false;
+    if(ImGui::BeginMenu("File")) 
+    {
+        if(ImGui::MenuItem("New", "Ctrl+N")) {}
+        if(ImGui::MenuItem("Open", "Ctrl+O")) {}
+        if(ImGui::MenuItem("Save", "Ctrl+S")) {}
+        if(ImGui::MenuItem("Save As..")) {}
+        if(ImGui::MenuItem("Exit")) {
+            exit(0);
+        }
+        ImGui::EndMenu();
+    }
     if (ImGui::BeginMenu("Edit")) 
     {
         if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
         if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
-        if (ImGui::MenuItem("Ambiente")) {}
+        if (ImGui::MenuItem("Ambiente")) {
+            // dlgEditorChao.show();
+            bShowEditor = true;
+        }
         ImGui::EndMenu();
     }
 
@@ -57,7 +75,10 @@ void DrawMenu()
 
     if(ImGui::BeginMenu("GA"))
     {
-        if(ImGui::MenuItem("Iniciar GA...")) {}
+        if(ImGui::MenuItem("Iniciar GA...")) 
+        {
+            dlgParams.show();
+        }
         if(ImGui::BeginMenu("Mostrar atual")) 
         {
             if(ImGui::MenuItem("Melhor")) {}
@@ -66,6 +87,7 @@ void DrawMenu()
         }
         ImGui::EndMenu();
     }
+    if(bShowEditor) dlgEditorChao.show();
     ImGui::EndMainMenuBar();
 }
 
@@ -87,6 +109,8 @@ int CGaBox2dApp::run()
     bool bMouseDown = false;
     sf::Vector2i ptMouse, lastPtMouse;
 	CGaParamsDlg dlgParams;
+    CEditorChaoDlg dlgEditorChao;
+
     while (window.isOpen()) 
     {
 
@@ -104,7 +128,8 @@ int CGaBox2dApp::run()
         window.clear();
 
         // VIEW.DRAW
-        DrawMenu();
+        // dlgEditorChao.OnInitDialog();
+        DrawMenu(dlgParams, dlgEditorChao);
 		// dlgParams.draw();
 		// if(ImGui::Button("Open")) dlgParams.show();
 
