@@ -8,17 +8,17 @@ public:
 	class CCircle
 	{
 	public:
-		double x;
-		double y;
-		double raio;
+		float x;
+		float y;
+		float raio;
 	};
 
 	class CBody
 	{
 	public:
-		double densidade;
-		double friccao;
-		double elasticidade;
+		float densidade;
+		float friccao;
+		float elasticidade;
 	};
 
 	class CRoda
@@ -28,7 +28,7 @@ public:
 		CBody	b;
 	public:
 		CRoda();
-		CRoda(double x, double y, double r, double dens, double fric, double elas);
+		CRoda(float x, float y, float r, float dens, float fric, float elas);
 	};
 
 public:
@@ -36,13 +36,13 @@ public:
 	CRoda	_roda2		;
 	CRoda	_peso1		;
 	CRoda	_peso2		;
-	double	_torque[4]	;
-	double	_freq  [6]	;
-	double	_damp  [6]	;
+	float	_torque[4]	;
+	float	_freq  [6]	;
+	float	_damp  [6]	;
 
 public:
-	CCarDef(void);
-	~CCarDef(void);
+	CCarDef();
+	~CCarDef();
 };
 
 };//namespace MODEL

@@ -39,33 +39,26 @@ public:
 	void Release(void);
 
 private:
-	CRITICAL_SECTION _cs;
+	// CRITICAL_SECTION _cs;
 };
 
 // CGaInfoDlg dialog
 class CGaBox2dView;
-class CGaInfoDlg : public CDialog
+class CGaInfoDlg
 {
-	DECLARE_DYNAMIC(CGaInfoDlg)
 
 public:
-	CGaInfoDlg(CWnd* pParent = NULL);   // standard constructor
+	CGaInfoDlg(){};
 	virtual ~CGaInfoDlg();
-	CWnd*	m_pView;
-// Dialog Data
-	enum { IDD = IDD_GA_INFO };
+	// CWnd*	m_pView;
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
 public:
-	UINT m_nGeracao;
-	UINT m_nPopulacao;
-	MfcUtil::ListCtrlEx::CListCtrlEx	m_lstGenes;
-	virtual BOOL OnInitDialog();
+	unsigned m_nGeracao;
+	unsigned m_nPopulacao;
+	// MfcUtil::ListCtrlEx::CListCtrlEx	m_lstGenes;
+	bool OnInitDialog();
 	void Refresh(CGaInfo* pInfo);
-	afx_msg void OnNMDblclkGenes(NMHDR *pNMHDR, LRESULT *pResult);
+	// void OnNMDblclkGenes(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 };//namespace GUI

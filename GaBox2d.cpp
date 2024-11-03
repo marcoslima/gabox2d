@@ -7,6 +7,7 @@
 #include "GaParamsDlg.h"
 #include "GaBox2d.h"
 #include "EditorChaoDlg.h"
+#include "GaBox2dView.h"
 #include <iostream>
 using namespace std;
 
@@ -95,7 +96,6 @@ int CGaBox2dApp::run()
 {
     uint64_t screenWidth = 1920;
     uint64_t screenHeight = 1080;
-    double aspectRatio = (double)screenWidth / (double)screenHeight;
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "GaBox2d Reborned");
     window.setFramerateLimit(60);
     if(!ImGui::SFML::Init(window, true))
@@ -105,6 +105,10 @@ int CGaBox2dApp::run()
     }
     ImGuiIO& io = ImGui::GetIO();
 
+    auto doc = CGaBox2dDoc();
+    auto view = CGaBox2dView();
+    view.SetDocument(&doc);
+
     sf::Clock deltaClock;
     bool bMouseDown = false;
     sf::Vector2i ptMouse, lastPtMouse;
@@ -113,13 +117,20 @@ int CGaBox2dApp::run()
 
     while (window.isOpen()) 
     {
-
         sf::Event event;
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(window, event);
 
             if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+            if(event.type == sf::Event::KeyPressed)
+            {
+                view.OnKeyPressed(event.key.code);
+            }
+            if(event.type == sf::Event::KeyReleased)
+            {
+                view.OnKeyReleased(event.key.code);
             }
         }
 

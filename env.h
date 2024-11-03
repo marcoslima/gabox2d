@@ -14,7 +14,7 @@ class vec2_t
 public:
 	double x;
 	double y;
-	vec2_t(double ax, double ay){x = ax; y = ay;}
+	vec2_t(const double ax, const double ay){x = ax; y = ay;}
 };
 
 typedef vector<vec2_t> vec_vecs_t;
@@ -35,10 +35,10 @@ public:
 	double	_omega;
 	double	_a;
 
-	double	_tlx;
-	double	_tly;
-	double	_brx;
-	double	_bry;
+	float	_tlx;
+	float	_tly;
+	float	_brx;
+	float	_bry;
 
 public:
 	void	set(double seed,
@@ -48,7 +48,8 @@ public:
 				double tlx, double tly,
 				double brx, double bry);
 	string	get(void);
-	void	set(string sParams);
+
+	static void	set(const string& sParams);
 	vec_vecs_t get_vecs(void);
 
 };

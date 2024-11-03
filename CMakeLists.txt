@@ -11,40 +11,45 @@ find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 
 # Define the path where the ImGui library will be cloned
 set(IMGUI_PATH ${CMAKE_CURRENT_BINARY_DIR}/imgui)
+set(IMGUI_SFML_PATH ${IMGUI_PATH}/imgui-sfml)
 
 # Clone the ImGui library from its GitHub repository
-IF(NOT EXISTS "${IMGUI_PATH}")
+IF (NOT EXISTS "${IMGUI_PATH}")
     execute_process(
-        COMMAND git clone https://github.com/ocornut/imgui.git ${IMGUI_PATH}
+            COMMAND git clone https://github.com/ocornut/imgui.git ${IMGUI_PATH}
     )
-ELSE()
+ELSE ()
     execute_process(
-        COMMAND pushd ${IMGUI_PATH} && git pull && popd
+            COMMAND pushd ${IMGUI_PATH} && git pull && popd
     )
-ENDIF()
+ENDIF ()
 
 # Clone the ImGui-SFML library from its GitHub repository
-IF(NOT EXISTS "${IMGUI_PATH}/imgui-sfml")
+IF (EXISTS "${IMGUI_SFML_PATH}")
     execute_process(
-        COMMAND git clone https://github.com/eliasdaler/imgui-sfml.git "${IMGUI_PATH}/imgui-sfml"
+            COMMAND rm -rf "${IMGUI_SFML_PATH}"
     )
-ELSE()
-    execute_process(
-        COMMAND pushd "${IMGUI_PATH}/imgui-sfml" && git pull && popd
-    )
-ENDIF()
+ENDIF ()
+execute_process(
+        COMMAND git clone https://github.com/eliasdaler/imgui-sfml.git "${IMGUI_SFML_PATH}"
+)
+execute_process(
+        COMMAND git checkout 2.6.x
+        WORKING_DIRECTORY "${IMGUI_SFML_PATH}"
+)
+
 
 # Add the ImGui and ImGui-SFML libraries to the project
 add_library(imgui STATIC
-    ${IMGUI_PATH}/imgui.cpp
-    ${IMGUI_PATH}/imgui_demo.cpp
-    ${IMGUI_PATH}/imgui_draw.cpp
-    ${IMGUI_PATH}/imgui_widgets.cpp
-    ${IMGUI_PATH}/imgui_tables.cpp
+        ${IMGUI_PATH}/imgui.cpp
+        ${IMGUI_PATH}/imgui_demo.cpp
+        ${IMGUI_PATH}/imgui_draw.cpp
+        ${IMGUI_PATH}/imgui_widgets.cpp
+        ${IMGUI_PATH}/imgui_tables.cpp
 )
 
 add_library(imgui-sfml STATIC
-    ${IMGUI_PATH}/imgui-sfml/imgui-SFML.cpp
+        ${IMGUI_PATH}/imgui-sfml/imgui-SFML.cpp
 )
 
 
@@ -59,47 +64,60 @@ target_include_directories(imgui-sfml PUBLIC ${IMGUI_PATH})
 set(BOX2D_PATH ${CMAKE_CURRENT_BINARY_DIR}/box2d)
 
 # Clone the Box2D library from its GitHub repository
-IF(NOT EXISTS "${BOX2D_PATH}")
+IF (NOT EXISTS "${BOX2D_PATH}")
     execute_process(
-        COMMAND git clone https://github.com/erincatto/box2d.git ${BOX2D_PATH}
+            COMMAND git clone https://github.com/erincatto/box2d.git ${BOX2D_PATH}
     )
-ELSE()
+ELSE ()
     execute_process(
-        COMMAND pushd ${BOX2D_PATH} && git pull && popd
+            COMMAND git pull
+            WORKING_DIRECTORY ${BOX2D_PATH}
     )
-ENDIF()
+ENDIF ()
 
 # Build the Box2D library
-IF(NOT EXISTS "${BOX2D_PATH}/build")
+IF (NOT EXISTS "${BOX2D_PATH}/build")
     execute_process(
-        COMMAND mkdir ${BOX2D_PATH}/build
+            COMMAND mkdir ${BOX2D_PATH}/build
     )
-ENDIF()
-IF(NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
+ENDIF ()
+IF (NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
     execute_process(
-        WORKING_DIRECTORY ${BOX2D_PATH}/build
-        COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF
+            WORKING_DIRECTORY ${BOX2D_PATH}/build
+            COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF
     )
     execute_process(
-        WORKING_DIRECTORY ${BOX2D_PATH}/build
-        COMMAND cmake --build . -j20
+            WORKING_DIRECTORY ${BOX2D_PATH}/build
+            COMMAND cmake --build . -j20
     )
-ENDIF()
+ENDIF ()
 
 # Add include directories for the Box2D library
 target_include_directories(imgui PUBLIC ${BOX2D_PATH}/include)
 
 # Add library directory for the Box2D library
-link_directories(${BOX2D_PATH}/build/bin)
+link_directories(${BOX2D_PATH}/build/src)
 ###########################################################
 
-add_executable(GaBox2d 
-    GaBox2d.cpp
-    GaParamsDlg.cpp
-    EditorChaoDlg.cpp
-    WndPreviewChao.cpp
-    env.cpp
-    imgui_input_uint8.cpp
+add_executable(GaBox2d
+        GaBox2d.cpp
+        GaParamsDlg.cpp
+        EditorChaoDlg.cpp
+        WndPreviewChao.cpp
+        env.cpp
+        imgui_input_uint8.cpp
+        GaBox2dDoc.cpp
+        devutils.cpp
+        GaBox2dView.cpp
+        GaCar.cpp
+        PhysCar.cpp
+        CNormalSeededRandom.cpp
+        CNormalSeededRandom.h
+        car.cpp
+        GrCar.cpp
+        Pen.h
+        SolidBrush.h
+        CarDef.cpp
 )
 
 

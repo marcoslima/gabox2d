@@ -1,112 +1,114 @@
 #include "env.h"
 #include <sstream>
 #include <cmath>
+#include <random>
 
-// extern MTRand mrand;
+#include "CNormalSeededRandom.h"
 
 using namespace std;
 
 namespace MODEL
 {
+    void CEnv::set(const double seed,
+                   const double dxm, const double dxs, const double dxo,
+                   const double dym, const double dys, const double dyo,
+                   const double phi, const double omega, const double a,
+                   const double tlx, const double tly,
+                   const double brx, const double bry)
+    {
+        _seed = static_cast<int>(seed);
+        _dxm = dxm;
+        _dxs = dxs;
+        _dxo = dxo;
+        _dym = dym;
+        _dys = dys;
+        _dyo = dyo;
+        _phi = phi;
+        _omega = omega;
+        _a = a;
+        _tlx = tlx;
+        _tly = tly;
+        _brx = brx;
+        _bry = bry;
+    }
 
-void CEnv::set(double seed,
-			double dxm, double dxs, double dxo,
-			double dym, double dys, double dyo,
-			double phi, double omega, double a,
-			double tlx, double tly,
-			double brx, double bry)
-{
-	_seed	= (int)seed	;
-	_dxm	= dxm	;
-	_dxs	= dxs	;
-	_dxo	= dxo	;
-	_dym	= dym	;
-	_dys	= dys	;
-	_dyo	= dyo	;
-	_phi	= phi	;
-	_omega	= omega	;
-	_a		= a		;
-	_tlx	= tlx	;
-	_tly	= tly	;
-	_brx	= brx	;
-	_bry	= bry	;
-}
+    string CEnv::get()
+    {
+        stringstream ss;
+        ss << "environment_definition_" << ENV_HEADER << "{";
 
-string	CEnv::get(void)
-{
-	stringstream ss;
-	ss << "environment_definition_" << ENV_HEADER << "{";
+        ss << _seed << ",";
+        ss << _dxm << ",";
+        ss << _dxs << ",";
+        ss << _dxo << ",";
+        ss << _dym << ",";
+        ss << _dys << ",";
+        ss << _dyo << ",";
+        ss << _phi << ",";
+        ss << _omega << ",";
+        ss << _a << ",";
+        ss << _tlx << ",";
+        ss << _tly << ",";
+        ss << _brx << ",";
+        ss << _bry << "}";
+        return ss.str();
+    }
 
-	ss << _seed	<< ",";
-	ss << _dxm	<< ",";
-	ss << _dxs	<< ",";
-	ss << _dxo	<< ",";
-	ss << _dym	<< ",";
-	ss << _dys	<< ",";
-	ss << _dyo	<< ",";
-	ss << _phi	<< ",";
-	ss << _omega<< ",";
-	ss << _a	<< ",";
-	ss << _tlx	<< ",";
-	ss << _tly	<< ",";
-	ss << _brx	<< ",";
-	ss << _bry	<< "}";
-	return ss.str();
-}
+    void CEnv::set(const string& sParams)
+    {
+#if 0
+        RE re("environment_definition_(?P<ver>\\d+\\.\\d+){\\s*(?P<seed>\\d+),\\s*(?P<dxm>-*\\d*\\.*\\d*),\\s*(?P<dxs>-*\\d*\\.*\\d*),\\s*(?P<dxo>-*\\d*\\.*\\d*),\\s*(?P<dym>-*\\d*\\.*\\d*),\\s*(?P<dys>-*\\d*\\.*\\d*),\\s*(?P<dyo>-*\\d*\\.*\\d*),\\s*(?P<phi>-*\\d*\\.*\\d*),\\s*(?P<omega>-*\\d*\\.*\\d*),\\s*(?P<a>-*\\d*\\.*\\d*),\\s*(?P<tlx>-*\\d*\\.*\\d*),\\s*(?P<tly>-*\\d*\\.*\\d*),\\s*(?P<brx>-*\\d*\\.*\\d*),\\s*(?P<bry>-*\\d*\\.*\\d*)\\s*}");
 
-void CEnv::set(string sParams)
-{
-	// RE re("environment_definition_(?P<ver>\\d+\\.\\d+){\\s*(?P<seed>\\d+),\\s*(?P<dxm>-*\\d*\\.*\\d*),\\s*(?P<dxs>-*\\d*\\.*\\d*),\\s*(?P<dxo>-*\\d*\\.*\\d*),\\s*(?P<dym>-*\\d*\\.*\\d*),\\s*(?P<dys>-*\\d*\\.*\\d*),\\s*(?P<dyo>-*\\d*\\.*\\d*),\\s*(?P<phi>-*\\d*\\.*\\d*),\\s*(?P<omega>-*\\d*\\.*\\d*),\\s*(?P<a>-*\\d*\\.*\\d*),\\s*(?P<tlx>-*\\d*\\.*\\d*),\\s*(?P<tly>-*\\d*\\.*\\d*),\\s*(?P<brx>-*\\d*\\.*\\d*),\\s*(?P<bry>-*\\d*\\.*\\d*)\\s*}");
+        double dVer;
+        re.FullMatch(StringPiece(sParams),
+        	&dVer,
+        	&_seed,
+        	&_dxm,
+        	&_dxs,
+        	&_dxo,
+        	&_dym	,
+        	&_dys	,
+        	&_dyo	,
+        	&_phi	,
+        	&_omega,
+        	&_a	,
+        	&_tlx,
+        	&_tly,
+        	&_brx,
+        	&_bry);
+#endif
+    }
 
-	double dVer;
-	// re.FullMatch(StringPiece(sParams),
-	// 	&dVer,
-	// 	&_seed,
-	// 	&_dxm,
-	// 	&_dxs,
-	// 	&_dxo,
-	// 	&_dym	,
-	// 	&_dys	,
-	// 	&_dyo	,
-	// 	&_phi	,
-	// 	&_omega,
-	// 	&_a	,
-	// 	&_tlx,	
-	// 	&_tly,	
-	// 	&_brx,	
-	// 	&_bry);
-}
+    vec_vecs_t CEnv::get_vecs()
+    {
+        CNormalSeededRandom randNorm(_seed);
 
-vec_vecs_t CEnv::get_vecs(void)
-{
-	vec_vecs_t	GroundPoly;
+        vec_vecs_t GroundPoly;
 
-	GroundPoly.clear();
+        GroundPoly.clear();
 
-	GroundPoly.push_back(vec2_t(_brx,_bry));
-	GroundPoly.push_back(vec2_t(_tlx,_bry));
+        GroundPoly.emplace_back(_brx, _bry);
+        GroundPoly.emplace_back(_tlx, _bry);
 
-	GroundPoly.push_back(vec2_t(_tlx,1));
-	GroundPoly.push_back(vec2_t(4,1));
-	
-	double dx,dy,ldy = 0;
-	double m,lm = 0;
-	// mrand.seed(_seed);
-	for(double i = 10.0f; i < _brx;i+=0)
-	{
-		// dx = mrand.randNorm(_dxm,_dxs)+_dxo;
-		// m  = mrand.randNorm(_dym,_dys)+_dyo;
-		dy = ldy + (dx * (lm + m));
-		
-		GroundPoly.push_back(vec2_t(i,dy + _a*sin(_omega * i + _phi)));
+        GroundPoly.emplace_back(_tlx, 1);
+        GroundPoly.emplace_back(4, 1);
 
-		i += fabs(dx);
-		ldy = dy;
-		lm = m;
-	}
+        double ldy = 0;
+        double lm = 0;
+        double x = 10.0f;
+        while(x < _brx)
+        {
+            const double dx = randNorm.random(_dxm, _dxs) + _dxo;
+            const double m = randNorm.random(_dym, _dys) + _dyo;
+            const double dy = ldy + (dx * (lm + m));
+            const double y = dy + _a * sin(_omega * x + _phi);
+            GroundPoly.emplace_back(x, y);
 
-	return GroundPoly;
-}
+            x += fabs(dx);
+            ldy = dy;
+            lm = m;
+        }
 
+        return GroundPoly;
+    }
 }; //namespace MODEL
-

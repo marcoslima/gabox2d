@@ -1,56 +1,62 @@
-#ifndef __GABOX2DVIEW_H__
-#define __GABOX2DVIEW_H__
+#pragma once
 
 #include "ga.h"
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
 #include "GaInfoDlg.h"
+#include "GaBox2dDoc.h"
+#include <SFML/Window/Keyboard.hpp>
+
+
 namespace GUI
 {
 // Paramstros para o thread:
-class CThreadParams
-{
-public:
-	HANDLE			m_hStopGa	;
-	HANDLE			m_hGaStopped;
-	HWND			m_wndNotify	;
-	ga_params_t		m_Params	;
-	CGaInfo*		m_pGaInfo	;
-	CEnv			m_env		;
-};
+// class CThreadParams
+// {
+// public:
+// 	HANDLE			m_hStopGa	;
+// 	HANDLE			m_hGaStopped;
+// 	ga_params_t		m_Params	;
+// 	CGaInfo*		m_pGaInfo	;
+// 	CEnv			m_env		;
+// };
 
 
 // GaBox2dView.h : interface of the CGaBox2dView class
-class CGaBox2dView : public CScrollView
+class CGaBox2dView final
 {
-protected: // create from serialization only
+public:
 	CGaBox2dView();
-	DECLARE_DYNCREATE(CGaBox2dView)
+
 
 // Attributes
 private:
 	// UI
-	CFont	m_fntSmall;
-	CFont	m_fntSupersmall;
+	// CFont		m_fntSmall;
+	// CFont		m_fntSupersmall;
 
-	// Outros
-	UINT	m_nSimTimer;
-	CBitmap	m_bmpBack;
-	UINT	m_nVelocidade;
-	bool	m_bGaRunning;
-	bool	m_bGaExited;
+	// Outros	
+	unsigned		m_nSimTimer;
 
-	bool	m_bShowInfoId;
-	bool	m_bShowInfoGaGenes;
-	CThreadParams	_thread_params;
-	CGaInfo	m_GaInfo;
+	unsigned		m_nVelocidade;
+	bool			m_bGaRunning;
+	bool			m_bGaExited;
+
+	bool			m_bShowInfoId;
+	bool			m_bShowInfoGaGenes;
+	// CThreadParams	_thread_params;
+	// CGaInfo			m_GaInfo;
 	bool			m_bWaitingEvolucao;
 
-public:
-	CGaBox2dDoc* GetDocument() const;
+private:
+	CGaBox2dDoc* _pDocument;
 
-	CGa*		getGa(void);
-	void releaseGa(void);
+public:
+	[[nodiscard]] CGaBox2dDoc* 	GetDocument() const;
+	void SetDocument(CGaBox2dDoc* pDoc);
+
+	CGa*			getGa();
+	void 			releaseGa();
 
 // GUI
 public:
@@ -59,79 +65,46 @@ public:
 
 // Overrides
 public:
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
-virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	void OnDraw();
+// virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
-	virtual void OnInitialUpdate(); // called first time after construct
-	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
-	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
-	afx_msg	LRESULT OnGaInfo(WPARAM wParma, LPARAM lParam);
-	afx_msg	LRESULT OnSimularGene(WPARAM wParma, LPARAM lParam);
+	void OnInitialUpdate(); // called first time after construct
+	// afx_msg	LRESULT OnGaInfo(WPARAM wParma, LPARAM lParam);
+	// afx_msg	LRESULT OnSimularGene(WPARAM wParma, LPARAM lParam);
 
 // Implementation
 public:
 	virtual ~CGaBox2dView();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
 
-protected:
-
-// Generated message map functions
-protected:
-	DECLARE_MESSAGE_MAP()
 public:
-	void Draw(CDC *pDc);
-	afx_msg void OnSimulaPlay();
-	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnUpdateSimulaPlay(CCmdUI *pCmdUI);
-	afx_msg void OnSimulaReset();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnVelocidadeMais();
-	afx_msg void OnVelocidadeMenos();
-	afx_msg void OnUpdateVelocidadeMais(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateVelocidadeMenos(CCmdUI *pCmdUI);
-	afx_msg void OnSimulaRepetir();
-	afx_msg void OnVelocidade1x();
-	afx_msg void OnVelocidade2x();
-	afx_msg void OnVelocidade4x();
-	afx_msg void OnVelocidade10x();
-	afx_msg void OnVelocidade100x();
-	afx_msg void OnUpdateVelocidade1x(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateVelocidade2x(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateVelocidade4x(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateVelocidade10x(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateVelocidade100x(CCmdUI *pCmdUI);
-	afx_msg void OnGaIniciarga();
-	afx_msg void OnEditPaste();
-	afx_msg void OnUpdateGaIniciarga(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateMostrarMelhor(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateMostrarQualquer(CCmdUI *pCmdUI);
-	afx_msg void OnMostrarMelhor();
-	afx_msg void OnMostrarQualquer();
-	afx_msg void OnViewCpuinfo();
-	afx_msg void OnInformaGagenes();
-	afx_msg void OnInformaIndividuoatual();
-	afx_msg void OnUpdateInformaGagenes(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateInformaIndividuoatual(CCmdUI *pCmdUI);
-	afx_msg void OnGaExtins();
-	afx_msg void OnGaColar();
-	afx_msg void OnUpdateGaExtins(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateGaColar(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateEditEditarch(CCmdUI *pCmdUI);
-	afx_msg void OnInformaEvolu();
-	afx_msg void OnUpdateInformaEvolu(CCmdUI *pCmdUI);
-	afx_msg void OnGaMudarpar();
+	void Draw(sf::RenderWindow& window) const;
+	void OnSimulaPlay();
+
+	void OnSimulaReset();
+	void OnVelocidadeMais();
+	void OnVelocidadeMenos();
+	void OnSimulaRepetir();
+	void OnVelocidade1x();
+	void OnVelocidade2x();
+	void OnVelocidade4x();
+	void OnVelocidade10x();
+	void OnVelocidade100x();
+	void OnGaIniciarga();
+	void OnEditPaste();
+	void OnMostrarMelhor();
+	void OnMostrarQualquer();
+	void OnViewCpuinfo();
+	void OnInformaGagenes();
+	void OnInformaIndividuoatual();
+	void OnGaExtins();
+	void OnGaColar();
+	void OnInformaEvolu();
+	void OnGaMudarpar();
+
+public:
+	static void OnKeyPressed(sf::Keyboard::Key key);
+
+	static void OnKeyReleased(sf::Keyboard::Key key);
 };
 
-#ifndef _DEBUG  // debug version in GaBox2dView.cpp
-inline CGaBox2dDoc* CGaBox2dView::GetDocument() const
-   { return reinterpret_cast<CGaBox2dDoc*>(m_pDocument); }
-#endif
-
 };//namespace GUI
-
-#endif //__GABOX2DVIEW_H__

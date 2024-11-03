@@ -1,6 +1,4 @@
-#ifndef __GACAR_H__
-#define __GACAR_H__
-
+#pragma once
 #include <string>
 #include "CarDef.h"
 
@@ -28,28 +26,29 @@ public:
 
 // Suporte ao algoritmo gen�tico:
 public:
-	double	_pontos				;
+	double	_pontos;
 
 // Internas
 protected:
-	void _generate_random_genes(void);
+	void _generate_random_genes();
 
-	// Decodifica o carro dos genes criando-o nas defini��es
-	void _decode(void);
+	// Decodifica o carro dos genes criando-o nas definições
+	void _decode();
 
 public:
 	CGaCar();
-	CGaCar(const char* szGenes);
-	~CGaCar(void);
-	void getGenes(string& genes);
-	inline const char *getGenes(void){return _genes.c_str();}
-	inline char getGene(size_t nIndex){return _genes[nIndex];}
-	inline void setGene(size_t nIndex, char gen){_genes[nIndex] = gen;}
-	string getGenesString(void);
-	double getPontuacao(void) const {return _pontos;}
+	explicit CGaCar(const char* szGenes);
+	~CGaCar();
+	void getGenes(string& genes) const;
+
+	[[nodiscard]] const char *getGenes() const {return _genes.c_str();}
+	[[nodiscard]] char getGene(const size_t nIndex) const {return _genes[nIndex];}
+	inline void setGene(const size_t nIndex, const char gen){_genes[nIndex] = gen;}
+	string getGenesString() const;
+	[[nodiscard]] double getPontuacao() const {return _pontos;}
 	void setGenes(const char *genes);
-	void setPontos(double pontos){_pontos = pontos;}
-	void CreateCar(const char *genes = NULL);
+	void setPontos(const double pontos){_pontos = pontos;}
+	void CreateCar(const char *genes = nullptr);
 
 	// Processo evolutivo:
 	void Crossover(CGaCar& other);
@@ -57,5 +56,3 @@ public:
 };
 
 }; // namespace GA
-
-#endif //__GACAR_H__

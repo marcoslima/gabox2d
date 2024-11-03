@@ -1,5 +1,4 @@
-#ifndef __CAR_H__
-#define __CAR_H__
+#pragma once
 #include "GaCar.h"
 #include "PhysCar.h"
 #include "GrCar.h"
@@ -12,23 +11,20 @@ class CCar :
 	public PHYS::CPhysCar, 
 	public GUI::CGrCar
 {
-// Interface
 public:
-	// Construtoras
 	CCar();
-	CCar(const char* szGenes);
-	
-	void beginSimulate(b2World *pWorld);
-	void endSimulate(void);
-	void CreateCar(const char* szGenes = NULL);
-	void DestroyCar(void);
-	bool doStep(void);
-	void Phys2Gr(void);
-	void Medir(b2World* pWorld, double max_t);
+
+	explicit CCar(const char* szGenes);
+	~CCar()= default;
+	void beginSimulate(b2WorldId WorldId);
+
+	static void endSimulate();
+	void CreateCar(const char* szGenes = nullptr);
+	void DestroyCar();
+	bool doStep();
+	void Phys2Gr();
+	void Medir(b2WorldId WorldId, double max_t);
 };
 
 typedef vector<CCar> vec_car_t;
 typedef list<CCar> lst_car_t;
-
-
-#endif //__CAR_H__

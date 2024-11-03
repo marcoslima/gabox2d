@@ -1,6 +1,4 @@
-#ifndef __PHYSCAR_H__
-#define __PHYSCAR_H__
-
+#pragma once
 #include <box2d/box2d.h>
 #include "CarDef.h"
 #include "env.h"
@@ -8,148 +6,188 @@ using namespace MODEL;
 
 namespace PHYS
 {
+    using b2_def_t = struct tagB2Def
+    {
+        b2Circle sd{};
+        b2BodyDef bd{};
+    };
 
-typedef struct tagB2Def
-{
-	b2CircleShape sd;
-	b2BodyDef	bd;
-} b2_def_t;
+    using car_t = struct tagCarParams
+    {
+        // Roda 1
+        b2_def_t R1;
 
-typedef struct tagCarParams
-{
-	// Roda 1
-	b2_def_t R1;
+        // Roda 2
+        b2_def_t R2;
 
-	// Roda 2
-	b2_def_t R2;
+        // Peso 1
+        b2_def_t P1;
 
-	// Peso 1
-	b2_def_t P1;
+        // Peso 2
+        b2_def_t P2;
 
-	// Peso 2
-	b2_def_t P2;
+        float torque[4]{};
 
-	double	torque[4];
+        // Para que os distance joints fa�am parte do genoma,
+        // teremos a frequencia de resposta e o damp deles codificados
+        // tamb�m.
+        float freq[6]{};
+        float damp[6]{};
+    };
 
-	// Para que os distance joints fa�am parte do genoma,
-	// teremos a frequencia de resposta e o damp deles codificados
-	// tamb�m.
-	double	freq[6];
-	double damp[6];	
-} car_t;
+    class CPhysCar;
 
-class CPhysCar;
-class CContactListener : public b2ContactListener
-{
-public:
-	void Add(const b2Contact* point);
-	void Persist(const b2Contact* point);
+    // class CContactListener
+    // {
+    // public:
+    //     void Add(const b2Contact *point);
+    //
+    //     void Persist(const b2Contact *point);
+    //
+    // public:
+    //     bool m_bDead;
+    //     bool m_bContactR1;
+    //     bool m_bContactR2;
+    //     b2Vec2 m_cVel;
+    //     b2Vec2 m_cPos;
+    // };
 
-public:
-	bool		m_bDead		;
-	bool		m_bContactR1;
-	bool		m_bContactR2;
-	b2Vec2		m_cVel		;
-	b2Vec2		m_cPos		;
-};
+    class CPhysCar
+    {
+        // friend class CContactListener;
 
-class CPhysCar
-{
-friend class CContactListener;
-public:
-	CPhysCar(void);
-	~CPhysCar(void);
+    public:
+        CPhysCar();
 
-public:
-// Defini��es do carro (decodificados dos genes)
-	car_t	_car_def;
+        ~CPhysCar();
 
-// Instanciamento do carro no box2d
-public:
-	b2Body*	_pRoda1;
-	b2Body*	_pRoda2;
-	b2Body*	_pPeso1;
-	b2Body*	_pPeso2;
+    public:
+        // Definições do carro (decodificados dos genes)
+        car_t _car_def;
 
-	b2Joint* _pJc1c2;
-	b2Joint* _pJc1p1;
-	b2Joint* _pJc1p2;
-	b2Joint* _pJc2p1;
-	b2Joint* _pJc2p2;
-	b2Joint* _pJp1p2;
+        // Instanciamento do carro no box2d
+    public:
+        b2BodyId m_Roda1Id;
+        b2BodyId m_Roda2Id;
+        b2BodyId m_Peso1Id;
+        b2BodyId m_Peso2Id;
 
-	b2World* _pWorld;
+        b2JointId m_Jc1c2Id;
+        b2JointId m_Jc1p1Id;
+        b2JointId m_Jc1p2Id;
+        b2JointId m_Jc2p1Id;
+        b2JointId m_Jc2p2Id;
+        b2JointId m_Jp1p2Id;
 
-	bool	_bBroke;
+        b2WorldId m_WorldId;
 
-// semi-constantes
-protected:
-	double _timeStep;
-	int32   _iterations;
+        bool _bBroke;
 
-	// Tempor�rias durante simula��o:
-	b2Vec2	_x0	;
-	double	_t;
-	bool	m_bContactR1;
-	bool	m_bContactR2;
-	double	_last_contact_r1;
-	double	_last_contact_r2;
-	double	_no_contact_time_r1;
-	double	_no_contact_time_r2;
-	b2Vec2 _cVel;
-	b2Vec2 _cPos;
+        // semi-constantes
+    protected:
+        float _timeStep;
+        int32_t _iterations;
 
-// Dados ef�meros. S� existem durante a medi��o/simula��o do carro.
-public:
-	double _trqA;
-	double _trqB;
-	double _trqC;
-	double _trqD;
+        // Temporárias durante simulação:
+        b2Vec2 _x0;
+        double _t;
+        bool m_bContactR1;
+        bool m_bContactR2;
+        double _last_contact_r1;
+        double _last_contact_r2;
+        double _no_contact_time_r1;
+        double _no_contact_time_r2;
+        b2Vec2 _cVel;
+        b2Vec2 _cPos;
 
-	double	_angle;
+        // Dados efêmeros. Só existem durante a medição/simulação do carro.
+    public:
+        float _trqA;
+        float _trqB;
+        float _trqC;
+        float _trqD;
 
-private:
-	void _simulation_pre_tick	(void			);
-	CContactListener _cl;
-	bool _bInStep;
-	void _verificar_step(void);
+        double _angle;
 
-protected:
-	void _init(void);
+    private:
+        void _simulation_pre_tick();
 
-	// Usa as defini��es decodificadas para criar o objeto em si no box2d
-	void _create				(b2World* pWorld, CCarDef carro);
-	void _destroy				(void			);
-	void _phys_begin_simulate	(void			);
-	void _phys_end_simulate		(void			);
-	bool _simulation_step		(void			);
+        // CContactListener _cl;
+        bool _bInStep;
+
+        void _verificar_step();
+
+    protected:
+        void _init();
+
+        void _translate_rodas_e_pesos(const CCarDef &carro);
+
+        void _copy_dyn_params(const CCarDef &carro);
+
+        void _create_rodas_e_pesos(const CCarDef &carro);
+
+        void _set_torques();
+
+        b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, int param_index) const;
+
+        void _create_joints();
+
+        // Usa as defini��es decodificadas para criar o objeto em si no box2d
+        void _create(b2WorldId WorldId, const CCarDef& carro);
+
+        void _destroy();
+
+        void _phys_begin_simulate();
+
+        static void _phys_end_simulate();
+
+        bool _simulation_step();
 
 
-// Suporte � simula��o no Box2d
-public:
-	b2Vec2 getCenter(void);
-	// Queries
-	b2Body* getR1(void){return _pRoda1;}
-	b2Body* getR2(void){return _pRoda2;}
-	b2Body* getP1(void){return _pPeso1;}
-	b2Body* getP2(void){return _pPeso2;}
-	double	getT(void){return _t;}
+        // Suporte � simula��o no Box2d
+    public:
+        b2Vec2 getCenter();
 
-	void Destroy(void){_destroy();}
+        // Queries
+        [[nodiscard]] b2BodyId getR1() const
+        {
+            return m_Roda1Id;
+        }
 
-	bool	m_bDead				;
-	double	m_distancia			;
-	double	m_contatoR1			;
-	double	m_contatoR2			;
-	double	m_acum_contatoR1	;
-	double	m_acum_contatoR2	;
-	double	m_vm				;
-	double	m_t					;
+        [[nodiscard]] b2BodyId getR2() const
+        {
+            return m_Roda2Id;
+        }
 
-};
+        [[nodiscard]] b2BodyId getP1() const
+        {
+            return m_Peso1Id;
+        }
 
-b2World* buildWorld(CEnv* env);
+        [[nodiscard]] b2BodyId getP2() const
+        {
+            return m_Peso2Id;
+        }
 
-};//namespace PHYS
+        [[nodiscard]] double getT() const
+        {
+            return _t;
+        }
 
-#endif //__PHYSCAR_H__
+        void Destroy()
+        {
+            _destroy();
+        }
+
+        bool m_bDead;
+        double m_distancia;
+        double m_contatoR1;
+        double m_contatoR2;
+        double m_acum_contatoR1;
+        double m_acum_contatoR2;
+        double m_vm;
+        double m_t;
+    };
+
+    b2WorldId buildWorld(CEnv *env);
+}; //namespace PHYS

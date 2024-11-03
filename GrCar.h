@@ -5,7 +5,9 @@
 
 #define CImage int
 #define Graphics int
-#define PointF int
+#include <SFML/Graphics.hpp>
+
+#define PointF sf::Vector2f
 
 namespace GUI
 {
@@ -18,40 +20,41 @@ static bool		g_bImgFailed = false;
 class CGrCar
 {
 public:
-	CGrCar(void);
-	~CGrCar(void);
+	CGrCar();
+	~CGrCar();
 
 	// Draw
-	void Draw(Graphics *pGr);
+	void Draw(sf::RenderWindow& window) const;
 
 	// Draw offline (carro n�o criado, apenas com os def's)
 	void DrawOffline(Graphics *pGr);
 public:
-	typedef struct tagCircle
+	using circle_t = struct tagCircle
 	{
 		PointF	c;
-		double	r;
-	} circle_t;
-	typedef struct tagRoda
+		float	r{};
+	};
+
+	using roda_t = struct tagRoda
 	{
 		circle_t	c		;
-		bool		touch	;
-		double		angle	;
+		bool		touch{}	;
+		float		angle{}	;
 
-	} roda_t;
+	};
 
-	typedef struct tagPeso
+	using peso_t = struct tagPeso
 	{
 		circle_t	c		;
-		bool		broke	;
-	} peso_t;
+		bool		broke{}	;
+	};
 
-	roda_t	_roda1	;
-	roda_t	_roda2	;
-	peso_t	_peso1	;
-	peso_t	_peso2	;
-	PointF	_cm		;
-	bool	_broke	;
+	roda_t	_roda1	= {};
+	roda_t	_roda2	= {};
+	peso_t	_peso1	= {};
+	peso_t	_peso2	= {};
+	PointF	_cm		= {};
+	bool	_broke	= {};
 };
 
 };//namespace GUI
