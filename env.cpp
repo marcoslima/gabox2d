@@ -1,6 +1,7 @@
 #include "env.h"
 #include <sstream>
 #include <cmath>
+#include <iostream>
 #include <random>
 
 #include "CNormalSeededRandom.h"
@@ -9,12 +10,20 @@ using namespace std;
 
 namespace MODEL
 {
-    void CEnv::set(const double seed,
-                   const double dxm, const double dxs, const double dxo,
-                   const double dym, const double dys, const double dyo,
-                   const double phi, const double omega, const double a,
-                   const double tlx, const double tly,
-                   const double brx, const double bry)
+    CEnv::CEnv()
+        : _seed(0)
+          , _dxm(0), _dxs(10), _dxo(50)
+          , _dym(0), _dys(3), _dyo(0)
+          , _phi(0), _omega(0), _a(0)
+          , _tlx(0), _tly(0)
+          , _brx(1920), _bry(1080) {}
+
+    void CEnv::set(const unsigned seed,
+                   const float dxm, const float dxs, const float dxo,
+                   const float dym, const float dys, const float dyo,
+                   const float phi, const float omega, const float a,
+                   const float tlx, const float tly,
+                   const float brx, const float bry)
     {
         _seed = static_cast<int>(seed);
         _dxm = dxm;
@@ -32,7 +41,7 @@ namespace MODEL
         _bry = bry;
     }
 
-    string CEnv::get()
+    string CEnv::get() const
     {
         stringstream ss;
         ss << "environment_definition_" << ENV_HEADER << "{";
@@ -79,7 +88,7 @@ namespace MODEL
 #endif
     }
 
-    vec_vecs_t CEnv::get_vecs()
+    vec_vecs_t CEnv::get_vecs() const
     {
         CNormalSeededRandom randNorm(_seed);
 
@@ -93,15 +102,16 @@ namespace MODEL
         GroundPoly.emplace_back(_tlx, 1);
         GroundPoly.emplace_back(4, 1);
 
-        double ldy = 0;
-        double lm = 0;
-        double x = 10.0f;
-        while(x < _brx)
+        float ldy = 0;
+        float lm = 0;
+        float x = 10.0f;
+        while (x < _brx)
         {
-            const double dx = randNorm.random(_dxm, _dxs) + _dxo;
-            const double m = randNorm.random(_dym, _dys) + _dyo;
-            const double dy = ldy + (dx * (lm + m));
-            const double y = dy + _a * sin(_omega * x + _phi);
+            const float dx = randNorm.random(_dxm, _dxs) + _dxo;
+            const float m = randNorm.random(_dym, _dys) + _dyo;
+            const float dy = ldy + (dx * (lm + m));
+            const float y = dy + _a * sin(_omega * x + _phi);
+
             GroundPoly.emplace_back(x, y);
 
             x += fabs(dx);
