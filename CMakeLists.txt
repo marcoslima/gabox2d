@@ -84,7 +84,7 @@ ENDIF ()
 IF (NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
     execute_process(
             WORKING_DIRECTORY ${BOX2D_PATH}/build
-            COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF
+            COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Debug
     )
     execute_process(
             WORKING_DIRECTORY ${BOX2D_PATH}/build
@@ -118,10 +118,13 @@ add_executable(GaBox2d
         Pen.h
         SolidBrush.h
         CarDef.cpp
+        World.h
+        phys.h
+        phys.cpp
 )
 
 
 target_include_directories("GaBox2d" PUBLIC ${SFML_INCLUDE_DIRS})
-target_link_libraries("GaBox2d" imgui imgui-sfml sfml-graphics sfml-audio GL box2d)
+target_link_libraries("GaBox2d" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd)
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
