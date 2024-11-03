@@ -1,5 +1,6 @@
 #include "GaBox2dDoc.h"
 #include "EditorChaoDlg.h"
+#include "phys.h"
 
 
 namespace GUI
@@ -7,16 +8,14 @@ namespace GUI
 // CGaBox2dDoc
 // CGaBox2dDoc construction/destruction
 CGaBox2dDoc::CGaBox2dDoc()
-	: m_GroundId()
-	, m_env()
+	: m_env()
 {
-	m_WorldId = b2_nullWorldId;
 }
 
 CGaBox2dDoc::~CGaBox2dDoc()
 {
-	if(!b2World_IsValid(m_WorldId))
-		b2DestroyWorld(m_WorldId);
+	if(!b2World_IsValid(m_World.m_WorldId))
+		b2DestroyWorld(m_World.m_WorldId);
 }
 
 b2Vec2 operator*(const b2Vec2 left, const double mul)
@@ -53,9 +52,9 @@ void CGaBox2dDoc::OnEditCopy() const
 }
 
 void CGaBox2dDoc::_start_world() {
-	m_WorldId = PHYS::buildWorld(&m_env);
+	PHYS::buildWorld(m_env, m_World);
 	m_vecGround = m_env.get_vecs();
-	m_car.beginSimulate(m_WorldId);
+	m_car.beginSimulate(m_World.m_WorldId);
 }
 
 void CGaBox2dDoc::OnEditEditarch()
@@ -78,7 +77,7 @@ void CGaBox2dDoc::OnEditEditarch()
 
 void CGaBox2dDoc::BeginSimulation()
 {
-	m_car.beginSimulate(m_WorldId);
+	m_car.beginSimulate(m_World.m_WorldId);
 }
 
 void CGaBox2dDoc::EndSimulation()

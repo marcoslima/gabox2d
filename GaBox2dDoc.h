@@ -22,8 +22,7 @@ public:
 
 	vec_car_t	m_populacao;
 
-	b2WorldId m_WorldId{};
-	b2BodyId  m_GroundId;
+	PHYS::CWorld m_World;
 
 	CEnv m_env;
 	vec_vecs_t	m_vecGround;
