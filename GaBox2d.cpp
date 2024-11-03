@@ -106,6 +106,8 @@ int CGaBox2dApp::run()
     ImGuiIO& io = ImGui::GetIO();
 
     auto doc = CGaBox2dDoc();
+    auto env = CEnv();
+    doc.OnNewDocument(env);
     auto view = CGaBox2dView();
     view.SetDocument(&doc);
 
@@ -143,7 +145,7 @@ int CGaBox2dApp::run()
         DrawMenu(dlgParams, dlgEditorChao);
 		// dlgParams.draw();
 		// if(ImGui::Button("Open")) dlgParams.show();
-
+        view.Draw(window);
         ImGui::SFML::Render(window);
         window.display();
 
