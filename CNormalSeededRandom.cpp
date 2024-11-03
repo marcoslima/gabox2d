@@ -14,3 +14,9 @@ double CNormalSeededRandom::random(const double mean, const double stddev)
     std::normal_distribution<double> distribution(mean, stddev);
     return distribution(generator);
 }
+
+float CNormalSeededRandom::random(const float mean, const float stddev)
+{
+    std::normal_distribution<float> distribution(mean, stddev);
+    return distribution(generator);
+}

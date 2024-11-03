@@ -15,6 +15,7 @@ private:
 public:
     explicit CNormalSeededRandom(unsigned seed);
     double random(double mean, double stddev);
+    float random(float mean, float stddev);
 };
 
 
