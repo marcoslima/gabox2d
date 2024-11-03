@@ -2,6 +2,7 @@
 #include <box2d/box2d.h>
 #include "CarDef.h"
 #include "env.h"
+#include "World.h"
 using namespace MODEL;
 
 namespace PHYS
@@ -9,7 +10,7 @@ namespace PHYS
     using b2_def_t = struct tagB2Def
     {
         b2Circle sd{};
-        b2BodyDef bd{};
+        b2BodyDef bd{b2DefaultBodyDef()};
     };
 
     using car_t = struct tagCarParams
@@ -79,7 +80,7 @@ namespace PHYS
         b2JointId m_Jc2p2Id;
         b2JointId m_Jp1p2Id;
 
-        b2WorldId m_WorldId;
+        CWorld m_World;
 
         bool _bBroke;
 
@@ -132,7 +133,7 @@ namespace PHYS
 
         void _create_joints();
 
-        // Usa as defini��es decodificadas para criar o objeto em si no box2d
+        // Usa as definições decodificadas para criar o objeto em si no box2d
         void _create(b2WorldId WorldId, const CCarDef& carro);
 
         void _destroy();
@@ -188,6 +189,4 @@ namespace PHYS
         double m_vm;
         double m_t;
     };
-
-    b2WorldId buildWorld(CEnv *env);
 }; //namespace PHYS

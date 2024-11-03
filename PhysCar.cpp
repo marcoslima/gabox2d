@@ -1,5 +1,8 @@
 #include "PhysCar.h"
 
+#include <iostream>
+#include <ostream>
+
 namespace PHYS
 {
     int ID_RODA1 = 1;
@@ -7,99 +10,6 @@ namespace PHYS
     int ID_PESO1 = 3;
     int ID_PESO2 = 4;
     int ID_GROUND = 5;
-
-
-    b2Vec2 TranslateVec(const vec2_t a)
-    {
-        return b2Vec2(static_cast<float>(a.x),
-                      static_cast<float>(a.y));
-    }
-
-    b2Hull compute_hull(const size_t nSize, const b2Vec2 *const pVertices)
-    {
-        return b2ComputeHull(pVertices, nSize); // NOLINT(*-narrowing-conversions)
-    }
-
-    b2WorldId buildWorld(CEnv *env)
-    {
-        const vec_vecs_t GroundPoly = env->get_vecs();
-
-        // ReSharper disable once CppUseStructuredBinding
-        b2WorldDef worldDef = b2DefaultWorldDef();
-
-        worldDef.gravity = {0.0f, -10.0f};
-        const b2WorldId WorldId = b2CreateWorld(&worldDef);
-
-        b2BodyDef groundBodyDef;
-        groundBodyDef.type = b2_staticBody;
-        groundBodyDef.position = b2Vec2(0.0f, 0.0f);
-
-        b2BodyId GroundId = b2CreateBody(WorldId, &groundBodyDef);
-
-        const size_t nSize = GroundPoly.size();
-        const auto pVertices = new b2Vec2[nSize];
-        for (size_t k = 0; k < nSize; k++)
-        {
-            pVertices[k] = TranslateVec(GroundPoly[k]);
-        }
-
-        b2ShapeDef groundShapeDef;
-        // groundShapeDef.SetAsBox(30.0f, 1.0f);
-        groundShapeDef.friction = 1.0;
-        groundShapeDef.restitution = 0.0;
-        const b2Hull hull = compute_hull(nSize, pVertices);
-        const b2Polygon polygon = b2MakePolygon(&hull, 1.0f);
-        b2CreatePolygonShape(GroundId, &groundShapeDef, &polygon);
-
-        // Limitadores dos boundary's:
-
-        // Parede esquerda:
-        // groundShapeDef.vertices[0].Set(env->_tlx, env->_tly);
-        // groundShapeDef.vertices[1].Set(env->_tlx, env->_bry);
-        // groundShapeDef.vertices[2].Set(env->_tlx + 3, env->_bry);
-        // groundShapeDef.vertices[3].Set(env->_tlx + 3, env->_tly);
-        // pGround->CreateShape(&groundShapeDef);
-        {
-            constexpr auto width = 3.0f;
-            const auto height = fabs(env->_bry - env->_tly);
-            const b2Vec2 center = {-1.5f, (env->_bry + env->_tly) / 2.0f};
-            auto shape = b2MakeOffsetBox(width, height, center, b2Rot(0, 0));
-            b2CreatePolygonShape(GroundId, &groundShapeDef, &shape);
-        }
-
-        // Parede direita:
-        // groundShapeDef.vertices[0].Set(env->_brx - 3, env->_tly);
-        // groundShapeDef.vertices[1].Set(env->_brx - 3, env->_bry);
-        // groundShapeDef.vertices[2].Set(env->_brx, env->_bry);
-        // groundShapeDef.vertices[3].Set(env->_brx, env->_tly);
-        // pGround->CreateShape(&groundShapeDef);
-        {
-            constexpr auto width = 3.0f;
-            const auto height = fabs(env->_bry - env->_tly);
-            const b2Vec2 center = {env->_brx + 1.5f, (env->_bry + env->_tly) / 2.0f};
-            auto shape = b2MakeOffsetBox(width, height, center, b2Rot(0, 0));
-            b2CreatePolygonShape(GroundId, &groundShapeDef, &shape);
-        }
-
-        // Teto
-        // groundShapeDef.vertices[0].Set(env->_tlx, env->_tly - 3);
-        // groundShapeDef.vertices[1].Set(env->_brx, env->_tly - 3);
-        // groundShapeDef.vertices[2].Set(env->_brx, env->_tly);
-        // groundShapeDef.vertices[3].Set(env->_tlx, env->_tly);
-        // pGround->CreateShape(&groundShapeDef);
-        {
-            auto width = fabs(env->_brx - env->_tlx);
-            constexpr auto height = 3.0f;
-            const b2Vec2 center = {(env->_brx + env->_tlx) / 2.0f, env->_tly - 1.5f};
-            auto shape = b2MakeOffsetBox(width, height, center, b2Rot(0, 0));
-            b2CreatePolygonShape(GroundId, &groundShapeDef, &shape);
-        }
-
-        b2Body_SetUserData(GroundId, &ID_GROUND);
-
-        return WorldId;
-    }
-
 
     CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
     {
@@ -152,10 +62,10 @@ namespace PHYS
     void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro) {
         //////////////////////////////////////////////
         // Cria��o dos objetos:
-        m_Roda1Id = CreateRoda(m_WorldId, _car_def, carro._roda1, ID_RODA1);
-        m_Roda2Id = CreateRoda(m_WorldId, _car_def, carro._roda2, ID_RODA2);
-        m_Peso1Id = CreateRoda(m_WorldId, _car_def, carro._peso1, ID_PESO1);
-        m_Peso2Id = CreateRoda(m_WorldId, _car_def, carro._peso2, ID_PESO2);
+        m_Roda1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda1, ID_RODA1);
+        m_Roda2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda2, ID_RODA2);
+        m_Peso1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso1, ID_PESO1);
+        m_Peso2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso2, ID_PESO2);
     }
 
     void CPhysCar::_set_torques() {
@@ -179,7 +89,7 @@ namespace PHYS
         jd.collideConnected = true;
         jd.hertz = _car_def.freq[param_index];
         jd.dampingRatio = _car_def.damp[param_index];
-        return b2CreateDistanceJoint(m_WorldId, &jd);
+        return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
     }
 
     void CPhysCar::_create_joints() {
@@ -197,8 +107,7 @@ namespace PHYS
         if (b2World_IsValid(WorldId))
             _destroy();
 
-        m_WorldId = WorldId;
-
+        m_World.m_WorldId = WorldId;
         _translate_rodas_e_pesos(carro);
         _copy_dyn_params(carro);
         _create_rodas_e_pesos(carro);
@@ -262,7 +171,7 @@ namespace PHYS
         // _cl.m_bContactR1 = false;
         // _cl.m_bContactR2 = false;
 
-        b2World_Step(m_WorldId, _timeStep, _iterations);
+        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
 
 #if 0 // TODO: Converter o contactlistener
           // Est� vivo ainda?
@@ -430,8 +339,6 @@ namespace PHYS
         m_Jc2p2Id = b2_nullJointId;
         m_Jp1p2Id = b2_nullJointId;
 
-        m_WorldId = b2_nullWorldId;
-
         _timeStep = 1.0f / 50.0f;
         _iterations = 10;
         _bInStep = false;
@@ -441,7 +348,7 @@ namespace PHYS
 
     void CPhysCar::_destroy()
     {
-        if (!b2World_IsValid(m_WorldId))
+        if (!b2World_IsValid(m_World.m_WorldId))
             return;
 
         _verificar_step();

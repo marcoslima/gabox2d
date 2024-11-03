@@ -29,7 +29,7 @@ void CCar::endSimulate()
 
 void CCar::CreateCar(const char *szGenes)
 {
-    if (b2World_IsValid(m_WorldId) && b2Body_IsValid(m_Roda1Id))
+    if (b2World_IsValid(m_World.m_WorldId) && b2Body_IsValid(m_Roda1Id))
         _destroy();
 
     _init();
