@@ -63,7 +63,7 @@ namespace PHYS
         // TODO: Fazer as paredes e o teto.
 
         // TODO: Verificar se é necessário.
-        // b2Body_SetUserData(world.m_GroundId, ID_GROUND);
+        // b2Body_SetUserData(world.m_GroundId, &PHYS::ID_GROUND);
     }
 
     void buildWorld(const MODEL::CEnv& env, CWorld& world)

@@ -1,9 +1,12 @@
-#include "GaBox2d.h"
 #include "GaBox2dDoc.h"
 #include "GaBox2dView.h"
 #include "EditorChaoDlg.h"
 #include "EvolucaoDlg.h"
 #include "devutils.h"
+#include "Pen.h"
+#include "SolidBrush.h"
+#include <CDT.hpp>
+
 using namespace DevUtils;
 
 namespace GUI
@@ -19,6 +22,7 @@ namespace GUI
           , m_bShowInfoGaGenes(false)
           // , _thread_params()
           , m_bWaitingEvolucao(false)
+          , _pDocument(nullptr)
           , m_pdlgIdInfo(nullptr)
           , m_pdlgGaInfo(nullptr) {}
 
@@ -97,104 +101,114 @@ namespace GUI
 #endif
 
 
-    void CGaBox2dView::Draw(sf::RenderWindow &window) const
+    void CGaBox2dView::_draw_sky(sf::RenderWindow &window, CEnv env) const
     {
-        CGaBox2dDoc *pDoc = GetDocument();
-        // ReSharper disable once CppUseStructuredBinding
-        CEnv env = pDoc->m_env;
-
-        // Rect rcClient;
-        PointF ptScrCenter;
-        // {
-        // 	CRect rcc;
-        // 	CPoint ptc;
-        sf::Vector2u rcc;
-        sf::Vector2u ptc;
-        // 	GetClientRect(rcc);
-        rcc = window.getSize();
-        // 	ptc = rcc.CenterPoint();
-        ptc = sf::Vector2u(rcc.x / 2, rcc.y / 2);
-
-        // 	rcClient = Rect(rcc.left,rcc.top,rcc.right,rcc.bottom);
-        // 	ptScrCenter = PointF(ptc.x,ptc.y);
-        // }
-        // Rect rcWorld(env._tlx,env._bry,env._brx-env._tlx,env._tly-env._bry);
-
-        // gr.SetClip(rcClient,CombineModeReplace);
-
-        // gr.FillRectangle(&SolidBrush(Color(0,0,0)),rcClient);
-
-        // Ajustamos a transforma��o:
-        // A transforma��o ser� tal que
-        // T(x,y) = (a.x + b, c.y + d)
-        // onde (x,y) est� em world coordinates (wc) e
-        // T(x,y) est� em device coordinates (dc)
-        //
-        // sabemos as transforma��es dos seguintes pontos:
-        // T(0,0) = (pc.x,pc.y) -> b = pc.x, d = pc.y
-        // T(tl.x,tl.y) = (rc.l,rc.t)
-        // T(br.x,br.y) = (rc.r,rc.b)
-        //
-        // a.tl_x + pc_x = rc_l
-        // a.br_x + pc_x = rc.r
-        //-----------------------
-        // a(tl_x-br_x) = (rc_l-rc.r)
-        //
-        //      (rc_l-rc_r)
-        // a = -------------
-        //      (tl_x-br_x)
-        //
-        //      (rc_t-rc_b)
-        // b = -------------
-        //      (tl_y-br_y)
-        ////////////////////////////////////////////////////////////
-
-        //	double dZoom = pow(1.3,(double)m_zoom);
-        float dZoom = 10.0;
-        float cx, cy;
-        PointF pos = pDoc->GetCenter();
-
-        cx = ptScrCenter.x - (pos.x * dZoom);
-        cy = ptScrCenter.y + (pos.y * dZoom);
-
-        // Matrix mt( dZoom	,	0		,
-        // 	       0		,	-dZoom	,
-        // 		   cx		,	cy		);
-        // gr.SetTransform(&mt);
-        sf::Transform transform;
-        transform.translate(cx, cy);
-        transform.scale(dZoom, dZoom);
-
-        // World na cor de c�u
+        // World na cor de céu
         // SolidBrush bshSky(Color(100,100,255));
         // gr.FillRectangle(&bshSky,rcWorld);
         sf::RectangleShape sky(sf::Vector2f(env._brx - env._tlx, env._tly - env._bry));
         sky.setFillColor(sf::Color(100, 100, 255));
         sky.setPosition(env._tlx, env._bry);
         window.draw(sky);
+    }
 
-        vec_vecs_t *pVg = &pDoc->m_vecGround;
-        size_t i;
+    void CGaBox2dView::_draw_ground(sf::RenderWindow &window, const CGaBox2dDoc *pDoc)
+    {
+        const CPen penGround(sf::Color(0, 0, 0), 0.1);
+        const CSolidBrush bshTransparent(sf::Color::Transparent);
+        const CSolidBrush bshGround(sf::Color(32, 128, 32));
+
+        const vec_vecs_t vecGround = pDoc->m_vecGround;
         // ReSharper disable once CppTooWideScopeInitStatement
-        size_t nSize = pVg->size();
+        const size_t nSize = vecGround.size();
         if (nSize == 0)
             return;
-#if 0
-        auto *pPoints = new PointF[nSize];
-        for (i = 0; i < nSize; i++)
+
+        // Pen penGround(sf::Color(0, 0, 0), 0.1);
+        // SolidBrush bshGround(sf::Color(32, 128, 32));
+        // gr.FillPolygon(&bshGround, pPoints, nSize);
+        // gr.DrawPolygon(&penGround, pPoints, nSize);
+        // delete pPoints;
+        //
+        // Pen penBorder(sf::Color(255, 0, 0), 5);
+        // gr.DrawRectangle(&penBorder, rcWorld);
+
+        // Triangularização para preenchimento do polígono:
+        // (Delunay Triangulation)
+        CDT::Triangulation<float> cdt;
+        vector<CDT::V2d<float> > vecVertices;
+        for (const auto &v: vecGround)
         {
-            pPoints[i].x = (*pVg)[i].x;
-            pPoints[i].y = (*pVg)[i].y;
+            vecVertices.emplace_back(v.x, v.y);
+        }
+        cdt.insertVertices(vecVertices);
+        vector<CDT::Edge> vecEdges;
+        vecEdges.reserve(vecGround.size());
+        for (int i = 0; i < vecGround.size(); i++)
+        {
+            vecEdges.emplace_back(i, (i + 1) % vecGround.size());
+        }
+        cdt.insertEdges(vecEdges);
+        cdt.eraseOuterTrianglesAndHoles();
+        const CPen penDebug(sf::Color(255, 0, 0), 0.1);
+        for (const auto &triangle: cdt.triangles)
+        {
+            sf::ConvexShape polygon(3);
+            for (size_t i = 0; i < 3; i++)
+            {
+                polygon.setPoint(i, sf::Vector2f(vecVertices[triangle.vertices[i]].x,
+                                                 vecVertices[triangle.vertices[i]].y));
+            }
+            // penDebug.apply(polygon);
+            bshGround.apply(polygon);
+            window.draw(polygon);
         }
 
-        Pen penGround(sf::Color(0, 0, 0), 0.1);
-        SolidBrush bshGround(sf::Color(32, 128, 32));
-        gr.FillPolygon(&bshGround, pPoints, nSize);
-        gr.DrawPolygon(&penGround, pPoints, nSize);
-        delete pPoints;
+        // Contorno do ground:
+        sf::ConvexShape polygon(nSize);
+        for (size_t i = 0; i < nSize; i++)
+        {
+            polygon.setPoint(i, sf::Vector2f(vecGround[i].x, vecGround[i].y));
+        }
+        penGround.apply(polygon);
+        bshTransparent.apply(polygon);
 
-        Pen penBorder(sf::Color(255, 0, 0), 5);
-        gr.DrawRectangle(&penBorder, rcWorld);
+        window.draw(polygon);
+    }
+
+    void CGaBox2dView::_draw_border(sf::RenderWindow &window, const MODEL::CEnv &env)
+    {
+        // Pen penBorder(sf::Color(255, 0, 0), 5);
+        // gr.DrawRectangle(&penBorder, rcWorld);
+        const CPen penBorder(sf::Color(255, 0, 0), 5);
+        const CSolidBrush bshBorder(sf::Color::Transparent);
+        sf::RectangleShape border(sf::Vector2f(env._brx - env._tlx, env._tly - env._bry));
+        border.setPosition(env._tlx, env._bry);
+        penBorder.apply(border);
+        bshBorder.apply(border);
+
+        window.draw(border);
+    }
+
+    void CGaBox2dView::Draw(sf::RenderWindow &window) const
+    {
+        CGaBox2dDoc *pDoc = GetDocument();
+        const CEnv env = pDoc->m_env;
+
+        // Zoom to fit
+        // sf::View view(sf::Vector2f(200.0f, 235.0f),
+        //               sf::Vector2f(800, -600));
+        sf::View view(sf::Vector2f(10.0f, 20.0f),
+                      sf::Vector2f(100, -70));
+        view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+        window.setView(view);
+
+
+        _draw_sky(window, env);
+        _draw_ground(window, pDoc);
+        _draw_border(window, env);
+        pDoc->GetCar().Draw(window);
+#if 0
 
         pDoc->GetCar().Draw(&gr);
 
@@ -204,7 +218,7 @@ namespace GUI
 #endif
     }
 
-    CGaBox2dDoc * CGaBox2dView::GetDocument() const
+    CGaBox2dDoc *CGaBox2dView::GetDocument() const
     {
         return _pDocument;
     }

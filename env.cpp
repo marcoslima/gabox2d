@@ -12,11 +12,11 @@ namespace MODEL
 {
     CEnv::CEnv()
         : _seed(0)
-          , _dxm(0), _dxs(10), _dxo(50)
-          , _dym(0), _dys(3), _dyo(0)
+          , _dxm(0), _dxs(1.0f), _dxo(5.0f)
+          , _dym(0), _dys(0.3f), _dyo(0)
           , _phi(0), _omega(0), _a(0)
-          , _tlx(0), _tly(0)
-          , _brx(1920), _bry(1080) {}
+          , _tlx(-100), _tly(500)
+          , _brx(500), _bry(-50) {}
 
     void CEnv::set(const unsigned seed,
                    const float dxm, const float dxs, const float dxo,

@@ -7,7 +7,6 @@
 #include "GaBox2dDoc.h"
 #include <SFML/Window/Keyboard.hpp>
 
-
 namespace GUI
 {
 // Paramstros para o thread:
@@ -77,6 +76,12 @@ public:
 	virtual ~CGaBox2dView();
 
 public:
+	void _draw_sky(sf::RenderWindow &window, CEnv env) const;
+
+	static void _draw_ground(sf::RenderWindow &window, const CGaBox2dDoc *pDoc);
+
+	static void _draw_border(sf::RenderWindow & window, const MODEL::CEnv & env);
+
 	void Draw(sf::RenderWindow& window) const;
 	void OnSimulaPlay();
 

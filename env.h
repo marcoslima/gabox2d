@@ -59,6 +59,6 @@ namespace MODEL
 
         static void set(const string &sParams);
 
-        vec_vecs_t get_vecs() const;
+        [[nodiscard]] vec_vecs_t get_vecs() const;
     };
 }; //namespace MODEL
