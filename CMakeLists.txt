@@ -99,6 +99,36 @@ target_include_directories(imgui PUBLIC ${BOX2D_PATH}/include)
 link_directories(${BOX2D_PATH}/build/src)
 ###########################################################
 
+###########################################################
+## CDT Library
+
+# Define the path where the CDT library will be cloned
+set(CDT_PATH ${CMAKE_CURRENT_BINARY_DIR}/cdt)
+
+# Clone the CDT library from its GitHub repository
+IF (NOT EXISTS "${CDT_PATH}")
+    execute_process(
+            COMMAND git clone https://github.com/artem-ogre/CDT.git ${CDT_PATH}
+
+    )
+ELSE ()
+    execute_process(
+            COMMAND git pull
+            WORKING_DIRECTORY ${CDT_PATH}
+    )
+ENDIF ()
+
+# Build the CDT library
+execute_process(
+        COMMAND cmake --build -DCDT_USE_AS_COMPILED_LIBRARY=ON
+        WORKING_DIRECTORY ${CDT_PATH}/CDT/build
+)
+
+# Add include directories for the CDT library
+target_include_directories(imgui PUBLIC ${CDT_PATH}/CDT/include)
+
+###########################################################
+
 add_executable(GaBox2d
         GaBox2d.cpp
         GaParamsDlg.cpp
