@@ -1,6 +1,5 @@
 #include "GaBox2dDoc.h"
 #include "GaBox2dView.h"
-#include "EditorChaoDlg.h"
 #include "EvolucaoDlg.h"
 #include "devutils.h"
 #include "Pen.h"
@@ -11,8 +10,6 @@ using namespace DevUtils;
 
 namespace GUI
 {
-    // CGaBox2dView
-    // CGaBox2dView construction/destruction
     CGaBox2dView::CGaBox2dView()
         : m_nSimTimer(0)
           , m_nVelocidade(1)
@@ -20,92 +17,18 @@ namespace GUI
           , m_bGaExited(false)
           , m_bShowInfoId(true)
           , m_bShowInfoGaGenes(false)
-          // , _thread_params()
           , m_bWaitingEvolucao(false)
-          , _pDocument(nullptr)
-          , m_pdlgIdInfo(nullptr)
-          , m_pdlgGaInfo(nullptr) {}
-
-    CGaBox2dView::~CGaBox2dView()
-    {
-        m_bGaRunning = false;
-        // TODO:CVT: SetEvent(_thread_params.m_hStopGa);
-        // TODO:CVT: WaitForSingleObject(_thread_params.m_hGaStopped,INFINITE);
-        delete m_pdlgGaInfo;
-        delete m_pdlgIdInfo;
-    }
+          , _pDocument(nullptr) {}
 
     sf::Vector2f WorldToLogical(b2Vec2 worldPoint)
     {
         return {worldPoint.x, worldPoint.y};
     }
 
-#if 0
-      // CGaBox2dView drawing
-    void DrawShape(sf::RenderWindow &window,
-                   const b2Fixture *fixture,
-                   const b2Transform &xf,
-                   b2Vec2 position,
-                   sf::Color crFill,
-                   sf::Color crCont)
-    {
-        const b2Shape *shape = fixture->GetShape();
-        b2Shape::Type shapeType = shape->GetType();
-        switch (shapeType)
-        {
-            case b2Shape::Type::e_circle:
-            {
-                const b2CircleShape *circle = (const b2CircleShape *) shape;
-                sf::Vector2f center = WorldToLogical(b2Mul(xf, circle->m_p));
-                float r = WorldToLogical(b2Vec2(circle->m_radius, 0)).x;
-                sf::CircleShape circle_shape(r);
-                circle_shape.setPosition(center - WorldToLogical(b2Vec2(r, r)));
-                circle_shape.setFillColor(crFill);
-                circle_shape.setOutlineColor(crCont);
-                circle_shape.setOutlineThickness(0.2f);
-
-                window.draw(circle_shape);
-
-                sf::Vector2f circle_pos = WorldToLogical(b2Mul(xf, circle->m_p + (circle->m_radius * b2Vec2(1.0f, 0))));
-                sf::Vertex line[] =
-                {
-                    sf::Vertex(circle_pos, crCont),
-                    sf::Vertex(center, crCont)
-                };
-                window.draw(line, 2, sf::Lines);
-            }
-            break;
-
-            case b2Shape::Type::e_polygon:
-            {
-                const b2PolygonShape *poly = (const b2PolygonShape *) shape;
-                size_t vertexCount = poly->m_count;
-                sf::ConvexShape convex(vertexCount);
-                for (size_t i = 0; i < vertexCount; ++i)
-                {
-                    b2Vec2 v = b2Mul(xf, poly->m_vertices[i]);
-                    convex.setPoint(i, WorldToLogical(v));
-                }
-                convex.setFillColor(crFill);
-                convex.setOutlineColor(crCont);
-                convex.setOutlineThickness(0.2f);
-
-                window.draw(convex);
-            }
-            break;
-
-            default:
-                break;
-        }
-    }
-#endif
-
 
     void CGaBox2dView::_draw_sky(sf::RenderWindow &window, const CEnv &env)
     {
         // World na cor de céu
-        // SolidBrush bshSky(Color(100,100,255));
-        // gr.FillRectangle(&bshSky,rcWorld);
         sf::RectangleShape sky(sf::Vector2f(env._brx - env._tlx, env._tly - env._bry));
         sky.setFillColor(sf::Color(100, 100, 255));
         sky.setPosition(env._tlx, env._bry);
@@ -119,19 +42,10 @@ namespace GUI
         const CSolidBrush bshGround(sf::Color(32, 128, 32));
 
         const vec_vecs_t vecGround = pDoc->m_vecGround;
-        // ReSharper disable once CppTooWideScopeInitStatement
+
         const size_t nSize = vecGround.size();
         if (nSize == 0)
             return;
-
-        // Pen penGround(sf::Color(0, 0, 0), 0.1);
-        // SolidBrush bshGround(sf::Color(32, 128, 32));
-        // gr.FillPolygon(&bshGround, pPoints, nSize);
-        // gr.DrawPolygon(&penGround, pPoints, nSize);
-        // delete pPoints;
-        //
-        // Pen penBorder(sf::Color(255, 0, 0), 5);
-        // gr.DrawRectangle(&penBorder, rcWorld);
 
         // Triangularização para preenchimento do polígono:
         // (Delunay Triangulation)
@@ -150,7 +64,8 @@ namespace GUI
         }
         cdt.insertEdges(vecEdges);
         cdt.eraseOuterTrianglesAndHoles();
-        const CPen penDebug(sf::Color(255, 0, 0), 0.1);
+        // const CPen penDebug(sf::Color(255, 0, 0), 0.1);
+        // ReSharper disable once CppUseStructuredBinding
         for (const auto &triangle: cdt.triangles)
         {
             sf::ConvexShape polygon(3);
@@ -176,7 +91,7 @@ namespace GUI
         window.draw(polygon);
     }
 
-    void CGaBox2dView::_draw_border(sf::RenderWindow &window, const MODEL::CEnv &env)
+    void CGaBox2dView::_draw_border(sf::RenderWindow &window, const CEnv &env)
     {
         // Pen penBorder(sf::Color(255, 0, 0), 5);
         // gr.DrawRectangle(&penBorder, rcWorld);
@@ -196,8 +111,6 @@ namespace GUI
         const CEnv env = pDoc->m_env;
 
         // Zoom to fit
-        // sf::View view(sf::Vector2f(200.0f, 235.0f),
-        //               sf::Vector2f(800, -600));
         sf::View view(sf::Vector2f(10.0f, 20.0f),
                       sf::Vector2f(100, -70));
         view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -228,29 +141,6 @@ namespace GUI
         _pDocument = pDoc;
     }
 
-    void CGaBox2dView::OnInitialUpdate()
-    {
-#if 0
-        CScrollView::OnInitialUpdate();
-        CSize sizeTotal;
-        // TODO: calculate the total size of this view
-        sizeTotal.cx = sizeTotal.cy = 100;
-        SetScrollSizes(MM_TEXT, sizeTotal);
-
-        m_fntSmall.CreateFont(-12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
-        m_fntSupersmall.CreateFont(-8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "small fonts");
-
-        m_pdlgIdInfo = new CIdInfoDlg(this);
-        m_pdlgIdInfo->Create(CIdInfoDlg::IDD, this);
-        m_pdlgIdInfo->ShowWindow(SW_SHOW);
-
-        m_pdlgGaInfo = new CGaInfoDlg(this);
-        m_pdlgGaInfo->m_pView = this;
-        m_pdlgGaInfo->Create(CGaInfoDlg::IDD, this);
-        m_pdlgGaInfo->ShowWindow(SW_SHOW);
-#endif
-    }
-
     // CGaBox2dView message handlers
     void CGaBox2dView::OnSimulaPlay()
     {
@@ -269,55 +159,14 @@ namespace GUI
 #endif
     }
 
-#if 0
-    void CGaBox2dView::OnTimer(unsigned nIDEvent)
+    void CGaBox2dView::OnSimulaReset() const
     {
-          static bool bWorking = false;
-        if (bWorking)
-            return;
-        bWorking = true;
-
         CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
-        if (!pDoc)
-        {
-            bWorking = false;
-            return;
-        }
-
-        UINT k;
-        for (k = 0; k < m_nVelocidade; k++)
-        {
-            if (!pDoc->GetCar().doStep())
-            {
-                //			OnSimulaPlay();
-                //			break;
-            }
-        }
-        Invalidate();
-
-        CScrollView::OnTimer(nIDEvent);
-        bWorking = false;
-    }
-#endif
-
-    void CGaBox2dView::OnSimulaReset()
-    {
-#if 0
-          CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
         if (!pDoc)
             return;
-
-        if (m_nSimTimer != 0)
-            OnSimulaPlay();
 
         pDoc->GetCar().CreateCar();
-        m_pdlgIdInfo->set(0, 0, 0, "");
-
-        if (m_nSimTimer == 0)
-            OnSimulaPlay();
-#endif
+        pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
     }
 
     void CGaBox2dView::OnVelocidadeMais()
@@ -785,7 +634,7 @@ namespace GUI
         {
             case sf::Keyboard::R:
             {
-                pDoc->OnNewDocument(pDoc->m_env);
+                OnSimulaReset();
                 break;
             }
             case sf::Keyboard::Q:
@@ -793,6 +642,8 @@ namespace GUI
                 pDoc->Quit();
                 break;
             }
+            default:
+                break;
         }
     }
 }
