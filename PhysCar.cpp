@@ -1,7 +1,7 @@
 #include "PhysCar.h"
 
 #include <iostream>
-#include <ostream>
+
 
 namespace PHYS
 {
@@ -25,6 +25,7 @@ namespace PHYS
         ret.bd.position = b2Vec2(roda.c.x, roda.c.y);
         ret.bd.type = b2_dynamicBody;
         ret.sd.radius = roda.c.raio;
+        ret.sd.center = b2Vec2(roda.c.x, roda.c.y);
 
         return ret;
     }
@@ -38,6 +39,7 @@ namespace PHYS
         shape_def.friction = roda.b.friccao;
         shape_def.density = roda.b.densidade;
         shape_def.restitution = roda.b.elasticidade;
+
         b2CreateCircleShape(RodaId, &shape_def, &car_def.R1.sd);
         b2Body_SetUserData(RodaId, IdBody);
 

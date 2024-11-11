@@ -24,11 +24,10 @@ namespace GUI
         return b2Vec2(left.x * static_cast<float>(mul), left.y * static_cast<float>(mul));
     }
 
-    bool CGaBox2dDoc::OnNewDocument(CEnv &env)
+    bool CGaBox2dDoc::OnNewDocument(const CEnv &env)
     {
         const auto seed = static_cast<unsigned>(time(nullptr));
         srand(seed); // NOLINT(*-msc51-cpp)
-        cout << "Seed: " << seed << endl;
 
         // CEditorChaoDlg dlgChao;
         // if(dlgChao.DoModal() == IDCANCEL)

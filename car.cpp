@@ -57,9 +57,11 @@ void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::circle_t &grCircle)
     b2Body_GetShapes(RodaId, shapes, 1);
 
     // b2Vec2	pos  = pRoda->GetPosition() + circle->GetLocalPosition();
-    const auto [x, y] = b2Shape_GetCircle(shapes[0]).center;
+    const auto posRoda = b2Body_GetPosition(RodaId);
+    auto [posCircle, radius] = b2Shape_GetCircle(shapes[0]);
+    const auto [x, y] = posRoda + posCircle;
     grCircle.c = PointF(x, y);
-    grCircle.r = b2Shape_GetCircle(shapes[0]).radius;
+    grCircle.r = radius;
 }
 
 void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::roda_t &grRoda, const bool bContact)

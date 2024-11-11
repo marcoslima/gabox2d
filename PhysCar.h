@@ -116,7 +116,7 @@ namespace PHYS
         // CContactListener _cl;
         bool _bInStep;
 
-        void _verificar_step();
+        static void _verificar_step();
 
     protected:
         void _init();
@@ -129,7 +129,7 @@ namespace PHYS
 
         void _set_torques();
 
-        b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, int param_index) const;
+        [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, int param_index) const;
 
         void _create_joints();
 
@@ -147,7 +147,7 @@ namespace PHYS
 
         // Suporte à simulação no Box2d
     public:
-        b2Vec2 getCenter() const;
+        [[nodiscard]] b2Vec2 getCenter() const;
 
         // Queries
         [[nodiscard]] b2BodyId getR1() const

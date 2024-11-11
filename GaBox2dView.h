@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ga.h"
-#include "IdInfoDlg.h"
-#include "GaInfoDlg.h"
 #include "GaBox2dDoc.h"
 #include <SFML/Window/Keyboard.hpp>
+
+using namespace GA;
 
 namespace GUI
 {

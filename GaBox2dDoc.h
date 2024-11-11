@@ -33,23 +33,18 @@ public:
 	void	BeginSimulation();
 
 	static void	EndSimulation();
-	PointF	GetCenter() const;
+	[[nodiscard]] PointF	GetCenter() const;
 
 	void Quit();
 
 	CCar&	GetCar(){return m_car;}
 
 //	char *RandomCar(car_t& car);
-
-// Overrides
-	public:
-	virtual bool OnNewDocument(CEnv& env);
+	bool OnNewDocument(const CEnv& env);
 
 // Implementation
-public:
-	virtual ~CGaBox2dDoc();
+	~CGaBox2dDoc();
 
-public:
 	void OnEditCopy() const;
 
 	void _start_world();
