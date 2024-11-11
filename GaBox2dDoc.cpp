@@ -1,94 +1,102 @@
 #include "GaBox2dDoc.h"
+
+#include <iostream>
+
 #include "EditorChaoDlg.h"
 #include "phys.h"
 
 
 namespace GUI
 {
-// CGaBox2dDoc
-// CGaBox2dDoc construction/destruction
-CGaBox2dDoc::CGaBox2dDoc()
-	: m_env()
-{
-}
+    // CGaBox2dDoc
+    // CGaBox2dDoc construction/destruction
+    CGaBox2dDoc::CGaBox2dDoc()
+        : m_env() {}
 
-CGaBox2dDoc::~CGaBox2dDoc()
-{
-	if(!b2World_IsValid(m_World.m_WorldId))
-		b2DestroyWorld(m_World.m_WorldId);
-}
+    CGaBox2dDoc::~CGaBox2dDoc()
+    {
+        if (!b2World_IsValid(m_World.m_WorldId))
+            b2DestroyWorld(m_World.m_WorldId);
+    }
 
-b2Vec2 operator*(const b2Vec2 left, const double mul)
-{
-	return b2Vec2(left.x*static_cast<float>(mul), left.y*static_cast<float>(mul));
-}
+    b2Vec2 operator*(const b2Vec2 left, const double mul)
+    {
+        return b2Vec2(left.x * static_cast<float>(mul), left.y * static_cast<float>(mul));
+    }
 
-bool CGaBox2dDoc::OnNewDocument(CEnv& env)
-{
-	srand(static_cast<unsigned>(time(nullptr))); // NOLINT(*-msc51-cpp)
+    bool CGaBox2dDoc::OnNewDocument(CEnv &env)
+    {
+        const auto seed = static_cast<unsigned>(time(nullptr));
+        srand(seed); // NOLINT(*-msc51-cpp)
+        cout << "Seed: " << seed << endl;
 
-	// CEditorChaoDlg dlgChao;
-	// if(dlgChao.DoModal() == IDCANCEL)
-	// {
-	// 	return FALSE;
-	// }
+        // CEditorChaoDlg dlgChao;
+        // if(dlgChao.DoModal() == IDCANCEL)
+        // {
+        // 	return FALSE;
+        // }
 
-	// m_env = dlgChao.m_World;
-	m_env = env;
+        // m_env = dlgChao.m_World;
+        m_env = env;
 
-	_start_world();
+        _start_world();
 
-	return true;
-}
+        return true;
+    }
 
-void CGaBox2dDoc::OnEditCopy() const
-{
-	string strGenes;
-	m_car.getGenes(strGenes);
+    void CGaBox2dDoc::OnEditCopy() const
+    {
+        string strGenes;
+        m_car.getGenes(strGenes);
 
-	// Código para copiar para a área de transferência
-	// TODO: Implementar para Linux ou genérico
-	// ...
-}
+        // Código para copiar para a área de transferência
+        // TODO: Implementar para Linux ou genérico
+        // ...
+    }
 
-void CGaBox2dDoc::_start_world() {
-	PHYS::buildWorld(m_env, m_World);
-	m_vecGround = m_env.get_vecs();
-	m_car.beginSimulate(m_World.m_WorldId);
-}
+    void CGaBox2dDoc::_start_world()
+    {
+        PHYS::buildWorld(m_env, m_World);
+        m_vecGround = m_env.get_vecs();
+        m_car.beginSimulate(m_World.m_WorldId);
+    }
 
-void CGaBox2dDoc::OnEditEditarch()
-{
-	// TODO: chamar editor de chão aqui.
-	// CEditorChaoDlg dlg;
-	// if(dlg.DoModal() != IDOK)
-	// 	return;
-	
-	// m_car.Destroy();
-	// delete m_pWorld;
+    void CGaBox2dDoc::OnEditEditarch()
+    {
+        // TODO: chamar editor de chão aqui.
+        // CEditorChaoDlg dlg;
+        // if(dlg.DoModal() != IDOK)
+        // 	return;
 
-	// m_env = dlg.m_World;
+        // m_car.Destroy();
+        // delete m_pWorld;
 
-	_start_world();
+        // m_env = dlg.m_World;
 
-	// POSITION pos = GetFirstViewPosition();
-	// GetNextView(pos)->Invalidate();
-}
+        _start_world();
 
-void CGaBox2dDoc::BeginSimulation()
-{
-	m_car.beginSimulate(m_World.m_WorldId);
-}
+        // POSITION pos = GetFirstViewPosition();
+        // GetNextView(pos)->Invalidate();
+    }
 
-void CGaBox2dDoc::EndSimulation()
-{
-	CCar::endSimulate();
-}
+    void CGaBox2dDoc::BeginSimulation()
+    {
+        m_car.beginSimulate(m_World.m_WorldId);
+    }
 
-PointF	CGaBox2dDoc::GetCenter()
-{
-	auto [x, y] = m_car.getCenter();
-	return PointF(x, y);
-}
+    void CGaBox2dDoc::EndSimulation()
+    {
+        CCar::endSimulate();
+    }
 
+    PointF CGaBox2dDoc::GetCenter() const
+    {
+        auto [x, y] = m_car.getCenter();
+        return PointF(x, y);
+    }
+
+    void CGaBox2dDoc::Quit()
+    {
+        m_bQuit = true;
+    }
 }

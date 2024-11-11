@@ -19,6 +19,7 @@ private:
 	CCar m_car;
 
 public:
+	bool m_bQuit = false;
 
 	vec_car_t	m_populacao;
 
@@ -32,7 +33,10 @@ public:
 	void	BeginSimulation();
 
 	static void	EndSimulation();
-	PointF	GetCenter();
+	PointF	GetCenter() const;
+
+	void Quit();
+
 	CCar&	GetCar(){return m_car;}
 
 //	char *RandomCar(car_t& car);

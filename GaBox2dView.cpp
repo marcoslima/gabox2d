@@ -101,7 +101,7 @@ namespace GUI
 #endif
 
 
-    void CGaBox2dView::_draw_sky(sf::RenderWindow &window, CEnv env) const
+    void CGaBox2dView::_draw_sky(sf::RenderWindow &window, const CEnv &env)
     {
         // World na cor de céu
         // SolidBrush bshSky(Color(100,100,255));
@@ -775,6 +775,24 @@ namespace GUI
 #endif
 
 
-    void CGaBox2dView::OnKeyPressed(sf::Keyboard::Key key) {}
-    void CGaBox2dView::OnKeyReleased(sf::Keyboard::Key key) {}
+    void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key) const
+    {
+    }
+    void CGaBox2dView::OnKeyReleased(const sf::Keyboard::Key key) const
+    {
+        const auto pDoc = GetDocument();
+        switch(key)
+        {
+            case sf::Keyboard::R:
+            {
+                pDoc->OnNewDocument(pDoc->m_env);
+                break;
+            }
+            case sf::Keyboard::Q:
+            {
+                pDoc->Quit();
+                break;
+            }
+        }
+    }
 }

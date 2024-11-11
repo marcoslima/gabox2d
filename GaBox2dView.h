@@ -76,7 +76,7 @@ public:
 	virtual ~CGaBox2dView();
 
 public:
-	void _draw_sky(sf::RenderWindow &window, CEnv env) const;
+	static void _draw_sky(sf::RenderWindow &window, const CEnv &env);
 
 	static void _draw_ground(sf::RenderWindow &window, const CGaBox2dDoc *pDoc);
 
@@ -107,9 +107,9 @@ public:
 	void OnGaMudarpar();
 
 public:
-	static void OnKeyPressed(sf::Keyboard::Key key);
+	void OnKeyPressed(const sf::Keyboard::Key key) const;
 
-	static void OnKeyReleased(sf::Keyboard::Key key);
+	void OnKeyReleased(sf::Keyboard::Key key) const;
 };
 
 };//namespace GUI

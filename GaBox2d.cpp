@@ -2,22 +2,18 @@
 //
 
 #include "GaBox2d.h"
-//#include "GaBox2dDoc.h"
-//#include "GaBox2dView.h"
 #include "GaParamsDlg.h"
-#include "GaBox2d.h"
 #include "EditorChaoDlg.h"
 #include "GaBox2dView.h"
 #include <iostream>
-using namespace std;
-
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
+
+
+using namespace std;
 
 
 namespace GUI
@@ -25,9 +21,7 @@ namespace GUI
 // CGaBox2dApp
 // CGaBox2dApp construction
 
-CGaBox2dApp::CGaBox2dApp()
-{
-}
+CGaBox2dApp::CGaBox2dApp() = default;
 
 void DrawMenu(CGaParamsDlg& dlgParams,
               CEditorChaoDlg& dlgEditorChao)
@@ -94,8 +88,8 @@ void DrawMenu(CGaParamsDlg& dlgParams,
 
 int CGaBox2dApp::run()
 {
-    uint64_t screenWidth = 1920;
-    uint64_t screenHeight = 1080;
+    screenWidth = 1920;
+    screenHeight = 1080;
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "GaBox2d Reborned");
     window.setFramerateLimit(60);
     if(!ImGui::SFML::Init(window, true))
@@ -103,7 +97,7 @@ int CGaBox2dApp::run()
         std::cout << "Error initializing ImGui-SFML!" << std::endl;
         return 1;
     }
-    ImGuiIO& io = ImGui::GetIO();
+    // ImGuiIO& io = ImGui::GetIO();
 
     auto doc = CGaBox2dDoc();
     auto env = CEnv();
@@ -112,8 +106,8 @@ int CGaBox2dApp::run()
     view.SetDocument(&doc);
 
     sf::Clock deltaClock;
-    bool bMouseDown = false;
-    sf::Vector2i ptMouse, lastPtMouse;
+    // bool bMouseDown = false;
+    // sf::Vector2i ptMouse, lastPtMouse;
 	CGaParamsDlg dlgParams;
     CEditorChaoDlg dlgEditorChao;
 
@@ -135,6 +129,12 @@ int CGaBox2dApp::run()
                 view.OnKeyReleased(event.key.code);
             }
         }
+
+        if(doc.m_bQuit)
+        {
+            window.close();
+        }
+        doc.GetCar().doStep();
 
         ImGui::SFML::Update(window, deltaClock.restart());
 		ImGui::ShowDemoWindow();
@@ -161,9 +161,9 @@ int CGaBox2dApp::run()
 CGaBox2dApp theApp;
 
 
-};//namespace GUI
+}
 
-int main(int argc, char* argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	return GUI::theApp.run();
 }

@@ -145,9 +145,9 @@ namespace PHYS
         bool _simulation_step();
 
 
-        // Suporte � simula��o no Box2d
+        // Suporte à simulação no Box2d
     public:
-        b2Vec2 getCenter();
+        b2Vec2 getCenter() const;
 
         // Queries
         [[nodiscard]] b2BodyId getR1() const
@@ -189,4 +189,4 @@ namespace PHYS
         double m_vm;
         double m_t;
     };
-}; //namespace PHYS
+}

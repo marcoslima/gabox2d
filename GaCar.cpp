@@ -4,66 +4,71 @@
 
 namespace GA
 {
-    double d26[] =
+    float d26[] =
     {
-        1,
-        26,
-        676,
-        17576,
-        456976,
-        11881376,
-        308915776
+        1.0f,
+        26.0f,
+        676.0f,
+        17576.0f,
+        456976.0f,
+        11881376.0f,
+        308915776.0f
     };
 
-    int randInt(const int max)
+    template<typename T>
+    T rand(const T min, const T max)
     {
         static std::random_device rd;
         static std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, max);
+        std::uniform_int_distribution dis(min, max);
         return dis(gen);
+    }
+
+    int randInt(const int max)
+    {
+        return rand<int>(0, max);
     }
 
     char randChar(const char min, const char max)
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::uniform_int_distribution<char> dis(min, max);
-        return dis(gen);
+        return rand<char>(min, max);
     }
 
-    double map_values(const double in_min,
-                      const double in_max,
-                      const double out_min,
-                      const double out_max,
-                      const double val)
+    float map_values(const float in_min,
+                      const float in_max,
+                      const float out_min,
+                      const float out_max,
+                      const float val)
     {
-        const double inDelta = in_max - in_min;
-        const double outDelta = out_max - out_min;
+        const float inDelta = in_max - in_min;
+        const float outDelta = out_max - out_min;
 
         return out_min + (val - in_min) * outDelta / inDelta;
     }
 
-    double DecodeGen(const int nLen, const char *genes, const double nMin, const double nMax, size_t &nPos)
+    float DecodeGen(const int nLen, const char *genes, const float nMin, const float nMax, size_t &nPos)
     {
-        double dVal = 0;
+        float dVal = 0;
         for (int i = 0; i < nLen; i++)
         {
-            char ch = *(genes + (nPos++));
-            ch -= 'A';
-            dVal += ch * d26[i];
-            //dVal += (*(genes+(nPos++)) - 'A') * d26[i];
+            // dVal += (*(genes+(nPos++)) - 'A') * d26[i]; // Linha original
+            const char* addr = genes + nPos++;
+            const char ch = *addr;
+            constexpr char A = 'A';
+            const float mul = static_cast<float>(ch) - A;
+            dVal += mul * d26[i];
         }
 
 
-        //	1 d�gito: A - Z ou 0 � 25, ou seja, d26[1]-1
-        //	2 d�gitos: M�ximo: ZZ que � 25*26 + 25 = 675, ou seja, d26[2]-1
+        //	1 dígito: A - Z ou 0 � 25, ou seja, d26[1]-1
+        //	2 dígitos: Máximo: ZZ que é 25*26 + 25 = 675, ou seja, d26[2]-1
 
-        return (double) map_values(0, d26[nLen] - 1, nMin, nMax, dVal);
+        return map_values(0, d26[nLen] - 1, nMin, nMax, dVal);
     }
 
     CCarDef::CRoda DecodeRoda(const char *genes, size_t &nPos)
     {
-        const int nLen = 4;
+        constexpr int nLen = 4;
         return {
             DecodeGen(nLen, genes, -8, 8, nPos),
             DecodeGen(nLen, genes, 2, 8, nPos),
@@ -83,7 +88,7 @@ namespace GA
         : _genes(szGenes)
           , _pontos(0) {}
 
-    CGaCar::~CGaCar(void) = default;
+    CGaCar::~CGaCar() = default;
 
     void CGaCar::_generate_random_genes()
     {
@@ -154,4 +159,4 @@ namespace GA
             other.setGene(i, tmp);
         }
     }
-}; // namespace GA
+}

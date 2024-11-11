@@ -69,6 +69,7 @@ namespace PHYS
     void buildWorld(const MODEL::CEnv& env, CWorld& world)
     {
         world.m_WorldId = _create_world();
-        _create_ground(world, env);
+        // TODO: O ground é quem está causando o assert do enlarged node.
+        // _create_ground(world, env);
     }
 }

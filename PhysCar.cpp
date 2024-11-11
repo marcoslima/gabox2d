@@ -21,18 +21,17 @@ namespace PHYS
     b2_def_t TranslateRoda(const CCarDef::CRoda &roda)
     {
         b2_def_t ret;
+        ret.bd = b2DefaultBodyDef();
         ret.bd.position = b2Vec2(roda.c.x, roda.c.y);
+        ret.bd.type = b2_dynamicBody;
         ret.sd.radius = roda.c.raio;
-        // ret.sd.density = roda.b.densidade;
-        // ret.sd.friction = roda.b.friccao;
-        // ret.sd.restitution = roda.b.elasticidade;
 
         return ret;
     }
     b2BodyId CreateRoda(const b2WorldId WorldId,
                         const car_t& car_def,
                         const CCarDef::CRoda &roda,
-                        int IdBody)
+                        void* IdBody)
     {
         const b2BodyId RodaId = b2CreateBody(WorldId, &car_def.R1.bd);
         b2ShapeDef shape_def = b2DefaultShapeDef();
@@ -40,7 +39,7 @@ namespace PHYS
         shape_def.density = roda.b.densidade;
         shape_def.restitution = roda.b.elasticidade;
         b2CreateCircleShape(RodaId, &shape_def, &car_def.R1.sd);
-        b2Body_SetUserData(RodaId, &IdBody);
+        b2Body_SetUserData(RodaId, IdBody);
 
         return RodaId;
     }
@@ -61,11 +60,11 @@ namespace PHYS
 
     void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro) {
         //////////////////////////////////////////////
-        // Cria��o dos objetos:
-        m_Roda1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda1, ID_RODA1);
-        m_Roda2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda2, ID_RODA2);
-        m_Peso1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso1, ID_PESO1);
-        m_Peso2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso2, ID_PESO2);
+        // Criação dos objetos:
+        m_Roda1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda1, &ID_RODA1);
+        m_Roda2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._roda2, &ID_RODA2);
+        m_Peso1Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso1, &ID_PESO1);
+        m_Peso2Id = CreateRoda(m_World.m_WorldId, _car_def, carro._peso2, &ID_PESO2);
     }
 
     void CPhysCar::_set_torques() {
@@ -160,7 +159,7 @@ namespace PHYS
 #endif
 
 
-    // Executa um passo da simula��o e retorna false se o carro morreu.
+    // Executa um passo da simulação e retorna false se o carro morreu.
     bool CPhysCar::_simulation_step()
     {
         _bInStep = true;
@@ -304,7 +303,7 @@ namespace PHYS
     }
 
 
-    b2Vec2 CPhysCar::getCenter()
+    b2Vec2 CPhysCar::getCenter() const
     {
         b2Vec2 pos[5];
         float massa[4];
@@ -352,6 +351,9 @@ namespace PHYS
             return;
 
         _verificar_step();
+
+        if(!b2Body_IsValid(m_Roda1Id))
+            return;
 
         // Consideraremos que todos os corpos existem se um deles existir
         b2DestroyBody(m_Roda1Id);

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace GUI
 {
@@ -8,10 +9,13 @@ namespace GUI
 
 class CGaBox2dApp
 {
+	uint64_t screenWidth = 1920;
+	uint64_t screenHeight = 1080;
+
 public:
 	CGaBox2dApp();
 
-	static int run();
+	int run();
 };
 
 extern CGaBox2dApp theApp;

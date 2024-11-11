@@ -17,7 +17,7 @@ void CCar::beginSimulate(const b2WorldId WorldId)
     // Instanciamento
     _create(WorldId, _carro);
 
-    // Inicializamos a simula��o f�sica:
+    // Inicializamos a simulação física:
     _phys_begin_simulate();
 }
 
@@ -88,7 +88,7 @@ void CCar::Phys2Gr()
     _broke = m_bDead;
 }
 
-void CCar::Medir(b2WorldId WorldId, const double max_t)
+void CCar::Medir(const b2WorldId WorldId, const double max_t)
 {
     beginSimulate(WorldId);
     const float x0 = getCenter().x;
