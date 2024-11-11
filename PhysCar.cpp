@@ -170,7 +170,8 @@ namespace PHYS
         // _cl.m_bContactR1 = false;
         // _cl.m_bContactR2 = false;
 
-        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
+        // b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
+        b2World_Step(m_World.m_WorldId, _timeStep, 8);
 
 #if 0 // TODO: Converter o contactlistener
           // Est� vivo ainda?

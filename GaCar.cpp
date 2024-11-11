@@ -137,11 +137,11 @@ namespace GA
         for (int i = 0; i < 6; i++)
         {
             constexpr int nLen = 4;
-            constexpr double dMaxDamp = 2.0;
-            constexpr double dMinDamp = 0.0;
-            constexpr double dMaxFreq = 30.0;
-            constexpr double dMinFreq = 0.1;
-            constexpr double dFp = 50;
+            constexpr float dMaxDamp = 2.0f;
+            constexpr float dMinDamp = 0.0f;
+            constexpr float dMaxFreq = 30.0f;
+            constexpr float dMinFreq = 0.1f;
+            constexpr float dFp = 50.0f;
             if (i < 4) _carro._torque[i] = DecodeGen(nLen, _genes.c_str(), -dFp, dFp, nPos);
             _carro._freq[i] = DecodeGen(nLen, _genes.c_str(), dMinFreq, dMaxFreq, nPos);
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
