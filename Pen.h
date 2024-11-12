@@ -8,7 +8,6 @@
 #include <SFML/Graphics.hpp>
 
 class CPen {
-private:
     sf::Color m_color;
     float m_width;
 
@@ -19,6 +18,7 @@ public:
     void setColor(const sf::Color color) { m_color = color; }
     void setWidth(const float width) { m_width = width; }
     [[nodiscard]] sf::Color getColor() const { return m_color; }
+    [[nodiscard]] float getWidth() const { return m_width; }
 
     void apply(sf::Shape& shape) const {
         shape.setOutlineColor(m_color);
