@@ -26,9 +26,6 @@ public:
 	// Draw
 	void Draw(sf::RenderWindow& window) const;
 
-	// Draw offline (carro n�o criado, apenas com os def's)
-	void DrawOffline(Graphics *pGr);
-public:
 	using circle_t = struct tagCircle
 	{
 		PointF	c;
@@ -57,6 +54,6 @@ public:
 	bool	_broke	= {};
 };
 
-};//namespace GUI
+}
 
 #endif //__GRCAR_H__

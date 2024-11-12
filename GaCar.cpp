@@ -126,6 +126,7 @@ namespace GA
 
     void CGaCar::_decode()
     {
+#if 0
         size_t nPos = 0;
 
         // Obtemos os body's e shape's def's dos genes:
@@ -146,6 +147,21 @@ namespace GA
             _carro._freq[i] = DecodeGen(nLen, _genes.c_str(), dMinFreq, dMaxFreq, nPos);
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
         }
+#else
+        _carro._roda1 = CCarDef::CRoda(-5, 1, 1, 0.1, 0.1, 0);
+        _carro._roda2 = CCarDef::CRoda(0, 1, 1, 0.1, 0.1, 0);
+        _carro._peso1 = CCarDef::CRoda(-5, 3, 1, 0.1, 0.1, 0);
+        _carro._peso2 = CCarDef::CRoda(0, 3, 1, 0.1, 0.1, 0);
+        for(float & torque : _carro._torque)
+        {
+            torque = 0.1;
+        }
+        for(int i = 0; i < 6; i++)
+        {
+            _carro._damp[i] = 0.1;
+            _carro._freq[i] = 0.1;
+        }
+#endif
     }
 
     void CGaCar::Crossover(CGaCar &other)
