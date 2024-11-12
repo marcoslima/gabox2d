@@ -55,7 +55,7 @@ namespace GUI
 
     void CGaBox2dDoc::_start_world()
     {
-        PHYS::buildWorld(m_env, m_World);
+        buildWorld(m_env, m_World);
         m_vecGround = m_env.get_vecs();
         m_car.beginSimulate(m_World.m_WorldId);
     }

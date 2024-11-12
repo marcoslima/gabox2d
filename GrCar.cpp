@@ -14,16 +14,16 @@ namespace GUI
     CGrCar::~CGrCar() = default;
 
     void DrawTickLine(sf::RenderWindow &window,
-                  const sf::Vector2f p1,
-                  const sf::Vector2f p2,
-                  const CPen &pen)
+                      const sf::Vector2f p1,
+                      const sf::Vector2f p2,
+                      const CPen &pen)
     {
         const auto line_length = static_cast<float>(sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2)));
         const auto angle = static_cast<float>(atan2(p2.y - p1.y, p2.x - p1.x));
         sf::RectangleShape line(sf::Vector2f(line_length, pen.getWidth()));
-        line.setOrigin(line_length/2.0f, pen.getWidth()/2.0f);
-        line.setPosition((p1+p2)/2.0f);
-        line.rotate(angle*180.0f/static_cast<float>(M_PI));
+        line.setOrigin(line_length / 2.0f, pen.getWidth() / 2.0f);
+        line.setPosition((p1 + p2) / 2.0f);
+        line.rotate(angle * 180.0f / static_cast<float>(M_PI));
         CPen(sf::Color::Transparent, 0).apply(line);
         CSolidBrush(pen.getColor()).apply(line);
         pen.apply(line);
@@ -36,7 +36,7 @@ namespace GUI
                   const sf::Color color)
     {
         // Draw a line from p1 to p2 with color
-        sf::Vertex line[] = {
+        const sf::Vertex line[] = {
             sf::Vertex(p1, color),
             sf::Vertex(p2, color)
         };
@@ -49,14 +49,8 @@ namespace GUI
                   const CPen &pen,
                   const CSolidBrush &brush)
     {
-        //	RectF rcBall(c.c.X-c.r,c.c.Y-c.r,2*c.r,2*c.r);
-        //	pGr->FillEllipse(pBrush,rcBall);
-        //	pGr->DrawEllipse(pPen,rcBall);
-        //
-        //	if(angle < 2*M_PI)
-        //		pGr->DrawLine(pPen,c.c,PointF(c.c.X + c.r * cos(angle), c.c.Y + c.r * sin(angle)));
         sf::CircleShape circle_shape(c.r);
-        circle_shape.setPosition(c.c.x-c.r, c.c.y-c.r);
+        circle_shape.setPosition(c.c.x - c.r, c.c.y - c.r);
         pen.apply(circle_shape);
         brush.apply(circle_shape);
         window.draw(circle_shape);
@@ -109,20 +103,20 @@ namespace GUI
         CSolidBrush bshCm(sf::Color::Transparent);
 
         DrawLine(window,
-                 PointF(_cm.x - 0.5, _cm.y - 0.5),
-                 PointF(_cm.x + 0.5, _cm.y + 0.5), crCm);
+                 PointF(_cm.x - 0.5f, _cm.y - 0.5f),
+                 PointF(_cm.x + 0.5f, _cm.y + 0.5f), crCm);
         DrawLine(window,
-                 PointF(_cm.x - 0.5, _cm.y + 0.5),
-                 PointF(_cm.x + 0.5, _cm.y - 0.5), crCm);
+                 PointF(_cm.x - 0.5f, _cm.y + 0.5f),
+                 PointF(_cm.x + 0.5f, _cm.y - 0.5f), crCm);
 
-        sf::CircleShape shapeCm(0.5);
-        shapeCm.setPosition(_cm.x-.5, _cm.y-.5);
+        sf::CircleShape shapeCm(0.5f);
+        shapeCm.setPosition(_cm.x - .5f, _cm.y - .5f);
         penCm.apply(shapeCm);
         bshCm.apply(shapeCm);
         window.draw(shapeCm);
 
         shapeCm.setRadius(0.8f);
-        shapeCm.setPosition(_cm.x-.8, _cm.y-.8);
+        shapeCm.setPosition(_cm.x - .8f, _cm.y - .8f);
         window.draw(shapeCm);
     }
-}; //namespace GUI
+}

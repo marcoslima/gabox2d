@@ -27,6 +27,16 @@ private:
 	bool			m_bShowInfoGaGenes;
 	bool			m_bWaitingEvolucao;
 
+	// UI:
+	float m_ZoomFactor = 1.0f;
+	bool m_bZoomIn = false;
+	bool m_bZoomOut = false;
+	sf::Vector2f m_view_pos = {0.0f, 0.0f};
+	bool m_bMoveLeft = false;
+	bool m_bMoveRight = false;
+	bool m_bMoveUp = false;
+	bool m_bMoveDown = false;
+
 	CGaBox2dDoc* _pDocument;
 
 public:
@@ -45,7 +55,7 @@ public:
 
 	static void _draw_border(sf::RenderWindow & window, const MODEL::CEnv & env);
 
-	void Draw(sf::RenderWindow& window) const;
+	void Draw(sf::RenderWindow& window);
 
 	static void OnSimulaPlay();
 
@@ -70,8 +80,8 @@ public:
 	void OnInformaEvolu();
 	void OnGaMudarpar();
 
-	void OnKeyPressed(sf::Keyboard::Key key) const;
-	void OnKeyReleased(sf::Keyboard::Key key) const;
+	void OnKeyPressed(sf::Keyboard::Key key);
+	void OnKeyReleased(sf::Keyboard::Key key);
 };
 
 }

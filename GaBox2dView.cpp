@@ -105,14 +105,22 @@ namespace GUI
         window.draw(border);
     }
 
-    void CGaBox2dView::Draw(sf::RenderWindow &window) const
+    void CGaBox2dView::Draw(sf::RenderWindow &window)
     {
         CGaBox2dDoc *pDoc = GetDocument();
         const CEnv env = pDoc->m_env;
+        constexpr float move_step = 1.0f;
+        constexpr float zoom_step = 1.01f;
+        if(m_bZoomOut)   m_ZoomFactor = min(m_ZoomFactor * zoom_step, 8.0f);
+        if(m_bZoomIn)  m_ZoomFactor = max(m_ZoomFactor / zoom_step, 0.125f);
+        if(m_bMoveLeft) m_view_pos.x -= move_step*m_ZoomFactor;
+        if(m_bMoveRight) m_view_pos.x += move_step*m_ZoomFactor;
+        if(m_bMoveUp)   m_view_pos.y += move_step*m_ZoomFactor;
+        if(m_bMoveDown) m_view_pos.y -= move_step*m_ZoomFactor;
 
         // Zoom to fit
-        sf::View view(sf::Vector2f(10.0f, 20.0f),
-                      sf::Vector2f(100, -70));
+        sf::View view(sf::Vector2f(10.0f+m_view_pos.x, 20.0f+m_view_pos.y),
+                      sf::Vector2f(100*m_ZoomFactor, -70*m_ZoomFactor));
         view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
         window.setView(view);
 
@@ -624,24 +632,63 @@ namespace GUI
 #endif
 
 
-    void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key) const
-    {
-    }
-    void CGaBox2dView::OnKeyReleased(const sf::Keyboard::Key key) const
+    void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key)
     {
         const auto pDoc = GetDocument();
-        switch(key)
+        switch (key)
+        {
+            case sf::Keyboard::Add:
+                m_bZoomIn = true;
+                break;
+            case sf::Keyboard::Subtract:
+                m_bZoomOut = true;
+                break;
+            case sf::Keyboard::Left:
+                m_bMoveLeft = true;
+                break;
+            case sf::Keyboard::Right:
+                m_bMoveRight = true;
+                break;
+            case sf::Keyboard::Up:
+                m_bMoveUp = true;
+                break;
+            case sf::Keyboard::Down:
+                m_bMoveDown = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    void CGaBox2dView::OnKeyReleased(const sf::Keyboard::Key key)
+    {
+        const auto pDoc = GetDocument();
+        switch (key)
         {
             case sf::Keyboard::R:
-            {
                 OnSimulaReset();
                 break;
-            }
             case sf::Keyboard::Q:
-            {
                 pDoc->Quit();
                 break;
-            }
+            case sf::Keyboard::Add:
+                m_bZoomIn = false;
+                break;
+            case sf::Keyboard::Subtract:
+                m_bZoomOut = false;
+                break;
+            case sf::Keyboard::Left:
+                m_bMoveLeft = false;
+            break;
+            case sf::Keyboard::Right:
+                m_bMoveRight = false;
+            break;
+            case sf::Keyboard::Up:
+                m_bMoveUp = false;
+            break;
+            case sf::Keyboard::Down:
+                m_bMoveDown = false;
+            break;
             default:
                 break;
         }

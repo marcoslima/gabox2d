@@ -1,4 +1,5 @@
 #include "env.h"
+#include <ranges>
 #include <sstream>
 #include <cmath>
 #include <iostream>
@@ -92,33 +93,36 @@ namespace MODEL
     {
         CNormalSeededRandom randNorm(_seed);
 
-        vec_vecs_t GroundPoly;
+        vec_vecs_t cwvecs, ccwvecs;
 
-        GroundPoly.clear();
+        cwvecs.clear();
 
-        GroundPoly.emplace_back(_brx, _bry);
-        GroundPoly.emplace_back(_tlx, _bry);
+        cwvecs.emplace_back(_brx, _bry);
+        cwvecs.emplace_back(_tlx, _bry);
 
-        GroundPoly.emplace_back(_tlx, 1);
-        GroundPoly.emplace_back(4, 1);
+        cwvecs.emplace_back(_tlx, 1);
+        cwvecs.emplace_back(4, 1);
 
         float ldy = 0;
         float lm = 0;
         float x = 10.0f;
+    	float y;
         while (x < _brx)
         {
             const float dx = randNorm.random(_dxm, _dxs) + _dxo;
             const float m = randNorm.random(_dym, _dys) + _dyo;
             const float dy = ldy + (dx * (lm + m));
-            const float y = dy + _a * sin(_omega * x + _phi);
+            y = dy + _a * sin(_omega * x + _phi);
 
-            GroundPoly.emplace_back(x, y);
+            cwvecs.emplace_back(x, y);
 
             x += fabs(dx);
             ldy = dy;
             lm = m;
         }
+    	cwvecs.emplace_back(_brx, y);
 
-        return GroundPoly;
+    	return cwvecs;
+
     }
-}; //namespace MODEL
+}

@@ -1,6 +1,4 @@
 #include "phys.h"
-
-#include <memory>
 #include <box2d/box2d.h>
 #include <box2d/types.h>
 
@@ -49,11 +47,18 @@ namespace PHYS
     void _create_ground_body(CWorld& world, const MODEL::CEnv& env)
     {
         const auto vecVertices= _get_b2vecs_from_ground(env);
-        const auto chainDef = _create_chain_def(vecVertices);
+        auto groundDef = b2DefaultBodyDef();
+        groundDef.type = b2_staticBody;
+        world.m_GroundId = b2CreateBody(world.m_WorldId, &groundDef);
 
-        const b2BodyDef bodyDef = b2DefaultBodyDef();
-        world.m_GroundId = b2CreateBody( world.m_WorldId, &bodyDef );
-        world.m_ChainId = b2CreateChain( world.m_GroundId, &chainDef );
+        for(int i = 0; i < vecVertices.size()-1; i++)
+        {
+            auto shapeDef = b2DefaultShapeDef();
+            shapeDef.friction = 1.0f;
+            shapeDef.restitution = 0.0f;
+            b2Segment segment{vecVertices[i], vecVertices[i+1]};
+            b2CreateSegmentShape(world.m_GroundId, &shapeDef, &segment);
+        }
     }
 
     void _create_ground(CWorld& world, const MODEL::CEnv& env)
@@ -69,7 +74,6 @@ namespace PHYS
     void buildWorld(const MODEL::CEnv& env, CWorld& world)
     {
         world.m_WorldId = _create_world();
-        // TODO: O ground é quem está causando o assert do enlarged node.
-        // _create_ground(world, env);
+        _create_ground(world, env);
     }
 }
