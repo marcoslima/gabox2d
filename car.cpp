@@ -63,8 +63,8 @@ void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
     auto [posCircle, radius] = b2Shape_GetCircle(shapes[0]);
     // cout << "Translating circle: " << posCircle.x << " " << posCircle.y << " " << radius << endl;
     const auto [x, y] = posRoda + posCircle;
-    grCircle.c = PointF(x, y);
-    grCircle.r = radius;
+    grCircle.center = PointF(x, y);
+    grCircle.radius = radius;
 }
 
 void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::gr_roda_t &grRoda, const bool bContact)
@@ -78,7 +78,7 @@ void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::gr_roda_t &grRoda, const 
 
 void TranslatePeso(const b2BodyId PesoId, GUI::CGrCar::gr_peso_t &grPeso, const bool bBroke)
 {
-    TranslateCircle(PesoId, grPeso.c);
+    TranslateCircle(PesoId, grPeso.circle);
     grPeso.broke = bBroke;
 }
 

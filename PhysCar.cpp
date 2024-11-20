@@ -26,7 +26,7 @@ namespace PHYS
         ret.b2_body_def.position = b2Vec2(roda.circle.x, roda.circle.y);
         ret.b2_body_def.type = b2_dynamicBody;
         ret.b2_circle.radius = roda.circle.raio;
-        ret.b2_circle.center = b2Vec2(roda.circle.x, roda.circle.y);
+        ret.b2_circle.center = b2Vec2(0, 0);
 
         return ret;
     }
@@ -59,8 +59,7 @@ namespace PHYS
         shape_def.friction = roda.body.friccao;
         shape_def.density = roda.body.densidade;
         shape_def.restitution = roda.body.elasticidade;
-        // cout << "Radius: " << car_def.sd.radius << endl;
-        cout << "X: " << car_def.b2_body_def.position.x << " Y: " << car_def.b2_body_def.position.y << endl;
+
         b2CreateCircleShape(RodaId, &shape_def, &car_def.b2_circle);
         b2Body_SetUserData(RodaId, IdBody);
 
@@ -95,19 +94,21 @@ namespace PHYS
         b2DistanceJointDef jd;
         const b2Vec2 positionA = b2Body_GetPosition(bodyA);
         const b2Vec2 positionB = b2Body_GetPosition(bodyB);
-        const b2Vec2 anchorA = b2Body_GetLocalVector(bodyA, positionA);
-        const b2Vec2 anchorB = b2Body_GetLocalVector(bodyB, positionB);
 
         jd = b2DefaultDistanceJointDef();
         jd.bodyIdA = bodyA;
         jd.bodyIdB = bodyB;
-        jd.localAnchorA = anchorA;
-        jd.localAnchorB = anchorB;
+        jd.localAnchorA = b2Vec2(0, 0);//anchorA;
+        jd.localAnchorB = b2Vec2(0, 0);//anchorB;
         jd.collideConnected = false;
         jd.hertz = car_def.freq[param_index];
         jd.dampingRatio = car_def.damp[param_index];
         jd.enableLimit = true;
-        jd.length = b2Distance(anchorA, anchorB);
+        jd.length = b2Distance(positionA, positionB);
+        jd.enableMotor = false;
+        jd.enableSpring = false;
+        jd.maxLength = jd.length * 1.1f;
+        jd.minLength = jd.length * 0.9f;
         return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
     }
 

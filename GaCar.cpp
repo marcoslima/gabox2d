@@ -148,17 +148,19 @@ namespace GA
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
         }
 #else
+        constexpr float ry = 7.0f;
+        constexpr float py = 10.0f;
         constexpr float r1x = 5.0f;
-        constexpr float r1y = 7.0f;
+        constexpr float r1y = ry;
         constexpr float r1r = 2.0f;
         constexpr float r2x = 13.0f;
-        constexpr float r2y = 7.0f;
+        constexpr float r2y = ry;
         constexpr float r2r = 0.5f;
         constexpr float p1x = 7.0f;
-        constexpr float p1y = 10.0f;
+        constexpr float p1y = py;
         constexpr float p1r = 1.0f;
         constexpr float p2x = 11.0f;
-        constexpr float p2y = 10.0f;
+        constexpr float p2y = py;
         constexpr float p2r = 1.0f;
         constexpr float dens = 1.0;
         constexpr float fric = 1.0;
