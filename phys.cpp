@@ -14,6 +14,7 @@ namespace PHYS
     {
         // ReSharper disable once CppUseStructuredBinding
         b2WorldDef worldDef = b2DefaultWorldDef();
+        worldDef.workerCount = 8;
 
         worldDef.gravity = {0.0f, -10.0f};
         return b2CreateWorld(&worldDef);

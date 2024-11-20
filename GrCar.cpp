@@ -20,14 +20,16 @@ namespace GUI
                       const CPen &pen)
     {
         const auto line_length = static_cast<float>(sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2)));
+        const auto line_height = pen.getWidth();
         const auto angle = static_cast<float>(atan2(p2.y - p1.y, p2.x - p1.x));
-        sf::RectangleShape line(sf::Vector2f(line_length, pen.getWidth()));
-        line.setOrigin(line_length / 2.0f, pen.getWidth() / 2.0f);
+
+        sf::RectangleShape line(sf::Vector2f(line_length, line_height));
+        line.setOutlineColor(sf::Color::Transparent);
+        line.setOutlineThickness(0);
+        CSolidBrush(pen.getColor()).apply(line);
+        line.setOrigin(line_length / 2.0f, line_height / 2.0f);
         line.setPosition((p1 + p2) / 2.0f);
         line.rotate(angle * 180.0f / static_cast<float>(M_PI));
-        CPen(sf::Color::Transparent, 0).apply(line);
-        CSolidBrush(pen.getColor()).apply(line);
-        pen.apply(line);
         window.draw(line);
     }
 
@@ -46,15 +48,21 @@ namespace GUI
 
     void DrawRoda(sf::RenderWindow &window,
                   const CGrCar::gr_circle_t &c,
-                  float angle,
+                  const float angle,
                   const CPen &pen,
                   const CSolidBrush &brush)
     {
         sf::CircleShape circle_shape(c.radius);
-        circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo?
+        circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo.
         pen.apply(circle_shape);
         brush.apply(circle_shape);
         window.draw(circle_shape);
+
+
+        DrawTickLine(window,
+            c.center, c.center + sf::Vector2f(c.radius * cos(angle),
+                c.radius * sin(angle)),
+                pen);
     }
 
     void CGrCar::Draw(sf::RenderWindow &window) const
@@ -85,7 +93,7 @@ namespace GUI
         DrawRoda(window, _peso2.circle, 3 * M_PI, penPeso, bshNull);
 
         // Joints:
-        const CPen penJoint(sf::Color(150, 150, 150), 0.05f);
+        const CPen penJoint(sf::Color(150, 150, 150), 0.2f);
 
         if (!_broke)
         {

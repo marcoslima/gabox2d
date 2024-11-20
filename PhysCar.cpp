@@ -1,6 +1,4 @@
 #include "PhysCar.h"
-
-#include <iostream>
 #include <numeric>
 
 
@@ -105,8 +103,9 @@ namespace PHYS
         jd.dampingRatio = car_def.damp[param_index];
         jd.enableLimit = true;
         jd.length = b2Distance(positionA, positionB);
-        jd.enableMotor = false;
-        jd.enableSpring = false;
+        jd.enableMotor = true;
+        jd.motorSpeed = -100;
+        jd.enableSpring = true;
         jd.maxLength = jd.length * 1.1f;
         jd.minLength = jd.length * 0.9f;
         return b2CreateDistanceJoint(m_World.m_WorldId, &jd);

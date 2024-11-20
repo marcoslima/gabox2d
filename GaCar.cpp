@@ -164,7 +164,7 @@ namespace GA
         constexpr float p2r = 1.0f;
         constexpr float dens = 1.0;
         constexpr float fric = 1.0;
-        constexpr float elas = 0.1;
+        constexpr float elas = 0.7;
 
         _carro._roda1 = CCarDef::CRodaParams(r1x, r1y, r1r, dens, fric, elas);
         _carro._roda2 = CCarDef::CRodaParams(r2x, r2y, r2r, dens, fric, elas);
@@ -172,13 +172,13 @@ namespace GA
         _carro._peso2 = CCarDef::CRodaParams(p2x, p2y, p2r, dens, fric, elas);
         for(float & torque : _carro._torque)
         {
-            constexpr float torque_amount = -10.0;
+            constexpr float torque_amount = 10.0;
             torque = torque_amount;
         }
         for(int i = 0; i < 6; i++)
         {
-            constexpr float damp = 1.0f;
-            constexpr float freq = 1.0f;
+            constexpr float damp = 0.0f;
+            constexpr float freq = 1.5f;
             _carro._damp[i] = damp;
             _carro._freq[i] = freq;
         }
