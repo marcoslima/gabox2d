@@ -45,13 +45,13 @@ namespace GUI
     }
 
     void DrawRoda(sf::RenderWindow &window,
-                  const CGrCar::circle_t &c,
+                  const CGrCar::gr_circle_t &c,
                   float angle,
                   const CPen &pen,
                   const CSolidBrush &brush)
     {
-        sf::CircleShape circle_shape(c.r);
-        circle_shape.setPosition(c.c.x - c.r, c.c.y - c.r); // Position é canto superior esquerdo?
+        sf::CircleShape circle_shape(c.radius);
+        circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo?
         pen.apply(circle_shape);
         brush.apply(circle_shape);
         window.draw(circle_shape);
@@ -69,32 +69,32 @@ namespace GUI
         // Roda 1
         const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
         const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
-        DrawRoda(window, _roda1.c, _roda1.angle, *pPen, *pBsh);
+        DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
 
         // Roda 2
         pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
         pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
-        DrawRoda(window, _roda2.c, _roda2.angle, *pPen, *pBsh);
+        DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
 
         // Pesos 1 e 2
         const CSolidBrush bshNull(sf::Color(0, 0, 0, 0));
         const CPen penPeso(sf::Color(255, 0, 0), 0.2);
         // penPeso.SetDashStyle(DashStyleDot);
 
-        DrawRoda(window, _peso1.c, 3 * M_PI, penPeso, bshNull);
-        DrawRoda(window, _peso2.c, 3 * M_PI, penPeso, bshNull);
+        DrawRoda(window, _peso1.circle, 3 * M_PI, penPeso, bshNull);
+        DrawRoda(window, _peso2.circle, 3 * M_PI, penPeso, bshNull);
 
         // Joints:
         const CPen penJoint(sf::Color(150, 150, 150), 0.05f);
 
         if (!_broke)
         {
-            DrawTickLine(window, _peso1.c.c, _peso2.c.c, penJoint);
-            DrawTickLine(window, _roda1.c.c, _peso2.c.c, penJoint);
-            DrawTickLine(window, _roda2.c.c, _peso1.c.c, penJoint);
-            DrawTickLine(window, _roda1.c.c, _roda2.c.c, penJoint);
-            DrawTickLine(window, _roda1.c.c, _peso1.c.c, penJoint);
-            DrawTickLine(window, _roda2.c.c, _peso2.c.c, penJoint);
+            DrawTickLine(window, _peso1.circle.center, _peso2.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _peso2.circle.center, penJoint);
+            DrawTickLine(window, _roda2.circle.center, _peso1.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _roda2.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _peso1.circle.center, penJoint);
+            DrawTickLine(window, _roda2.circle.center, _peso2.circle.center, penJoint);
         }
 
 

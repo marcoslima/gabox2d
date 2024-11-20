@@ -26,30 +26,30 @@ public:
 	// Draw
 	void Draw(sf::RenderWindow& window) const;
 
-	using circle_t = struct tagCircle
+	using gr_circle_t = struct tagCircle
 	{
-		PointF	c;
-		float	r{};
+		PointF	center;
+		float	radius{};
 	};
 
-	using roda_t = struct tagRoda
+	using gr_roda_t = struct tagRoda
 	{
-		circle_t	c		;
+		gr_circle_t	circle		;
 		bool		touch{}	;
 		float		angle{}	;
 
 	};
 
-	using peso_t = struct tagPeso
+	using gr_peso_t = struct tagPeso
 	{
-		circle_t	c		;
+		gr_circle_t	circle		;
 		bool		broke{}	;
 	};
 
-	roda_t	_roda1	= {};
-	roda_t	_roda2	= {};
-	peso_t	_peso1	= {};
-	peso_t	_peso2	= {};
+	gr_roda_t	_roda1	= {};
+	gr_roda_t	_roda2	= {};
+	gr_peso_t	_peso1	= {};
+	gr_peso_t	_peso2	= {};
 	PointF	_cm		= {};
 	bool	_broke	= {};
 };
