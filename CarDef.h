@@ -5,7 +5,7 @@ namespace MODEL
 class CCarDef
 {
 public:
-	class CCircle
+	class CCircleParams
 	{
 	public:
 		float x;
@@ -13,7 +13,7 @@ public:
 		float raio;
 	};
 
-	class CBody
+	class CBodyParams
 	{
 	public:
 		float densidade;
@@ -21,21 +21,20 @@ public:
 		float elasticidade;
 	};
 
-	class CRoda
+	class CRodaParams
 	{
 	public:
-		CCircle c;
-		CBody	b;
-	public:
-		CRoda();
-		CRoda(float x, float y, float r, float dens, float fric, float elas);
+		CCircleParams circle;
+		CBodyParams	body;
+
+		CRodaParams();
+		CRodaParams(float x, float y, float r, float dens, float fric, float elas);
 	};
 
-public:
-	CRoda	_roda1		;
-	CRoda	_roda2		;
-	CRoda	_peso1		;
-	CRoda	_peso2		;
+	CRodaParams	_roda1		;
+	CRodaParams	_roda2		;
+	CRodaParams	_peso1		;
+	CRodaParams	_peso2		;
 	float	_torque[4]	;
 	float	_freq  [6]	;
 	float	_damp  [6]	;
@@ -45,4 +44,4 @@ public:
 	~CCarDef();
 };
 
-};//namespace MODEL
+}

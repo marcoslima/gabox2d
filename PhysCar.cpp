@@ -1,6 +1,7 @@
 #include "PhysCar.h"
 
 #include <iostream>
+#include <numeric>
 
 
 namespace PHYS
@@ -18,41 +19,44 @@ namespace PHYS
 
     CPhysCar::~CPhysCar() = default;
 
-    b2_def_t TranslateRoda(const CCarDef::CRoda &roda)
+    b2_roda_ou_peso_def TranslateRoda(const CCarDef::CRodaParams &roda)
     {
-        b2_def_t ret;
-        ret.bd = b2DefaultBodyDef();
-        ret.bd.position = b2Vec2(roda.c.x, roda.c.y);
-        ret.bd.type = b2_dynamicBody;
-        ret.sd.radius = roda.c.raio;
-        ret.sd.center = b2Vec2(roda.c.x, roda.c.y);
+        b2_roda_ou_peso_def ret;
+        ret.b2_body_def = b2DefaultBodyDef();
+        ret.b2_body_def.position = b2Vec2(roda.circle.x, roda.circle.y);
+        ret.b2_body_def.type = b2_dynamicBody;
+        ret.b2_circle.radius = roda.circle.raio;
+        ret.b2_circle.center = b2Vec2(roda.circle.x, roda.circle.y);
 
         return ret;
     }
-    b2BodyId CreateRoda(const b2WorldId WorldId,
-                        const b2_def_t& car_def,
-                        const CCarDef::CRoda &roda,
-                        void* IdBody)
-    {
-        const b2BodyId RodaId = b2CreateBody(WorldId, &car_def.bd);
-        b2ShapeDef shape_def = b2DefaultShapeDef();
-        shape_def.friction = roda.b.friccao;
-        shape_def.density = roda.b.densidade;
-        shape_def.restitution = roda.b.elasticidade;
 
-        b2CreateCircleShape(RodaId, &shape_def, &car_def.sd);
+    b2BodyId CreateRoda(const b2WorldId WorldId,
+                        const b2_roda_ou_peso_def &car_def,
+                        const CCarDef::CRodaParams &roda,
+                        void *IdBody)
+    {
+        const b2BodyId RodaId = b2CreateBody(WorldId, &car_def.b2_body_def);
+        b2ShapeDef shape_def = b2DefaultShapeDef();
+        shape_def.friction = roda.body.friccao;
+        shape_def.density = roda.body.densidade;
+        shape_def.restitution = roda.body.elasticidade;
+        // cout << "Radius: " << car_def.sd.radius << endl;
+        cout << "X: " << car_def.b2_body_def.position.x << " Y: " << car_def.b2_body_def.position.y << endl;
+        b2CreateCircleShape(RodaId, &shape_def, &car_def.b2_circle);
         b2Body_SetUserData(RodaId, IdBody);
 
         return RodaId;
     }
 
-    void CPhysCar::_translate_rodas_e_pesos(const CCarDef& carro)
+    void CPhysCar::_translate_rodas_e_pesos(const CCarDef &carro)
     {
         _car_def.R1 = TranslateRoda(carro._roda1);
         _car_def.R2 = TranslateRoda(carro._roda2);
         _car_def.P1 = TranslateRoda(carro._peso1);
         _car_def.P2 = TranslateRoda(carro._peso2);
     }
+
     void CPhysCar::_copy_dyn_params(const CCarDef &carro)
     {
         copy(begin(carro._torque), end(carro._torque), begin(_car_def.torque));
@@ -60,7 +64,8 @@ namespace PHYS
         copy(begin(carro._damp), end(carro._damp), begin(_car_def.damp));
     }
 
-    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro) {
+    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro)
+    {
         //////////////////////////////////////////////
         // Criação dos objetos:
         m_Roda1Id = CreateRoda(m_World.m_WorldId, _car_def.R1, carro._roda1, &ID_RODA1);
@@ -69,7 +74,8 @@ namespace PHYS
         m_Peso2Id = CreateRoda(m_World.m_WorldId, _car_def.P2, carro._peso2, &ID_PESO2);
     }
 
-    void CPhysCar::_set_torques() {
+    void CPhysCar::_set_torques()
+    {
         // Torques:
         _trqA = _car_def.torque[0];
         _trqB = _car_def.torque[1];
@@ -82,18 +88,26 @@ namespace PHYS
                                       const int param_index) const
     {
         b2DistanceJointDef jd;
+        const b2Vec2 positionA = b2Body_GetPosition(bodyA);
+        const b2Vec2 positionB = b2Body_GetPosition(bodyB);
+        const b2Vec2 anchorA = b2Body_GetLocalVector(bodyA, positionA);
+        const b2Vec2 anchorB = b2Body_GetLocalVector(bodyB, positionB);
+
         jd = b2DefaultDistanceJointDef();
         jd.bodyIdA = bodyA;
         jd.bodyIdB = bodyB;
-        jd.localAnchorA = b2Body_GetWorldPoint(bodyA, b2Vec2(0, 0));
-        jd.localAnchorB = b2Body_GetWorldPoint(bodyB, b2Vec2(0, 0));
-        jd.collideConnected = true;
+        jd.localAnchorA = anchorA;
+        jd.localAnchorB = anchorB;
+        jd.collideConnected = false;
         jd.hertz = _car_def.freq[param_index];
         jd.dampingRatio = _car_def.damp[param_index];
+        jd.enableLimit = true;
+        jd.length = b2Distance(anchorA, anchorB);
         return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
     }
 
-    void CPhysCar::_create_joints() {
+    void CPhysCar::_create_joints()
+    {
         m_Jc1c2Id = _create_joint(m_Roda1Id, m_Roda2Id, 0);
         m_Jc1p1Id = _create_joint(m_Roda1Id, m_Peso1Id, 1);
         m_Jc1p2Id = _create_joint(m_Roda1Id, m_Peso2Id, 2);
@@ -245,7 +259,7 @@ namespace PHYS
         return !m_bDead;
     }
 
-    void CPhysCar::_phys_begin_simulate()
+    void CPhysCar::_init_simulation_vars()
     {
         _x0 = getCenter();
         _t = 0;
@@ -308,23 +322,33 @@ namespace PHYS
 
     b2Vec2 CPhysCar::getCenter() const
     {
-        b2Vec2 pos[5];
-        float massa[4];
-
-        pos[0] = b2Body_GetPosition(m_Roda1Id);
-        pos[1] = b2Body_GetPosition(m_Roda2Id);
-        pos[2] = b2Body_GetPosition(m_Peso1Id);
-        pos[3] = b2Body_GetPosition(m_Peso2Id);
-
-        massa[0] = b2Body_GetMass(m_Roda1Id);
-        massa[1] = b2Body_GetMass(m_Roda2Id);
-        massa[2] = b2Body_GetMass(m_Peso1Id);
-        massa[3] = b2Body_GetMass(m_Peso2Id);
-
-        pos[4] = (massa[0] * pos[0] + massa[1] * pos[1] + massa[2] * pos[2] + massa[3] * pos[3]);
-        pos[4] *= 1.0f / (massa[0] + massa[1] + massa[2] + massa[3]);
-
-        return pos[4];
+        const vector<b2Vec2> pos = {
+            b2Body_GetPosition(m_Roda1Id),
+            b2Body_GetPosition(m_Roda2Id),
+            b2Body_GetPosition(m_Peso1Id),
+            b2Body_GetPosition(m_Peso2Id)
+        };
+        const vector<float> massa = {
+            b2Body_GetMass(m_Roda1Id),
+            b2Body_GetMass(m_Roda2Id),
+            b2Body_GetMass(m_Peso1Id),
+            b2Body_GetMass(m_Peso2Id)
+        };
+        const float totalMass = reduce(massa.begin(), massa.end(), 0.0f);
+        const float invMass = 1.0f / totalMass;
+        const b2Vec2 numerator = transform_reduce(
+            pos.begin(),
+            pos.end(),
+            massa.begin(),
+            b2Vec2{0, 0},
+            plus<>(),
+            [](const b2Vec2 &p, const float &m)
+            {
+                return m * p;
+            }
+        );
+        b2Vec2 cm = numerator * invMass;
+        return cm;
     }
 
     void CPhysCar::_init()
@@ -355,7 +379,7 @@ namespace PHYS
 
         _verificar_step();
 
-        if(!b2Body_IsValid(m_Roda1Id))
+        if (!b2Body_IsValid(m_Roda1Id))
             return;
 
         // Consideraremos que todos os corpos existem se um deles existir

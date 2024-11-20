@@ -7,31 +7,31 @@ using namespace MODEL;
 
 namespace PHYS
 {
-    using b2_def_t = struct tagB2Def
+    using b2_roda_ou_peso_def = struct tagB2RodaPesoDef
     {
-        b2Circle sd{};
-        b2BodyDef bd{b2DefaultBodyDef()};
+        b2Circle b2_circle{};
+        b2BodyDef b2_body_def{b2DefaultBodyDef()};
     };
 
     using car_t = struct tagCarParams
     {
         // Roda 1
-        b2_def_t R1;
+        b2_roda_ou_peso_def R1;
 
         // Roda 2
-        b2_def_t R2;
+        b2_roda_ou_peso_def R2;
 
         // Peso 1
-        b2_def_t P1;
+        b2_roda_ou_peso_def P1;
 
         // Peso 2
-        b2_def_t P2;
+        b2_roda_ou_peso_def P2;
 
         float torque[4]{};
 
-        // Para que os distance joints fa�am parte do genoma,
+        // Para que os distance joints façam parte do genoma,
         // teremos a frequencia de resposta e o damp deles codificados
-        // tamb�m.
+        // também.
         float freq[6]{};
         float damp[6]{};
     };
@@ -138,7 +138,7 @@ namespace PHYS
 
         void _destroy();
 
-        void _phys_begin_simulate();
+        void _init_simulation_vars();
 
         static void _phys_end_simulate();
 

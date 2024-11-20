@@ -66,7 +66,7 @@ namespace GA
         return map_values(0, d26[nLen] - 1, nMin, nMax, dVal);
     }
 
-    CCarDef::CRoda DecodeRoda(const char *genes, size_t &nPos)
+    CCarDef::CRodaParams DecodeRoda(const char *genes, size_t &nPos)
     {
         constexpr int nLen = 4;
         return {
@@ -148,18 +148,37 @@ namespace GA
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
         }
 #else
-        _carro._roda1 = CCarDef::CRoda(-5, 1, 1, 0.1, 0.1, 0);
-        _carro._roda2 = CCarDef::CRoda(0, 1, 1, 0.1, 0.1, 0);
-        _carro._peso1 = CCarDef::CRoda(-5, 3, 1, 0.1, 0.1, 0);
-        _carro._peso2 = CCarDef::CRoda(0, 3, 1, 0.1, 0.1, 0);
+        constexpr float r1x = 5.0f;
+        constexpr float r1y = 7.0f;
+        constexpr float r1r = 2.0f;
+        constexpr float r2x = 13.0f;
+        constexpr float r2y = 7.0f;
+        constexpr float r2r = 0.5f;
+        constexpr float p1x = 7.0f;
+        constexpr float p1y = 10.0f;
+        constexpr float p1r = 1.0f;
+        constexpr float p2x = 11.0f;
+        constexpr float p2y = 10.0f;
+        constexpr float p2r = 1.0f;
+        constexpr float dens = 1.0;
+        constexpr float fric = 1.0;
+        constexpr float elas = 0.1;
+
+        _carro._roda1 = CCarDef::CRodaParams(r1x, r1y, r1r, dens, fric, elas);
+        _carro._roda2 = CCarDef::CRodaParams(r2x, r2y, r2r, dens, fric, elas);
+        _carro._peso1 = CCarDef::CRodaParams(p1x, p1y, p1r, dens, fric, elas);
+        _carro._peso2 = CCarDef::CRodaParams(p2x, p2y, p2r, dens, fric, elas);
         for(float & torque : _carro._torque)
         {
-            torque = 0.1;
+            constexpr float torque_amount = -10.0;
+            torque = torque_amount;
         }
         for(int i = 0; i < 6; i++)
         {
-            _carro._damp[i] = 0.1;
-            _carro._freq[i] = 0.1;
+            constexpr float damp = 1.0f;
+            constexpr float freq = 1.0f;
+            _carro._damp[i] = damp;
+            _carro._freq[i] = freq;
         }
 #endif
     }

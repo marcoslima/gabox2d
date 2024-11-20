@@ -1,6 +1,7 @@
 #include "GrCar.h"
 
 #include <cmath>
+#include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
 
@@ -50,7 +51,7 @@ namespace GUI
                   const CSolidBrush &brush)
     {
         sf::CircleShape circle_shape(c.r);
-        circle_shape.setPosition(c.c.x - c.r, c.c.y - c.r);
+        circle_shape.setPosition(c.c.x - c.r, c.c.y - c.r); // Position é canto superior esquerdo?
         pen.apply(circle_shape);
         brush.apply(circle_shape);
         window.draw(circle_shape);

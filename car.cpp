@@ -18,7 +18,7 @@ void CCar::beginSimulate(const b2WorldId WorldId)
     _create(WorldId, _carro);
 
     // Inicializamos a simulação física:
-    _phys_begin_simulate();
+    _init_simulation_vars();
 }
 
 void CCar::endSimulate()
