@@ -22,7 +22,7 @@ public:
 	void CreateCar(const char* szGenes = nullptr);
 	void DestroyCar();
 	bool doStep();
-	void Phys2Gr();
+	void UpdateGraphicsData();
 	void Medir(b2WorldId WorldId, double max_t);
 };
 
