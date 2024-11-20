@@ -62,12 +62,7 @@ namespace PHYS
 
         ~CPhysCar();
 
-    public:
-        // Definições do carro (decodificados dos genes)
-        car_t _car_def;
-
         // Instanciamento do carro no box2d
-    public:
         b2BodyId m_Roda1Id;
         b2BodyId m_Roda2Id;
         b2BodyId m_Peso1Id;
@@ -121,17 +116,13 @@ namespace PHYS
     protected:
         void _init();
 
-        void _translate_rodas_e_pesos(const CCarDef &carro);
+        void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
 
-        void _copy_dyn_params(const CCarDef &carro);
+        void _set_torques(const car_t &car_def);
 
-        void _create_rodas_e_pesos(const CCarDef &carro);
+        [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
 
-        void _set_torques();
-
-        [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, int param_index) const;
-
-        void _create_joints();
+        void _create_joints(const car_t &car_def);
 
         // Usa as definições decodificadas para criar o objeto em si no box2d
         void _create(b2WorldId WorldId, const CCarDef& carro);

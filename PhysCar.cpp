@@ -12,14 +12,14 @@ namespace PHYS
     int ID_PESO2 = 4;
     int ID_GROUND = 5;
 
-    CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
+    void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
-        _init();
+        copy(begin(carro._torque), end(carro._torque), begin(car_def.torque));
+        copy(begin(carro._freq), end(carro._freq), begin(car_def.freq));
+        copy(begin(carro._damp), end(carro._damp), begin(car_def.damp));
     }
 
-    CPhysCar::~CPhysCar() = default;
-
-    b2_roda_ou_peso_def TranslateRoda(const CCarDef::CRodaParams &roda)
+    b2_roda_ou_peso_def _translate_roda(const CCarDef::CRodaParams &roda)
     {
         b2_roda_ou_peso_def ret;
         ret.b2_body_def = b2DefaultBodyDef();
@@ -30,6 +30,24 @@ namespace PHYS
 
         return ret;
     }
+
+    car_t _translate_rodas_e_pesos(const CCarDef &carro)
+    {
+        car_t car_def;
+        car_def.R1 = _translate_roda(carro._roda1);
+        car_def.R2 = _translate_roda(carro._roda2);
+        car_def.P1 = _translate_roda(carro._peso1);
+        car_def.P2 = _translate_roda(carro._peso2);
+        _copy_dyn_params(carro, car_def);
+        return car_def;
+    }
+
+    CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
+    {
+        _init();
+    }
+
+    CPhysCar::~CPhysCar() = default;
 
     b2BodyId CreateRoda(const b2WorldId WorldId,
                         const b2_roda_ou_peso_def &car_def,
@@ -49,42 +67,29 @@ namespace PHYS
         return RodaId;
     }
 
-    void CPhysCar::_translate_rodas_e_pesos(const CCarDef &carro)
-    {
-        _car_def.R1 = TranslateRoda(carro._roda1);
-        _car_def.R2 = TranslateRoda(carro._roda2);
-        _car_def.P1 = TranslateRoda(carro._peso1);
-        _car_def.P2 = TranslateRoda(carro._peso2);
-    }
 
-    void CPhysCar::_copy_dyn_params(const CCarDef &carro)
-    {
-        copy(begin(carro._torque), end(carro._torque), begin(_car_def.torque));
-        copy(begin(carro._freq), end(carro._freq), begin(_car_def.freq));
-        copy(begin(carro._damp), end(carro._damp), begin(_car_def.damp));
-    }
-
-    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro)
+    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t& car_def)
     {
         //////////////////////////////////////////////
         // Criação dos objetos:
-        m_Roda1Id = CreateRoda(m_World.m_WorldId, _car_def.R1, carro._roda1, &ID_RODA1);
-        m_Roda2Id = CreateRoda(m_World.m_WorldId, _car_def.R2, carro._roda2, &ID_RODA2);
-        m_Peso1Id = CreateRoda(m_World.m_WorldId, _car_def.P1, carro._peso1, &ID_PESO1);
-        m_Peso2Id = CreateRoda(m_World.m_WorldId, _car_def.P2, carro._peso2, &ID_PESO2);
+        m_Roda1Id = CreateRoda(m_World.m_WorldId, car_def.R1, carro._roda1, &ID_RODA1);
+        m_Roda2Id = CreateRoda(m_World.m_WorldId, car_def.R2, carro._roda2, &ID_RODA2);
+        m_Peso1Id = CreateRoda(m_World.m_WorldId, car_def.P1, carro._peso1, &ID_PESO1);
+        m_Peso2Id = CreateRoda(m_World.m_WorldId, car_def.P2, carro._peso2, &ID_PESO2);
     }
 
-    void CPhysCar::_set_torques()
+    void CPhysCar::_set_torques(const car_t& car_def)
     {
         // Torques:
-        _trqA = _car_def.torque[0];
-        _trqB = _car_def.torque[1];
-        _trqC = _car_def.torque[2];
-        _trqD = _car_def.torque[3];
+        _trqA = car_def.torque[0];
+        _trqB = car_def.torque[1];
+        _trqC = car_def.torque[2];
+        _trqD = car_def.torque[3];
     }
 
     b2JointId CPhysCar::_create_joint(const b2BodyId bodyA,
                                       const b2BodyId bodyB,
+                                      const car_t& car_def,
                                       const int param_index) const
     {
         b2DistanceJointDef jd;
@@ -99,21 +104,21 @@ namespace PHYS
         jd.localAnchorA = anchorA;
         jd.localAnchorB = anchorB;
         jd.collideConnected = false;
-        jd.hertz = _car_def.freq[param_index];
-        jd.dampingRatio = _car_def.damp[param_index];
+        jd.hertz = car_def.freq[param_index];
+        jd.dampingRatio = car_def.damp[param_index];
         jd.enableLimit = true;
         jd.length = b2Distance(anchorA, anchorB);
         return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
     }
 
-    void CPhysCar::_create_joints()
+    void CPhysCar::_create_joints(const car_t& car_def)
     {
-        m_Jc1c2Id = _create_joint(m_Roda1Id, m_Roda2Id, 0);
-        m_Jc1p1Id = _create_joint(m_Roda1Id, m_Peso1Id, 1);
-        m_Jc1p2Id = _create_joint(m_Roda1Id, m_Peso2Id, 2);
-        m_Jc2p1Id = _create_joint(m_Roda2Id, m_Peso1Id, 3);
-        m_Jc2p2Id = _create_joint(m_Roda2Id, m_Peso2Id, 4);
-        m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, 5);
+        m_Jc1c2Id = _create_joint(m_Roda1Id, m_Roda2Id, car_def, 0);
+        m_Jc1p1Id = _create_joint(m_Roda1Id, m_Peso1Id, car_def, 1);
+        m_Jc1p2Id = _create_joint(m_Roda1Id, m_Peso2Id, car_def, 2);
+        m_Jc2p1Id = _create_joint(m_Roda2Id, m_Peso1Id, car_def, 3);
+        m_Jc2p2Id = _create_joint(m_Roda2Id, m_Peso2Id, car_def, 4);
+        m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, car_def, 5);
     }
 
     void CPhysCar::_create(const b2WorldId WorldId, const CCarDef &carro)
@@ -123,11 +128,10 @@ namespace PHYS
             _destroy();
 
         m_World.m_WorldId = WorldId;
-        _translate_rodas_e_pesos(carro);
-        _copy_dyn_params(carro);
-        _create_rodas_e_pesos(carro);
-        _create_joints();
-        _set_torques();
+        const car_t car_def = _translate_rodas_e_pesos(carro);
+        _create_rodas_e_pesos(carro, car_def);
+        _create_joints(car_def);
+        _set_torques(car_def);
     }
 
 #if 0
