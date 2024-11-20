@@ -50,7 +50,8 @@ namespace GUI
                   const CGrCar::gr_circle_t &c,
                   const float angle,
                   const CPen &pen,
-                  const CSolidBrush &brush)
+                  const CSolidBrush &brush,
+                  const bool draw_angle = true)
     {
         sf::CircleShape circle_shape(c.radius);
         circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo.
@@ -58,6 +59,7 @@ namespace GUI
         brush.apply(circle_shape);
         window.draw(circle_shape);
 
+        if(!draw_angle) return;
 
         DrawTickLine(window,
             c.center, c.center + sf::Vector2f(c.radius * cos(angle),
@@ -89,8 +91,8 @@ namespace GUI
         const CPen penPeso(sf::Color(255, 0, 0), 0.2);
         // penPeso.SetDashStyle(DashStyleDot);
 
-        DrawRoda(window, _peso1.circle, 3 * M_PI, penPeso, bshNull);
-        DrawRoda(window, _peso2.circle, 3 * M_PI, penPeso, bshNull);
+        DrawRoda(window, _peso1.circle, 3 * M_PI, penPeso, bshNull, false);
+        DrawRoda(window, _peso2.circle, 3 * M_PI, penPeso, bshNull, false);
 
         // Joints:
         const CPen penJoint(sf::Color(150, 150, 150), 0.2f);
