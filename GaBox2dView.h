@@ -38,6 +38,7 @@ private:
 	bool m_bShowHelp = false;
 
 	CGaBox2dDoc* _pDocument;
+	bool m_bFollowCar = true;
 
 public:
 	[[nodiscard]] CGaBox2dDoc* 	GetDocument() const;
@@ -48,6 +49,12 @@ public:
 	[[nodiscard]] bool isShowHelp() const { return m_bShowHelp; }
 
 	void OnDraw();
+
+	void ShowHelp();
+
+	bool isFollowCar() const;
+
+	void toggleFollowCar();
 
 	// Implementation
 	static void _draw_sky(sf::RenderWindow &window, const CEnv &env);

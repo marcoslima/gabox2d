@@ -25,6 +25,21 @@ namespace GUI
     }
 
 
+    void CGaBox2dView::ShowHelp()
+    {
+        m_bShowHelp = true;
+    }
+
+    bool CGaBox2dView::isFollowCar() const
+    {
+        return m_bFollowCar;
+    }
+
+    void CGaBox2dView::toggleFollowCar()
+    {
+        m_bFollowCar = !m_bFollowCar;
+    }
+
     void CGaBox2dView::_draw_sky(sf::RenderWindow &window, const CEnv &env)
     {
         // World na cor de céu
@@ -109,8 +124,6 @@ namespace GUI
         CGaBox2dDoc *pDoc = GetDocument();
         const auto car = pDoc->GetCar();
         const auto center_mass = car.getCenter();
-        m_view_pos.x = center_mass.x;
-        m_view_pos.y = center_mass.y;
         const CEnv env = pDoc->m_env;
         constexpr float move_step = 1.0f;
         constexpr float zoom_step = 1.01f;
@@ -121,8 +134,10 @@ namespace GUI
         if(m_bMoveUp)   m_view_pos.y += move_step*m_ZoomFactor;
         if(m_bMoveDown) m_view_pos.y -= move_step*m_ZoomFactor;
 
-        // Zoom to fit
-        sf::View view(sf::Vector2f(10.0f+m_view_pos.x, 20.0f+m_view_pos.y),
+        // View configuration
+        const float view_x = m_view_pos.x + (m_bFollowCar ? center_mass.x : 0.0f);
+        const float view_y = m_view_pos.y + (m_bFollowCar ? center_mass.y : 0.0f);
+        sf::View view(sf::Vector2f(view_x, view_y),
                       sf::Vector2f(100*m_ZoomFactor, -70*m_ZoomFactor));
         view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
         window.setView(view);

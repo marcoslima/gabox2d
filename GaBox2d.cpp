@@ -73,7 +73,7 @@ namespace GUI
 
     void DrawMenu(CGaParamsDlg &dlgParams,
                   CEditorChaoDlg &dlgEditorChao,
-                  const CGaBox2dView &view)
+                  CGaBox2dView &view)
     {
         ImGui::BeginMainMenuBar();
         dlgEditorChao.OnInitDialog();
@@ -139,6 +139,31 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
+        if(ImGui::BeginMenu("View"))
+        {
+            if(ImGui::MenuItem("Follow car", nullptr, view.isFollowCar()))
+            {
+                view.toggleFollowCar();
+            }
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("Help"))
+        {
+            if(ImGui::MenuItem("Show..."))
+            {
+                view.ShowHelp();
+            }
+            if(ImGui::BeginMenu("Shortcuts..."))
+            {
+                ImGui::MenuItem("Zoom in/out\t+/-");
+                ImGui::MenuItem("Pan\t<-/->");
+                ImGui::MenuItem("Show help\tF1");
+                ImGui::MenuItem("New random car\tN");
+                ImGui::MenuItem("Repeat current car\tR");
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
         if (bShowEditor) dlgEditorChao.show();
         ImGui::EndMainMenuBar();
     }
@@ -152,7 +177,7 @@ namespace GUI
 
     void DrawGui(CGaParamsDlg &dlgParams,
                   CEditorChaoDlg &dlgEditorChao,
-                  const CGaBox2dView &view)
+                  CGaBox2dView &view)
     {
         DrawMenu(dlgParams, dlgEditorChao, view);
 
