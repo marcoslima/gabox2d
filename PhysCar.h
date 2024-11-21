@@ -81,10 +81,8 @@ namespace PHYS
         float _trqC;
         float _trqD;
 
-        double _angle;
-
     private:
-        void _simulation_pre_tick();
+        void _simulation_pre_tick() const;
         void _simulation_pos_tick();
 
         // CContactListener _cl;

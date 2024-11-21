@@ -135,64 +135,13 @@ namespace PHYS
         _set_torques(car_def);
     }
 
-#if 0
-  #define ISBODY(s1,s2,id) (s1 == id  || s2 == id)
-
-    void CContactListener::Add(const b2ContactPoint *point)
-    {
-        int s1 = *((int *) point->shape1->GetBody()->GetUserData());
-        int s2 = *((int *) point->shape2->GetBody()->GetUserData());
-
-        bool bGround = ISBODY(s1, s2, ID_GROUND);
-        bool bR1 = ISBODY(s1, s2, ID_RODA1);
-        bool bR2 = ISBODY(s1, s2, ID_RODA2);
-        bool bP1 = ISBODY(s1, s2, ID_PESO1);
-        bool bP2 = ISBODY(s1, s2, ID_PESO2);
-
-        if ((bGround && (bP1 || bP2)) || (bR1 && bR2))
-            m_bDead = true;
-
-        m_cVel = point->velocity;
-        m_cPos = point->position;
-        /*
-            if(point->velocity.Length() > 100.0)
-            {
-                m_bDead = true;
-            }
-        */
-    }
-
-    void CContactListener::Persist(const b2ContactPoint *point)
-    {
-        const int s1 = *const_cast<int *>(point->shape1->GetBody()->GetUserData());
-        const int s2 = *const_cast<int *>(point->shape2->GetBody()->GetUserData());
-
-        const bool bGround = ISBODY(s1, s2, ID_GROUND);
-        bool bR1 = ISBODY(s1, s2, ID_RODA1);
-        bool bR2 = ISBODY(s1, s2, ID_RODA2);
-
-        if (bGround)
-        {
-            m_bContactR1 |= bR1;
-            m_bContactR2 |= bR2;
-        }
-    }
-#endif
-
-
     // Executa um passo da simulação e retorna false se o carro morreu.
     bool CPhysCar::_simulation_step()
     {
         _bInStep = true;
+
         _simulation_pre_tick();
-
-        // TODO: Converter o contactlistener
-        // _cl.m_bDead = false;
-        // _cl.m_bContactR1 = false;
-        // _cl.m_bContactR2 = false;
-
-        b2World_Step(m_World.m_WorldId, _timeStep, 8);
-
+        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
         _simulation_pos_tick();
 
         _bInStep = false;
@@ -222,35 +171,15 @@ namespace PHYS
     }
 
 
-    void CPhysCar::_simulation_pre_tick()
+    void CPhysCar::_simulation_pre_tick() const
     {
-        float fAngulo;
+        if (m_bDead) return;
 
-        const float dx = b2Body_GetPosition(m_Roda2Id).x - b2Body_GetPosition(m_Roda1Id).x;
-        const float dy = b2Body_GetPosition(m_Roda2Id).y - b2Body_GetPosition(m_Roda1Id).y;
-        if (dx == 0)
-        {
-            fAngulo = M_PI_2 * (dy > 0) ? (1) : (-1);
-        } else
-        {
-            fAngulo = atan(dy / dx);
-        }
+        if (m_bContactR1)
+            b2Body_ApplyTorque(m_Roda1Id, (_trqA + _trqB) * b2Body_GetMass(m_Roda1Id), true);
 
-        if (fAngulo > M_PI_2)
-            fAngulo -= M_PI_2;
-        if (fAngulo < -M_PI_2)
-            fAngulo += M_PI_2;
-
-        _angle = fAngulo * (180 / M_PI);
-
-        if (!m_bDead)
-        {
-            if (m_bContactR1)
-                b2Body_ApplyTorque(m_Roda1Id, (_trqA + _trqB) * b2Body_GetMass(m_Roda1Id), true);
-
-            if (m_bContactR2)
-                b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
-        }
+        if (m_bContactR2)
+            b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
     }
 
     void CPhysCar::_simulation_pos_tick()
