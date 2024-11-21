@@ -108,6 +108,10 @@ namespace GUI
     void CGaBox2dView::Draw(sf::RenderWindow &window)
     {
         CGaBox2dDoc *pDoc = GetDocument();
+        const auto car = pDoc->GetCar();
+        const auto center_mass = car.getCenter();
+        m_view_pos.x = center_mass.x;
+        m_view_pos.y = center_mass.y;
         const CEnv env = pDoc->m_env;
         constexpr float move_step = 1.0f;
         constexpr float zoom_step = 1.01f;
