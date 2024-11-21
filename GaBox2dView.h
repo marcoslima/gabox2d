@@ -18,7 +18,6 @@ public:
 
 // Attributes
 private:
-	unsigned		m_nSimTimer;
 	unsigned		m_nVelocidade;
 	bool			m_bGaRunning;
 	bool			m_bGaExited;
@@ -84,6 +83,11 @@ public:
 
 	void OnKeyPressed(sf::Keyboard::Key key);
 	void OnKeyReleased(sf::Keyboard::Key key);
+
+	[[nodiscard]] string getDeadReason() const
+	{
+		return GetDocument()->GetCar().m_dead_reason;
+	}
 };
 
 }

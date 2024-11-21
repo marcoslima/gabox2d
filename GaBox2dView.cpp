@@ -11,8 +11,7 @@ using namespace DevUtils;
 namespace GUI
 {
     CGaBox2dView::CGaBox2dView()
-        : m_nSimTimer(0)
-          , m_nVelocidade(1)
+        :   m_nVelocidade(1)
           , m_bGaRunning(false)
           , m_bGaExited(false)
           , m_bShowInfoId(true)
