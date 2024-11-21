@@ -154,21 +154,17 @@ namespace GUI
     }
 
     // CGaBox2dView message handlers
-    void CGaBox2dView::OnSimulaPlay()
+    void CGaBox2dView::OnSimulaPlay() const
     {
-#if 0
-          if (m_nSimTimer == 0)
+        const auto pDoc = GetDocument();
+        if(pDoc->m_IsSimulating)
         {
-            // Ligar simula��o:
-            GetDocument()->BeginSimulation();
-            m_nSimTimer = (UINT) SetTimer((UINT_PTR) 1001, 10,NULL);
-        } else
-        {
-            KillTimer(m_nSimTimer);
-            m_nSimTimer = 0;
-            GUI::CGaBox2dDoc::EndSimulation();
+            pDoc->EndSimulation();
         }
-#endif
+        else
+        {
+            pDoc->BeginSimulation();
+        }
     }
 
     void CGaBox2dView::OnSimulaReset() const
@@ -191,25 +187,18 @@ namespace GUI
         m_nVelocidade--;
     }
 
-    void CGaBox2dView::OnSimulaRepetir()
+    void CGaBox2dView::OnSimulaRepetir() const
     {
-#if 0
-          CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
-        if (!pDoc)
-            return;
+        CGaBox2dDoc *pDoc = GetDocument();
 
-        CString strGenes;
+        string strGenes;
         pDoc->GetCar().getGenes(strGenes);
 
-        if (m_nSimTimer != 0)
-            OnSimulaPlay();
+        if(pDoc->m_IsSimulating) OnSimulaPlay();
 
-        pDoc->GetCar().CreateCar(strGenes);
+        pDoc->GetCar().CreateCar(strGenes.c_str());
 
-        if (m_nSimTimer == 0)
-            OnSimulaPlay();
-#endif
+        OnSimulaPlay();
     }
 
     void CGaBox2dView::OnVelocidade1x()

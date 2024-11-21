@@ -1,5 +1,8 @@
 #include "PhysCar.h"
+
+#include <iostream>
 #include <numeric>
+#include <ostream>
 
 
 namespace PHYS
@@ -9,7 +12,7 @@ namespace PHYS
     int ID_PESO1 = 3;
     int ID_PESO2 = 4;
     int ID_GROUND = 5;
-    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 2;
+    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 20;
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
@@ -202,7 +205,7 @@ namespace PHYS
 
         _no_contact_time_r1 = _t - _last_contact_r1;
         _no_contact_time_r2 = _t - _last_contact_r2;
-
+        // cout << "No contact time R1, R2: " << _no_contact_time_r1 << ", " << _no_contact_time_r2 << endl;
         if (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS || _no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
         {
             m_bDead = true;

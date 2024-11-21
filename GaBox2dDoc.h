@@ -20,6 +20,7 @@ private:
 
 public:
 	bool m_bQuit = false;
+	bool m_IsSimulating = false;
 
 	vec_car_t	m_populacao;
 
@@ -31,8 +32,8 @@ public:
 // Operations
 public:
 	void	BeginSimulation();
+	void	EndSimulation();
 
-	static void	EndSimulation();
 	[[nodiscard]] PointF	GetCenter() const;
 
 	void Quit();

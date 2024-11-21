@@ -59,12 +59,12 @@ public:
 
 	void Draw(sf::RenderWindow& window);
 
-	static void OnSimulaPlay();
+	void OnSimulaPlay() const;
 
 	void OnSimulaReset() const;
 	void OnVelocidadeMais();
 	void OnVelocidadeMenos();
-	void OnSimulaRepetir();
+	void OnSimulaRepetir() const;
 	void OnVelocidade1x();
 	void OnVelocidade2x();
 	void OnVelocidade4x();

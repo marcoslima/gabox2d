@@ -80,11 +80,13 @@ namespace GUI
 
     void CGaBox2dDoc::BeginSimulation()
     {
+        m_IsSimulating = true;
         m_car.beginSimulate(m_World.m_WorldId);
     }
 
     void CGaBox2dDoc::EndSimulation()
     {
+        m_IsSimulating = false;
         CCar::endSimulate();
     }
 
