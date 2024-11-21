@@ -36,6 +36,7 @@ private:
 	bool m_bMoveRight = false;
 	bool m_bMoveUp = false;
 	bool m_bMoveDown = false;
+	bool m_bShowHelp = false;
 
 	CGaBox2dDoc* _pDocument;
 
@@ -45,6 +46,7 @@ public:
 
 	CGa*			getGa();
 	void 			releaseGa();
+	[[nodiscard]] bool isShowHelp() const { return m_bShowHelp; }
 
 	void OnDraw();
 

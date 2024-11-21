@@ -24,7 +24,8 @@ namespace GUI
 CGaBox2dApp::CGaBox2dApp() = default;
 
 void DrawMenu(CGaParamsDlg& dlgParams,
-              CEditorChaoDlg& dlgEditorChao)
+              CEditorChaoDlg& dlgEditorChao,
+              const CGaBox2dView& view)
 {
     ImGui::BeginMainMenuBar();
     dlgEditorChao.OnInitDialog();
@@ -84,6 +85,50 @@ void DrawMenu(CGaParamsDlg& dlgParams,
     }
     if(bShowEditor) dlgEditorChao.show();
     ImGui::EndMainMenuBar();
+
+    ////////////////////////////////////
+    /// Show Help
+    if(view.isShowHelp())
+    {
+        ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
+                                 | ImGuiTableFlags_NoBordersInBodyUntilResize
+                                 | ImGuiTableFlags_NoHostExtendX;
+
+        ImGui::Begin("Help");
+        if(ImGui::BeginTable("help table", 2, flags1))
+        {
+            ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+            ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("F1"); ImGui::TableNextColumn();
+            ImGui::Text("Show Help");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("<-/->"); ImGui::TableNextColumn();
+            ImGui::Text("Horizontal Pan");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("+/-"); ImGui::TableNextColumn();
+            ImGui::Text("Zoom");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("N"); ImGui::TableNextColumn();
+            ImGui::Text("New random car");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("R"); ImGui::TableNextColumn();
+            ImGui::Text("Repeat current car");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("Q"); ImGui::TableNextColumn();
+            ImGui::Text("Quit");
+
+            ImGui::EndTable();
+        }
+        ImGui::End();
+    }
 }
 
 int CGaBox2dApp::run()
@@ -142,7 +187,7 @@ int CGaBox2dApp::run()
 
         // VIEW.DRAW
         // dlgEditorChao.OnInitDialog();
-        DrawMenu(dlgParams, dlgEditorChao);
+        DrawMenu(dlgParams, dlgEditorChao, view);
 		// dlgParams.draw();
 		// if(ImGui::Button("Open")) dlgParams.show();
         view.Draw(window);

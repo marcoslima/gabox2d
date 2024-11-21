@@ -655,6 +655,9 @@ namespace GUI
             case sf::Keyboard::Down:
                 m_bMoveDown = true;
                 break;
+            case sf::Keyboard::F1:
+                m_bShowHelp = !m_bShowHelp;
+                break;
             default:
                 break;
         }
@@ -665,9 +668,12 @@ namespace GUI
         const auto pDoc = GetDocument();
         switch (key)
         {
-            case sf::Keyboard::R:
+            case sf::Keyboard::N:
                 OnSimulaReset();
-                break;
+            break;
+            case sf::Keyboard::R:
+                OnSimulaRepetir();
+            break;
             case sf::Keyboard::Q:
                 pDoc->Quit();
                 break;
