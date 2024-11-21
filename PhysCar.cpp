@@ -189,7 +189,17 @@ namespace PHYS
     {
         m_bContactR1 = b2Body_GetContactCapacity(m_Roda1Id) > 0;
         m_bContactR2 = b2Body_GetContactCapacity(m_Roda2Id) > 0;
-        m_bDead |= (b2Body_GetContactCapacity(m_Peso1Id) > 0 || b2Body_GetContactCapacity(m_Peso2Id) > 0);
+
+        if(!m_bDead && b2Body_GetContactCapacity(m_Peso1Id) > 0)
+        {
+            m_bDead = true;
+            m_dead_reason = "Peso 1";
+        }
+        if(!m_bDead && b2Body_GetContactCapacity(m_Peso2Id) > 0)
+        {
+            m_bDead = true;
+            m_dead_reason = "Peso 2";
+        }
 
         // Contato das rodas:
         if (m_bContactR1)
@@ -206,9 +216,10 @@ namespace PHYS
         _no_contact_time_r1 = _t - _last_contact_r1;
         _no_contact_time_r2 = _t - _last_contact_r2;
         // cout << "No contact time R1, R2: " << _no_contact_time_r1 << ", " << _no_contact_time_r2 << endl;
-        if (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS || _no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
+        if(!m_bDead && (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS || _no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS))
         {
             m_bDead = true;
+            m_dead_reason = "No contact";
         }
 
         if (m_bDead && b2Joint_IsValid(m_Jp1p2Id))
@@ -298,6 +309,7 @@ namespace PHYS
         _iterations = 10;
         _bInStep = false;
         m_bDead = false;
+        m_dead_reason = "Alive";
     }
 
     void CPhysCar::_destroy()

@@ -56,6 +56,7 @@ namespace PHYS
         b2JointId m_Jp1p2Id;
 
         CWorld m_World;
+        string m_dead_reason;
 
         // semi-constantes
     protected:
