@@ -9,6 +9,7 @@ namespace PHYS
     int ID_PESO1 = 3;
     int ID_PESO2 = 4;
     int ID_GROUND = 5;
+    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 2;
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
@@ -190,74 +191,9 @@ namespace PHYS
         // _cl.m_bContactR1 = false;
         // _cl.m_bContactR2 = false;
 
-        // b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
         b2World_Step(m_World.m_WorldId, _timeStep, 8);
 
-#if 0 // TODO: Converter o contactlistener
-          // Est� vivo ainda?
-        m_bDead |= _cl.m_bDead;
-        _cVel = _cl.m_cVel;
-        _cPos = _cl.m_cPos;
-        m_bContactR1 = _cl.m_bContactR1;
-        m_bContactR2 = _cl.m_bContactR2;
-
-        // Contato das rodas:
-        if (m_bContactR1)
-        {
-            m_acum_contatoR1 += _timeStep;
-            _last_contact_r1 = _t;
-        }
-        if (m_bContactR2)
-        {
-            m_acum_contatoR2 += _timeStep;
-            _last_contact_r2 = _t;
-        }
-
-        _no_contact_time_r1 = _t - _last_contact_r1;
-        _no_contact_time_r2 = _t - _last_contact_r2;
-
-        if (_no_contact_time_r1 > 2 || _no_contact_time_r2 > 2)
-        {
-            m_bDead = true;
-        }
-#endif
-
-
-        if (m_bDead && b2Joint_IsValid(m_Jp1p2Id))
-        {
-            b2DestroyJoint(m_Jc1c2Id);
-            b2DestroyJoint(m_Jc1p1Id);
-            b2DestroyJoint(m_Jc1p2Id);
-            b2DestroyJoint(m_Jc2p1Id);
-            b2DestroyJoint(m_Jc2p2Id);
-            b2DestroyJoint(m_Jp1p2Id);
-
-            m_Jc1c2Id = b2_nullJointId;
-            m_Jc1p1Id = b2_nullJointId;
-            m_Jc1p2Id = b2_nullJointId;
-            m_Jc2p1Id = b2_nullJointId;
-            m_Jc2p2Id = b2_nullJointId;
-            m_Jp1p2Id = b2_nullJointId;
-        }
-
-        m_contatoR1 = m_acum_contatoR1;
-        m_contatoR2 = m_acum_contatoR2;
-
-        b2Vec2 x = getCenter();
-        m_distancia = x.x - _x0.x;
-        if (m_distancia < 0)
-            m_distancia = 0;
-
-
-        if (_t != 0)
-        {
-            m_vm = m_distancia / _t;
-        } else
-        {
-            m_vm = 0;
-        }
-
-        _t += _timeStep;
+        _simulation_pos_tick();
 
         _bInStep = false;
         return !m_bDead;
@@ -267,9 +203,6 @@ namespace PHYS
     {
         _x0 = getCenter();
         _t = 0;
-
-        // TODO: Converter.
-        // _pWorld->SetContactListener(&_cl);
 
         m_contatoR1 = 0;
         m_contatoR2 = 0;
@@ -285,8 +218,7 @@ namespace PHYS
 
     void CPhysCar::_phys_end_simulate()
     {
-        // TODO: Verificar se é necessário após conversão.
-        // _pWorld->SetContactListener(NULL);
+        // Nothing to do.
     }
 
 
@@ -314,13 +246,74 @@ namespace PHYS
         if (!m_bDead)
         {
             if (m_bContactR1)
-                // _pRoda1->ApplyTorque((_trqA + _trqB) * _pRoda1->GetMass());
                 b2Body_ApplyTorque(m_Roda1Id, (_trqA + _trqB) * b2Body_GetMass(m_Roda1Id), true);
 
             if (m_bContactR2)
-                // _pRoda2->ApplyTorque((_trqC + _trqD) * _pRoda2->GetMass());
                 b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
         }
+    }
+
+    void CPhysCar::_simulation_pos_tick()
+    {
+        m_bContactR1 = b2Body_GetContactCapacity(m_Roda1Id) > 0;
+        m_bContactR2 = b2Body_GetContactCapacity(m_Roda2Id) > 0;
+        m_bDead |= (b2Body_GetContactCapacity(m_Peso1Id) > 0 || b2Body_GetContactCapacity(m_Peso2Id) > 0);
+
+        // Contato das rodas:
+        if (m_bContactR1)
+        {
+            m_acum_contatoR1 += _timeStep;
+            _last_contact_r1 = _t;
+        }
+        if (m_bContactR2)
+        {
+            m_acum_contatoR2 += _timeStep;
+            _last_contact_r2 = _t;
+        }
+
+        _no_contact_time_r1 = _t - _last_contact_r1;
+        _no_contact_time_r2 = _t - _last_contact_r2;
+
+        if (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS || _no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            m_bDead = true;
+        }
+
+        if (m_bDead && b2Joint_IsValid(m_Jp1p2Id))
+        {
+            b2DestroyJoint(m_Jc1c2Id);
+            b2DestroyJoint(m_Jc1p1Id);
+            b2DestroyJoint(m_Jc1p2Id);
+            b2DestroyJoint(m_Jc2p1Id);
+            b2DestroyJoint(m_Jc2p2Id);
+            b2DestroyJoint(m_Jp1p2Id);
+
+            m_Jc1c2Id = b2_nullJointId;
+            m_Jc1p1Id = b2_nullJointId;
+            m_Jc1p2Id = b2_nullJointId;
+            m_Jc2p1Id = b2_nullJointId;
+            m_Jc2p2Id = b2_nullJointId;
+            m_Jp1p2Id = b2_nullJointId;
+        }
+
+        m_contatoR1 = m_acum_contatoR1;
+        m_contatoR2 = m_acum_contatoR2;
+
+        const b2Vec2 x = getCenter();
+        m_distancia = x.x - _x0.x;
+        if (m_distancia < 0)
+            m_distancia = 0;
+
+
+        if (_t != 0)
+        {
+            m_vm = m_distancia / _t;
+        } else
+        {
+            m_vm = 0;
+        }
+
+        _t += _timeStep;
     }
 
 
@@ -372,7 +365,6 @@ namespace PHYS
         _timeStep = 1.0f / 50.0f;
         _iterations = 10;
         _bInStep = false;
-        _bBroke = false;
         m_bDead = false;
     }
 

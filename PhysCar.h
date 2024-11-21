@@ -36,30 +36,10 @@ namespace PHYS
         float damp[6]{};
     };
 
-    class CPhysCar;
-
-    // class CContactListener
-    // {
-    // public:
-    //     void Add(const b2Contact *point);
-    //
-    //     void Persist(const b2Contact *point);
-    //
-    // public:
-    //     bool m_bDead;
-    //     bool m_bContactR1;
-    //     bool m_bContactR2;
-    //     b2Vec2 m_cVel;
-    //     b2Vec2 m_cPos;
-    // };
-
     class CPhysCar
     {
-        // friend class CContactListener;
-
     public:
         CPhysCar();
-
         ~CPhysCar();
 
         // Instanciamento do carro no box2d
@@ -76,8 +56,6 @@ namespace PHYS
         b2JointId m_Jp1p2Id;
 
         CWorld m_World;
-
-        bool _bBroke;
 
         // semi-constantes
     protected:
@@ -107,6 +85,7 @@ namespace PHYS
 
     private:
         void _simulation_pre_tick();
+        void _simulation_pos_tick();
 
         // CContactListener _cl;
         bool _bInStep;
