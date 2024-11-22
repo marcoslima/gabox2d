@@ -103,6 +103,37 @@ namespace GUI
         bshTransparent.apply(polygon);
 
         window.draw(polygon);
+
+        /////////////////////////////////////////////
+        /// Debug ground: vertices
+
+        // Font for the text:
+        auto text_font = sf::Font();
+        // load it from linux file:
+        text_font.loadFromFile("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf");
+
+
+        int i = 0;
+        for (const auto &v: vecGround)
+        {
+            sf::CircleShape circle(0.1);
+            circle.setPosition(v.x, v.y);
+            circle.setFillColor(sf::Color::Red);
+            window.draw(circle);
+
+            // Draw the vertice index:
+            sf::Text text;
+            text.setFont(text_font);
+            text.setString(to_string(i));
+            text.setCharacterSize(24);
+            text.setFillColor(sf::Color::Black);
+            text.setPosition(v.x, v.y);
+            // text.setRotation(90);
+            text.setScale(0.1f, -0.1f);
+            window.draw(text);
+            i++;
+        }
+
     }
 
     void CGaBox2dView::_draw_border(sf::RenderWindow &window, const CEnv &env)

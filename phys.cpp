@@ -51,15 +51,15 @@ namespace PHYS
         auto groundDef = b2DefaultBodyDef();
         groundDef.type = b2_staticBody;
         world.m_GroundId = b2CreateBody(world.m_WorldId, &groundDef);
+        b2Body_SetUserData(world.m_GroundId, &ID_GROUND);
 
-        for(int i = 0; i < vecVertices.size()-1; i++)
-        {
-            auto shapeDef = b2DefaultShapeDef();
-            shapeDef.friction = 1.0f;
-            shapeDef.restitution = 0.0f;
-            b2Segment segment{vecVertices[i], vecVertices[i+1]};
-            b2CreateSegmentShape(world.m_GroundId, &shapeDef, &segment);
-        }
+        auto shapeDef = b2DefaultChainDef();
+        shapeDef.friction = 1.0f;
+        shapeDef.restitution = 0.0f;
+        shapeDef.points = vecVertices.data();
+        shapeDef.count = static_cast<int32_t>(vecVertices.size());
+        shapeDef.isLoop = true;
+        b2CreateChain(world.m_GroundId, &shapeDef);
     }
 
     void _create_ground(CWorld& world, const MODEL::CEnv& env)
@@ -67,9 +67,6 @@ namespace PHYS
         _create_ground_body(world, env);
 
         // TODO: Fazer as paredes e o teto.
-
-        // TODO: Verificar se é necessário.
-        // b2Body_SetUserData(world.m_GroundId, &PHYS::ID_GROUND);
     }
 
     void buildWorld(const MODEL::CEnv& env, CWorld& world)

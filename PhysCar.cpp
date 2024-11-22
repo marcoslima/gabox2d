@@ -4,14 +4,11 @@
 #include <numeric>
 #include <ostream>
 
+#include "phys.h"
+
 
 namespace PHYS
 {
-    int ID_RODA1 = 1;
-    int ID_RODA2 = 2;
-    int ID_PESO1 = 3;
-    int ID_PESO2 = 4;
-    int ID_GROUND = 5;
     constexpr int MAX_NO_CONTACT_TIME_SECONDS = 20;
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)

@@ -122,7 +122,16 @@ namespace MODEL
         }
     	cwvecs.emplace_back(_brx, y);
 
-    	return cwvecs;
+    	// reverse copy
+		ccwvecs.clear();
+		for (auto it = cwvecs.rbegin(); it != cwvecs.rend(); ++it)
+		{
+			ccwvecs.push_back(*it);
+		}
+
+		cwvecs.insert(cwvecs.end(), ccwvecs.begin(), ccwvecs.end());
+
+    	return ccwvecs;
 
     }
 }

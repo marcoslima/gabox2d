@@ -38,7 +38,7 @@ private:
 	bool m_bShowHelp = false;
 
 	CGaBox2dDoc* _pDocument;
-	bool m_bFollowCar = true;
+	bool m_bFollowCar = false;
 
 public:
 	[[nodiscard]] CGaBox2dDoc* 	GetDocument() const;
