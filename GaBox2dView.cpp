@@ -5,6 +5,7 @@
 #include "Pen.h"
 #include "SolidBrush.h"
 #include <CDT.hpp>
+#include "assets.h"
 
 using namespace DevUtils;
 
@@ -49,14 +50,14 @@ namespace GUI
         window.draw(sky);
     }
 
-    void CGaBox2dView::_debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t vecGround) {
+    void CGaBox2dView::_debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t &vecGround) {
         /////////////////////////////////////////////
         /// Debug ground: vertices
 
         // Font for the text:
         auto text_font = sf::Font();
         // load it from linux file:
-        text_font.loadFromFile("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf");
+        text_font.loadFromFile(TTF_FONT_FILE);
 
 
         int i = 0;
@@ -181,14 +182,6 @@ namespace GUI
         _draw_ground(window);
         _draw_border(window, env);
         pDoc->GetCar().Draw(window);
-#if 0
-
-        pDoc->GetCar().Draw(&gr);
-
-        m_pdlgIdInfo->set(-1, -1,
-                          pDoc->GetCar().getT(),
-                          pDoc->GetCar().getGenes());
-#endif
     }
 
     CGaBox2dDoc *CGaBox2dView::GetDocument() const

@@ -145,11 +145,7 @@ add_executable(GaBox2d
         CNormalSeededRandom.h
         car.cpp
         GrCar.cpp
-        Pen.h
-        SolidBrush.h
         CarDef.cpp
-        World.h
-        phys.h
         phys.cpp
 )
 

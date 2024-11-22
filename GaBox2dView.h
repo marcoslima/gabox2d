@@ -62,7 +62,7 @@ public:
 	// Implementation
 	static void _draw_sky(sf::RenderWindow &window, const CEnv &env);
 
-	static void _debug_draw_ground(sf::RenderWindow &window, vec_vecs_t vecGround);
+	static void _debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t &vecGround);
 
 	void _draw_ground(sf::RenderWindow &window) const;
 

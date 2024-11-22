@@ -9,7 +9,7 @@
 
 namespace PHYS
 {
-    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 20;
+    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 2;
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
@@ -182,41 +182,83 @@ namespace PHYS
             b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
     }
 
+    template<typename E_TYPE>
+    bool is_body_in_event(const E_TYPE* event, const void* user_data)
+    {
+        if(!b2Shape_IsValid(event->shapeIdA) || !b2Shape_IsValid(event->shapeIdB)) return false;
+
+        const b2BodyId idA = b2Shape_GetBody(event->shapeIdA);
+        if(b2Body_GetUserData(idA) == user_data) return true;
+
+        const b2BodyId idB = b2Shape_GetBody(event->shapeIdB);
+        if(b2Body_GetUserData(idB) == user_data) return true;
+
+        return false;
+    }
+
     void CPhysCar::_simulation_pos_tick()
     {
-        m_bContactR1 = b2Body_GetContactCapacity(m_Roda1Id) > 0;
-        m_bContactR2 = b2Body_GetContactCapacity(m_Roda2Id) > 0;
+        if(!m_bDead)
+        {
+            const b2ContactEvents contacts = b2World_GetContactEvents(m_World.m_WorldId);
+            for(int i = 0; i < contacts.beginCount; ++i)
+            {
+                const b2ContactBeginTouchEvent* event = contacts.beginEvents + i;
+                if(is_body_in_event(event, &ID_GROUND))
+                {
+                    const bool bContactPeso1 = is_body_in_event(event, &ID_PESO1);
+                    const bool bContactPeso2 = is_body_in_event(event, &ID_PESO2);
+                    m_bContactR1 |= is_body_in_event(event, &ID_RODA1);
+                    m_bContactR2 |= is_body_in_event(event, &ID_RODA2);
 
-        if(!m_bDead && b2Body_GetContactCapacity(m_Peso1Id) > 0)
-        {
-            m_bDead = true;
-            m_dead_reason = "Peso 1";
-        }
-        if(!m_bDead && b2Body_GetContactCapacity(m_Peso2Id) > 0)
-        {
-            m_bDead = true;
-            m_dead_reason = "Peso 2";
-        }
+                    if(bContactPeso1)
+                    {
+                        m_bDead = true;
+                        m_dead_reason = "Peso 1";
+                    }
+                    if(bContactPeso2)
+                    {
+                        m_bDead = true;
+                        m_dead_reason = "Peso 2";
+                    }
+                    if(m_bContactR1)
+                    {
+                        m_acum_contatoR1 += _timeStep;
+                        _last_contact_r1 = _t;
+                    }
+                    if(m_bContactR2)
+                    {
+                        m_acum_contatoR2 += _timeStep;
+                        _last_contact_r2 = _t;
+                    }
+                }
+            }
 
-        // Contato das rodas:
-        if (m_bContactR1)
-        {
-            m_acum_contatoR1 += _timeStep;
-            _last_contact_r1 = _t;
-        }
-        if (m_bContactR2)
-        {
-            m_acum_contatoR2 += _timeStep;
-            _last_contact_r2 = _t;
-        }
+            for(int i = 0; i < contacts.endCount; ++i)
+            {
+                const b2ContactEndTouchEvent* event = contacts.endEvents + i;
+                if(is_body_in_event(event, &ID_GROUND))
+                {
+                    m_bContactR1 &= !is_body_in_event(event, &ID_RODA1);
+                    m_bContactR2 &= !is_body_in_event(event, &ID_RODA2);
+                }
+            }
 
-        _no_contact_time_r1 = _t - _last_contact_r1;
-        _no_contact_time_r2 = _t - _last_contact_r2;
-        // cout << "No contact time R1, R2: " << _no_contact_time_r1 << ", " << _no_contact_time_r2 << endl;
-        if(!m_bDead && (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS || _no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS))
-        {
-            m_bDead = true;
-            m_dead_reason = "No contact";
+
+            _no_contact_time_r1 = _t - _last_contact_r1;
+            _no_contact_time_r2 = _t - _last_contact_r2;
+
+            if(_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS)
+            {
+                m_bDead = true;
+                m_dead_reason = "No contact R1";
+            }
+            if(_no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
+            {
+                m_bDead = true;
+                m_dead_reason = "No contact R2";
+            }
+
         }
 
         if (m_bDead && b2Joint_IsValid(m_Jp1p2Id))

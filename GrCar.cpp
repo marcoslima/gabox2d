@@ -7,6 +7,7 @@
 
 #include "Pen.h"
 #include "SolidBrush.h"
+#include "assets.h"
 
 namespace GUI
 {
@@ -76,15 +77,32 @@ namespace GUI
         const CPen penRoda(sf::Color(64, 64, 64), 0.2);
         const CPen penRodaC(sf::Color(0, 0, 0), 0.2);
 
+        auto text_font = sf::Font();
+        // load it from linux file:
+        text_font.loadFromFile(TTF_FONT_FILE);
+        sf::Text text;
+        text.setFont(text_font);
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::Black);
+        text.setScale(0.05f, -0.05f);
+        text.setOrigin(12, 12);
+
         // Roda 1
         const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
         const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
         DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
+        text.setPosition(_roda1.circle.center.x, _roda1.circle.center.y);
+        text.setString("R1");
+        window.draw(text);
+
 
         // Roda 2
         pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
         pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
         DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
+        text.setPosition(_roda2.circle.center.x, _roda2.circle.center.y);
+        text.setString("R2");
+        window.draw(text);
 
         // Pesos 1 e 2
         const CSolidBrush bshNull(sf::Color(0, 0, 0, 0));
