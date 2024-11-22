@@ -49,13 +49,45 @@ namespace GUI
         window.draw(sky);
     }
 
-    void CGaBox2dView::_draw_ground(sf::RenderWindow &window, const CGaBox2dDoc *pDoc)
+    void CGaBox2dView::_debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t vecGround) {
+        /////////////////////////////////////////////
+        /// Debug ground: vertices
+
+        // Font for the text:
+        auto text_font = sf::Font();
+        // load it from linux file:
+        text_font.loadFromFile("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf");
+
+
+        int i = 0;
+        for (const auto &v: vecGround)
+        {
+            sf::CircleShape circle(0.1);
+            circle.setPosition(v.x, v.y);
+            circle.setFillColor(sf::Color::Red);
+            window.draw(circle);
+
+            // Draw the vertice index:
+            sf::Text text;
+            text.setFont(text_font);
+            text.setString(to_string(i));
+            text.setCharacterSize(24);
+            text.setFillColor(sf::Color::Black);
+            text.setPosition(v.x, v.y);
+            // text.setRotation(90);
+            text.setScale(0.1f, -0.1f);
+            window.draw(text);
+            i++;
+        }
+    }
+
+    void CGaBox2dView::_draw_ground(sf::RenderWindow &window) const
     {
         const CPen penGround(sf::Color(0, 0, 0), 0.1);
         const CSolidBrush bshTransparent(sf::Color::Transparent);
         const CSolidBrush bshGround(sf::Color(32, 128, 32));
 
-        const vec_vecs_t vecGround = pDoc->m_vecGround;
+        const vec_vecs_t vecGround = _pDocument->m_vecGround;
 
         const size_t nSize = vecGround.size();
         if (nSize == 0)
@@ -104,36 +136,7 @@ namespace GUI
 
         window.draw(polygon);
 
-        /////////////////////////////////////////////
-        /// Debug ground: vertices
-
-        // Font for the text:
-        auto text_font = sf::Font();
-        // load it from linux file:
-        text_font.loadFromFile("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf");
-
-
-        int i = 0;
-        for (const auto &v: vecGround)
-        {
-            sf::CircleShape circle(0.1);
-            circle.setPosition(v.x, v.y);
-            circle.setFillColor(sf::Color::Red);
-            window.draw(circle);
-
-            // Draw the vertice index:
-            sf::Text text;
-            text.setFont(text_font);
-            text.setString(to_string(i));
-            text.setCharacterSize(24);
-            text.setFillColor(sf::Color::Black);
-            text.setPosition(v.x, v.y);
-            // text.setRotation(90);
-            text.setScale(0.1f, -0.1f);
-            window.draw(text);
-            i++;
-        }
-
+        if(m_bDrawDebugGround) _debug_draw_ground(window, vecGround);
     }
 
     void CGaBox2dView::_draw_border(sf::RenderWindow &window, const CEnv &env)
@@ -175,7 +178,7 @@ namespace GUI
 
 
         _draw_sky(window, env);
-        _draw_ground(window, pDoc);
+        _draw_ground(window);
         _draw_border(window, env);
         pDoc->GetCar().Draw(window);
 #if 0

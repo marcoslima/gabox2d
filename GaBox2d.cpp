@@ -145,6 +145,10 @@ namespace GUI
             {
                 view.toggleFollowCar();
             }
+            if(ImGui::MenuItem("Draw Ground Debug", nullptr, view.isDebugGround()))
+            {
+                view.toggleDrawDebugGround();
+            }
             ImGui::EndMenu();
         }
         if(ImGui::BeginMenu("Help"))
@@ -172,6 +176,8 @@ namespace GUI
     {
         ImGui::Begin("Info");
         ImGui::Text("Dead reason: %s", view.getDeadReason().c_str());
+        ImGui::Text("Time: %f", view.GetDocument()->GetCar().getT());
+        ImGui::Text("Genes: %s", view.GetDocument()->GetCar().getGenes());
         ImGui::End();
     }
 

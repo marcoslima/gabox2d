@@ -36,6 +36,7 @@ private:
 	bool m_bMoveUp = false;
 	bool m_bMoveDown = false;
 	bool m_bShowHelp = false;
+	bool m_bDrawDebugGround = false;
 
 	CGaBox2dDoc* _pDocument;
 	bool m_bFollowCar = false;
@@ -47,6 +48,8 @@ public:
 	CGa*			getGa();
 	void 			releaseGa();
 	[[nodiscard]] bool isShowHelp() const { return m_bShowHelp; }
+	[[nodiscard]] bool isDebugGround() const {return m_bDrawDebugGround; }
+	void toggleDrawDebugGround(){m_bDrawDebugGround = !m_bDrawDebugGround; }
 
 	void OnDraw();
 
@@ -59,7 +62,9 @@ public:
 	// Implementation
 	static void _draw_sky(sf::RenderWindow &window, const CEnv &env);
 
-	static void _draw_ground(sf::RenderWindow &window, const CGaBox2dDoc *pDoc);
+	static void _debug_draw_ground(sf::RenderWindow &window, vec_vecs_t vecGround);
+
+	void _draw_ground(sf::RenderWindow &window) const;
 
 	static void _draw_border(sf::RenderWindow & window, const MODEL::CEnv & env);
 

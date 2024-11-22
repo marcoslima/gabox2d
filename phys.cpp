@@ -62,11 +62,63 @@ namespace PHYS
         b2CreateChain(world.m_GroundId, &shapeDef);
     }
 
+    void _make_left_wall(const CWorld &world, const MODEL::CEnv &env) {
+        constexpr float tick = 5.0f;
+        b2BodyDef wallDef = b2DefaultBodyDef();
+        wallDef.type = b2_staticBody;
+        const float height = fabs(env._bry - env._tly);
+        const b2Polygon groundBox = b2MakeBox(tick, height);
+        wallDef.position = b2Vec2(env._tlx-tick, (env._bry + env._tly) / 2);
+
+        const b2BodyId wallId = b2CreateBody(world.m_WorldId, &wallDef);
+
+        const b2ShapeDef groundShapeDef = b2DefaultShapeDef();
+        b2CreatePolygonShape(wallId, &groundShapeDef, &groundBox);
+
+        b2Body_SetUserData(wallId, &ID_GROUND);
+    }
+
+    void _make_right_wall(const CWorld &world, const MODEL::CEnv &env) {
+        constexpr float tick = 5.0f;
+        b2BodyDef wallDef = b2DefaultBodyDef();
+        wallDef.type = b2_staticBody;
+        const float height = fabs(env._bry - env._tly);
+        const b2Polygon groundBox = b2MakeBox(tick, height);
+        wallDef.position = b2Vec2(env._brx+tick, (env._bry + env._tly) / 2);
+
+        const b2BodyId wallId = b2CreateBody(world.m_WorldId, &wallDef);
+
+        const b2ShapeDef groundShapeDef = b2DefaultShapeDef();
+        b2CreatePolygonShape(wallId, &groundShapeDef, &groundBox);
+
+        b2Body_SetUserData(wallId, &ID_GROUND);
+    }
+
+    void _make_ceiling(const CWorld &world, const MODEL::CEnv &env) {
+        constexpr float tick = 5.0f;
+        b2BodyDef wallDef = b2DefaultBodyDef();
+        wallDef.type = b2_staticBody;
+        const float width = fabs(env._brx - env._tlx);
+        const b2Polygon groundBox = b2MakeBox(width, tick);
+        wallDef.position = b2Vec2((env._brx + env._tlx) / 2, env._tly+tick);
+
+        const b2BodyId wallId = b2CreateBody(world.m_WorldId, &wallDef);
+
+        const b2ShapeDef groundShapeDef = b2DefaultShapeDef();
+        b2CreatePolygonShape(wallId, &groundShapeDef, &groundBox);
+
+        b2Body_SetUserData(wallId, &ID_GROUND);
+    }
+
+
     void _create_ground(CWorld& world, const MODEL::CEnv& env)
     {
         _create_ground_body(world, env);
 
-        // TODO: Fazer as paredes e o teto.
+        // Paredes e teto:
+        _make_left_wall(world, env);
+        _make_right_wall(world, env);
+        _make_ceiling(world, env);
     }
 
     void buildWorld(const MODEL::CEnv& env, CWorld& world)
