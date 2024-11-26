@@ -692,6 +692,8 @@ namespace GUI
             case sf::Keyboard::F1:
                 m_bShowHelp = !m_bShowHelp;
                 break;
+            case sf::Keyboard::F:
+                toggleFollowCar();
             default:
                 break;
         }

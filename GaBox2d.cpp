@@ -62,6 +62,11 @@ namespace GUI
             ImGui::Text("Repeat current car");
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
+            ImGui::Text("F");
+            ImGui::TableNextColumn();
+            ImGui::Text("Follow car");
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
             ImGui::Text("Q");
             ImGui::TableNextColumn();
             ImGui::Text("Quit");
@@ -141,7 +146,7 @@ namespace GUI
         }
         if(ImGui::BeginMenu("View"))
         {
-            if(ImGui::MenuItem("Follow car", nullptr, view.isFollowCar()))
+            if(ImGui::MenuItem("Follow car\tF", nullptr, view.isFollowCar()))
             {
                 view.toggleFollowCar();
             }
@@ -164,6 +169,7 @@ namespace GUI
                 ImGui::MenuItem("Show help\tF1");
                 ImGui::MenuItem("New random car\tN");
                 ImGui::MenuItem("Repeat current car\tR");
+                ImGui::MenuItem("Follow car\tF");
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
