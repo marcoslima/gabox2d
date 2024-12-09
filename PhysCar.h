@@ -65,13 +65,13 @@ namespace PHYS
 
         // Temporárias durante simulação:
         b2Vec2 _x0;
-        double _t;
+        float _t;
         bool m_bContactR1;
         bool m_bContactR2;
-        double _last_contact_r1;
-        double _last_contact_r2;
-        double _no_contact_time_r1;
-        double _no_contact_time_r2;
+        float _last_contact_r1;
+        float _last_contact_r2;
+        float _no_contact_time_r1;
+        float _no_contact_time_r2;
         b2Vec2 _cVel;
         b2Vec2 _cPos;
 
@@ -84,6 +84,33 @@ namespace PHYS
 
     private:
         void _simulation_pre_tick() const;
+
+        void _register_contact_times();
+
+        void _process_no_contact_time();
+
+        void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
+
+        void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
+
+        void _process_contacts(const b2ContactEvents &contacts);
+
+        void _test_peso(b2BodyId pesoId, const string &name);
+
+        void _test_contacts();
+
+        void _process_contacts();
+
+        void _remove_joints_if_dead();
+
+        void _register_distance_travelled();
+
+        void _calc_average_velocity();
+
+        void _register_time_step();
+
+        void _register_contacts();
+
         void _simulation_pos_tick();
 
         // CContactListener _cl;

@@ -9,7 +9,7 @@
 
 namespace PHYS
 {
-    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 2;
+    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 4;
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
@@ -66,7 +66,7 @@ namespace PHYS
     }
 
 
-    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t& car_def)
+    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def)
     {
         //////////////////////////////////////////////
         // Criação dos objetos:
@@ -76,7 +76,7 @@ namespace PHYS
         m_Peso2Id = CreateRoda(m_World.m_WorldId, car_def.P2, carro._peso2, &ID_PESO2);
     }
 
-    void CPhysCar::_set_torques(const car_t& car_def)
+    void CPhysCar::_set_torques(const car_t &car_def)
     {
         // Torques:
         _trqA = car_def.torque[0];
@@ -87,7 +87,7 @@ namespace PHYS
 
     b2JointId CPhysCar::_create_joint(const b2BodyId bodyA,
                                       const b2BodyId bodyB,
-                                      const car_t& car_def,
+                                      const car_t &car_def,
                                       const int param_index) const
     {
         b2DistanceJointDef jd;
@@ -97,8 +97,8 @@ namespace PHYS
         jd = b2DefaultDistanceJointDef();
         jd.bodyIdA = bodyA;
         jd.bodyIdB = bodyB;
-        jd.localAnchorA = b2Vec2(0, 0);//anchorA;
-        jd.localAnchorB = b2Vec2(0, 0);//anchorB;
+        jd.localAnchorA = b2Vec2(0, 0); //anchorA;
+        jd.localAnchorB = b2Vec2(0, 0); //anchorB;
         jd.collideConnected = false;
         jd.hertz = car_def.freq[param_index];
         jd.dampingRatio = car_def.damp[param_index];
@@ -112,7 +112,7 @@ namespace PHYS
         return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
     }
 
-    void CPhysCar::_create_joints(const car_t& car_def)
+    void CPhysCar::_create_joints(const car_t &car_def)
     {
         m_Jc1c2Id = _create_joint(m_Roda1Id, m_Roda2Id, car_def, 0);
         m_Jc1p1Id = _create_joint(m_Roda1Id, m_Peso1Id, car_def, 1);
@@ -153,6 +153,9 @@ namespace PHYS
         _x0 = getCenter();
         _t = 0;
 
+        m_bContactR1 = false;
+        m_bContactR2 = false;
+
         m_contatoR1 = 0;
         m_contatoR2 = 0;
         m_acum_contatoR1 = 0;
@@ -182,132 +185,177 @@ namespace PHYS
             b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
     }
 
-    template<typename E_TYPE>
-    bool is_body_in_event(const E_TYPE* event, const void* user_data)
+    void CPhysCar::_register_contact_times()
     {
-        if(!b2Shape_IsValid(event->shapeIdA) || !b2Shape_IsValid(event->shapeIdB)) return false;
+        if (m_bContactR1)
+        {
+            m_acum_contatoR1 += _timeStep;
+            _last_contact_r1 = _t;
+        }
 
-        const b2BodyId idA = b2Shape_GetBody(event->shapeIdA);
-        if(b2Body_GetUserData(idA) == user_data) return true;
+        if (m_bContactR2)
+        {
+            m_acum_contatoR2 += _timeStep;
+            _last_contact_r2 = _t;
+        }
 
-        const b2BodyId idB = b2Shape_GetBody(event->shapeIdB);
-        if(b2Body_GetUserData(idB) == user_data) return true;
+        _no_contact_time_r1 = _t - _last_contact_r1;
+        _no_contact_time_r2 = _t - _last_contact_r2;
+    }
 
-        return false;
+    void CPhysCar::_process_no_contact_time()
+    {
+        const float smallest_no_contact_time = std::min(_no_contact_time_r1, _no_contact_time_r2);
+        if (smallest_no_contact_time <= MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            return;
+        }
+
+        if (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            m_bDead = true;
+            m_dead_reason = "No contact R1";
+        }
+        if (_no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            m_bDead = true;
+            m_dead_reason = "No contact R2";
+        }
+    }
+
+    void showTouch(const string &name, const bool bContact, const float touch_strength)
+    {
+        cout << name << " Touch(" << bContact << "): " << touch_strength << endl;
+    }
+
+    void applyTouchIfBody(const b2BodyId bodyId,
+                          const b2BodyId targetBody,
+                          bool &targetFlag,
+                          const string &targetName,
+                          const bool bContact,
+                          const float touch_strength)
+    {
+        if (B2_ID_EQUALS(bodyId, targetBody))
+        {
+            showTouch(targetName, bContact, touch_strength);
+            targetFlag = bContact;
+        }
+    }
+
+    void CPhysCar::_process_touch_on_body(const b2BodyId bodyId, const bool bContact, const float touch_strength)
+    {
+        applyTouchIfBody(bodyId, m_Roda1Id, m_bContactR1, "R1", bContact, touch_strength);
+        applyTouchIfBody(bodyId, m_Roda2Id, m_bContactR2, "R2", bContact, touch_strength);
+    }
+
+    void CPhysCar::_process_contact_data(const b2ContactData &contactData, const b2BodyId bodyId)
+    {
+        const b2Manifold manifold = contactData.manifold;
+        const b2Vec2 normal = manifold.normal;
+        const float touch_strength = b2AbsFloat(b2Length(normal));
+        const bool isContact = touch_strength > 0.9f;
+        _process_touch_on_body(bodyId, isContact, touch_strength);
+    }
+
+    bool is_body_contacting(const b2BodyId bodyId)
+    {
+        const int count = b2Body_GetShapeCount(bodyId);
+        vector<b2ShapeId> shapes(count);
+        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
+        if (shape_count == 0) return false;
+
+        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
+        vector<b2ContactData> contactData(contact_capacity);
+        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
+
+        return contact_count > 0;
+    }
+
+    void CPhysCar::_test_peso(const b2BodyId pesoId, const string &name)
+    {
+        if (is_body_contacting(pesoId))
+        {
+            m_bDead = true;
+            m_dead_reason = name;
+        }
+    }
+
+    void CPhysCar::_test_contacts()
+    {
+        _test_peso(m_Peso1Id, "Peso 1");
+        _test_peso(m_Peso2Id, "Peso 2");
+        m_bContactR1 = is_body_contacting(m_Roda1Id);
+        m_bContactR2 = is_body_contacting(m_Roda2Id);
+    }
+
+    void CPhysCar::_process_contacts()
+    {
+        if (m_bDead) return;
+
+        _test_contacts();
+        _register_contact_times();
+        _process_no_contact_time();
+    }
+
+    void destroyJoint(b2JointId &targetJoint)
+    {
+        b2DestroyJoint(targetJoint);
+        targetJoint = b2_nullJointId;
+    }
+
+    void CPhysCar::_remove_joints_if_dead()
+    {
+        if (!m_bDead || !b2Joint_IsValid(m_Jp1p2Id)) return;
+
+        destroyJoint(m_Jc1c2Id);
+        destroyJoint(m_Jc1p1Id);
+        destroyJoint(m_Jc1p2Id);
+        destroyJoint(m_Jc2p1Id);
+        destroyJoint(m_Jc2p2Id);
+        destroyJoint(m_Jp1p2Id);
+    }
+
+    void CPhysCar::_register_distance_travelled()
+    {
+        m_distancia = std::max(getCenter().x - _x0.x, 0.0f);
+    }
+
+    void CPhysCar::_calc_average_velocity()
+    {
+        m_vm = _t != 0.0f ? m_distancia / _t : 0.0f;
+    }
+
+    void CPhysCar::_register_time_step()
+    {
+        _t += _timeStep;
+    }
+
+    void CPhysCar::_register_contacts()
+    {
+        m_contatoR1 = m_acum_contatoR1;
+        m_contatoR2 = m_acum_contatoR2;
     }
 
     void CPhysCar::_simulation_pos_tick()
     {
-        if(!m_bDead)
-        {
-            const b2ContactEvents contacts = b2World_GetContactEvents(m_World.m_WorldId);
-            for(int i = 0; i < contacts.beginCount; ++i)
-            {
-                const b2ContactBeginTouchEvent* event = contacts.beginEvents + i;
-                if(is_body_in_event(event, &ID_GROUND))
-                {
-                    const bool bContactPeso1 = is_body_in_event(event, &ID_PESO1);
-                    const bool bContactPeso2 = is_body_in_event(event, &ID_PESO2);
-                    m_bContactR1 |= is_body_in_event(event, &ID_RODA1);
-                    m_bContactR2 |= is_body_in_event(event, &ID_RODA2);
-
-                    if(bContactPeso1)
-                    {
-                        m_bDead = true;
-                        m_dead_reason = "Peso 1";
-                    }
-                    if(bContactPeso2)
-                    {
-                        m_bDead = true;
-                        m_dead_reason = "Peso 2";
-                    }
-                    if(m_bContactR1)
-                    {
-                        m_acum_contatoR1 += _timeStep;
-                        _last_contact_r1 = _t;
-                    }
-                    if(m_bContactR2)
-                    {
-                        m_acum_contatoR2 += _timeStep;
-                        _last_contact_r2 = _t;
-                    }
-                }
-            }
-
-            for(int i = 0; i < contacts.endCount; ++i)
-            {
-                const b2ContactEndTouchEvent* event = contacts.endEvents + i;
-                if(is_body_in_event(event, &ID_GROUND))
-                {
-                    m_bContactR1 &= !is_body_in_event(event, &ID_RODA1);
-                    m_bContactR2 &= !is_body_in_event(event, &ID_RODA2);
-                }
-            }
-
-
-            _no_contact_time_r1 = _t - _last_contact_r1;
-            _no_contact_time_r2 = _t - _last_contact_r2;
-
-            if(_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS)
-            {
-                m_bDead = true;
-                m_dead_reason = "No contact R1";
-            }
-            if(_no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
-            {
-                m_bDead = true;
-                m_dead_reason = "No contact R2";
-            }
-
-        }
-
-        if (m_bDead && b2Joint_IsValid(m_Jp1p2Id))
-        {
-            b2DestroyJoint(m_Jc1c2Id);
-            b2DestroyJoint(m_Jc1p1Id);
-            b2DestroyJoint(m_Jc1p2Id);
-            b2DestroyJoint(m_Jc2p1Id);
-            b2DestroyJoint(m_Jc2p2Id);
-            b2DestroyJoint(m_Jp1p2Id);
-
-            m_Jc1c2Id = b2_nullJointId;
-            m_Jc1p1Id = b2_nullJointId;
-            m_Jc1p2Id = b2_nullJointId;
-            m_Jc2p1Id = b2_nullJointId;
-            m_Jc2p2Id = b2_nullJointId;
-            m_Jp1p2Id = b2_nullJointId;
-        }
-
-        m_contatoR1 = m_acum_contatoR1;
-        m_contatoR2 = m_acum_contatoR2;
-
-        const b2Vec2 x = getCenter();
-        m_distancia = x.x - _x0.x;
-        if (m_distancia < 0)
-            m_distancia = 0;
-
-
-        if (_t != 0)
-        {
-            m_vm = m_distancia / _t;
-        } else
-        {
-            m_vm = 0;
-        }
-
-        _t += _timeStep;
+        _process_contacts();
+        _remove_joints_if_dead();
+        _register_contacts();
+        _register_distance_travelled();
+        _calc_average_velocity();
+        _register_time_step();
     }
 
 
     b2Vec2 CPhysCar::getCenter() const
     {
-        const vector<b2Vec2> pos = {
+        const vector pos = {
             b2Body_GetPosition(m_Roda1Id),
             b2Body_GetPosition(m_Roda2Id),
             b2Body_GetPosition(m_Peso1Id),
             b2Body_GetPosition(m_Peso2Id)
         };
-        const vector<float> massa = {
+        const vector massa = {
             b2Body_GetMass(m_Roda1Id),
             b2Body_GetMass(m_Roda2Id),
             b2Body_GetMass(m_Peso1Id),
@@ -320,13 +368,13 @@ namespace PHYS
             pos.end(),
             massa.begin(),
             b2Vec2{0, 0},
-            plus<>(),
+            plus(),
             [](const b2Vec2 &p, const float &m)
             {
                 return m * p;
             }
         );
-        b2Vec2 cm = numerator * invMass;
+        const b2Vec2 cm = numerator * invMass;
         return cm;
     }
 
@@ -385,4 +433,4 @@ namespace PHYS
         }
 #endif
     }
-}; //namespace PHYS
+}
