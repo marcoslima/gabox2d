@@ -3,8 +3,6 @@
 #include <imgui.h>
 
 #include "EditorChaoDlg.h"
-#include <fstream>
-#include <sstream>
 #include "devutils.h"
 using namespace std;
 using namespace DevUtils;
@@ -14,15 +12,16 @@ namespace GUI
 {
     // CEditorChaoDlg dialog
     CEditorChaoDlg::CEditorChaoDlg()
-        : m_World(), m_dDxMedia(0)
-          , m_dDxStdev(10)
-          , m_dDxOffset(50)
-          , m_dDyMedia(0)
-          , m_dDyStdev(3)
-          , m_dDyOffset(0)
-          , m_dSinPhi(0)
-          , m_dSinOmega(0)
-          , m_dSinA(0)
+        : m_World()
+          , m_fDxMedia(0)
+          , m_fDxStdev(10)
+          , m_fDxOffset(50)
+          , m_fDyMedia(0)
+          , m_fDyStdev(3)
+          , m_fDyOffset(0)
+          , m_fSinPhi(0)
+          , m_fSinOmega(0)
+          , m_fSinA(0)
           , m_nTlx(-100)
           , m_nTly(500)
           , m_nBrx(500)
@@ -84,16 +83,19 @@ namespace GUI
         // bry				= str2dbl(m_strBry		);
 
         m_World.set(m_nSeed,
-                    m_dDxMedia, m_dDxStdev, m_dDxOffset,
-                    m_dDyMedia, m_dDyStdev, m_dDyOffset,
-                    m_dSinPhi, m_dSinOmega, m_dSinA,
-                    m_nTlx, m_nTly, m_nBrx, m_nBry);
+                    m_fDxMedia, m_fDxStdev, m_fDxOffset,
+                    m_fDyMedia, m_fDyStdev, m_fDyOffset,
+                    m_fSinPhi, m_fSinOmega, m_fSinA,
+                    static_cast<float>(m_nTlx),
+                    static_cast<float>(m_nTly),
+                    static_cast<float>(m_nBrx),
+                    static_cast<float>(m_nBry));
 
         m_vecVecs.clear();
 
         m_wndPreview.m_env = m_World;
-        m_wndPreview.m_vecTl = b2Vec2(m_nTlx, m_nTly);
-        m_wndPreview.m_vecBr = b2Vec2(m_nBrx, m_nBry);
+        m_wndPreview.m_vecTl = b2Vec2(static_cast<float>(m_nTlx), static_cast<float>(m_nTly));
+        m_wndPreview.m_vecBr = b2Vec2(static_cast<float>(m_nBrx), static_cast<float>(m_nBry));
 
         m_wndPreview.Invalidate();
     }
@@ -173,7 +175,11 @@ namespace GUI
         // OnBnClickedCriar();
     }
 
-    void DragDouble(const char *label, void *p_data, float v_speed, const void *p_min, const void *p_max,
+    void DragDouble(const char *label,
+                    void *p_data,
+                    const float v_speed,
+                    const void *p_min,
+                    const void *p_max,
                     const char *format)
     {
         ImGui::PushItemWidth(-1.0e-38f);
@@ -181,7 +187,11 @@ namespace GUI
         ImGui::PopItemWidth();
     }
 
-    void DragSigned(const char *label, void *p_data, float v_speed, const void *p_min, const void *p_max,
+    void DragSigned(const char *label,
+                    void *p_data,
+                    const float v_speed,
+                    const void *p_min,
+                    const void *p_max,
                     const char *format)
     {
         ImGui::PushItemWidth(-1.0e-38f);
@@ -191,9 +201,9 @@ namespace GUI
 
     void CEditorChaoDlg::RenderDimensoes()
     {
-        ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
-                                 | ImGuiTableFlags_NoBordersInBodyUntilResize
-                                 | ImGuiTableFlags_NoHostExtendX;
+        constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
+                                           | ImGuiTableFlags_NoBordersInBodyUntilResize
+                                           | ImGuiTableFlags_NoHostExtendX;
 
         ImGui::BeginGroup();
         if (ImGui::BeginTable("table", 4, flags1))
@@ -208,21 +218,21 @@ namespace GUI
             ImGui::TableNextColumn();
             ImGui::Text("dx");
             ImGui::TableNextColumn();
-            DragDouble("##a", &m_dDxMedia, 0.01f, &f64_zero, nullptr, "%.1f");
+            DragDouble("##a", &m_fDxMedia, 0.01f, &f64_zero, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##b", &m_dDxStdev, 0.01f, &f64_zero, nullptr, "%.1f");
+            DragDouble("##b", &m_fDxStdev, 0.01f, &f64_zero, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##c", &m_dDxOffset, 0.01f, nullptr, nullptr, "%.1f");
+            DragDouble("##c", &m_fDxOffset, 0.01f, nullptr, nullptr, "%.1f");
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::Text("dy");
             ImGui::TableNextColumn();
-            DragDouble("##d", &m_dDyMedia, 0.01f, nullptr, nullptr, "%.1f");
+            DragDouble("##d", &m_fDyMedia, 0.01f, nullptr, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##e", &m_dDyStdev, 0.01f, &f64_zero, nullptr, "%.1f");
+            DragDouble("##e", &m_fDyStdev, 0.01f, &f64_zero, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##f", &m_dDyOffset, 0.01f, nullptr, nullptr, "%.1f");
+            DragDouble("##f", &m_fDyOffset, 0.01f, nullptr, nullptr, "%.1f");
             ImGui::EndTable();
         }
         ImGui::EndGroup();
@@ -239,9 +249,9 @@ namespace GUI
 
     void CEditorChaoDlg::RenderOcilador()
     {
-        ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
-                                 | ImGuiTableFlags_NoBordersInBodyUntilResize
-                                 | ImGuiTableFlags_NoHostExtendX;
+        constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
+                                           | ImGuiTableFlags_NoBordersInBodyUntilResize
+                                           | ImGuiTableFlags_NoHostExtendX;
 
         ImGui::BeginGroup();
         if (ImGui::BeginTable("ocilador", 4, flags1))
@@ -256,11 +266,11 @@ namespace GUI
             ImGui::TableNextColumn();
             ImGui::Text("sen");
             ImGui::TableNextColumn();
-            DragDouble("##g", &m_dSinPhi, .5f, nullptr, nullptr, "%.1f");
+            DragDouble("##g", &m_fSinPhi, .5f, nullptr, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##h", &m_dSinOmega, .5f, nullptr, nullptr, "%.1f");
+            DragDouble("##h", &m_fSinOmega, .5f, nullptr, nullptr, "%.1f");
             ImGui::TableNextColumn();
-            DragDouble("##i", &m_dSinA, .5f, nullptr, nullptr, "%.1f");
+            DragDouble("##i", &m_fSinA, .5f, nullptr, nullptr, "%.1f");
             ImGui::EndTable();
         }
         ImGui::EndGroup();
@@ -268,9 +278,9 @@ namespace GUI
 
     void CEditorChaoDlg::RenderAmbiente()
     {
-        ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
-                                 | ImGuiTableFlags_NoBordersInBodyUntilResize
-                                 | ImGuiTableFlags_NoHostExtendX;
+        constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
+                                           | ImGuiTableFlags_NoBordersInBodyUntilResize
+                                           | ImGuiTableFlags_NoHostExtendX;
 
         ImGui::BeginGroup();
         ImGui::Text("Ambiente");
@@ -303,7 +313,7 @@ namespace GUI
 
     void CEditorChaoDlg::RenderButtons()
     {
-        ImVec2 size = ImVec2(100, 0);
+        constexpr auto size = ImVec2(100, 0);
         ImGui::BeginGroup();
         ImGui::Button("Criar", size);
         ImGui::Button("Salvar", size);
@@ -316,7 +326,7 @@ namespace GUI
         ImGui::EndGroup();
     }
 
-    void RenderHorizontalSpace(float size = 10)
+    void RenderHorizontalSpace(const float size = 10)
     {
         ImGui::SameLine();
         ImGui::Dummy(ImVec2(size, 0));
@@ -328,7 +338,7 @@ namespace GUI
         ImGui::Text("Seed");
         ImGui::SameLine();
         ImGui::PushItemWidth(80);
-        ImGui::InputInt("##Seed", (int *) &m_nSeed);
+        ImGui::InputInt("##Seed", reinterpret_cast<int *>(&m_nSeed));
         ImGui::PopItemWidth();
         ImGui::SameLine();
         ImGui::Checkbox("Auto-criar", &m_bAutoUpdate);
@@ -358,19 +368,15 @@ namespace GUI
 
     void CEditorChaoDlg::OnInitDialog()
     {
-        static ImGuiTableFlags flags1 = ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBodyUntilResize;
-
-        if (ImGui::BeginPopupModal(_wndName, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal(_wndName, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             RenderDialog();
 
             ImGui::EndPopup();
         }
-
-        return;
     }
 
-    void CEditorChaoDlg::show()
+    void CEditorChaoDlg::show() const
     {
         ImGui::OpenPopup(_wndName);
     }

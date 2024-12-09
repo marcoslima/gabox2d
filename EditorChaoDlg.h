@@ -35,15 +35,15 @@ public:
 
 public:
 	CEnv	m_World;
-	double m_dDxMedia;
-	double m_dDxStdev;
-	double m_dDxOffset;
-	double m_dDyMedia;
-	double m_dDyStdev;
-	double m_dDyOffset;
-	double m_dSinPhi;
-	double m_dSinOmega;
-	double m_dSinA;
+	float m_fDxMedia;
+	float m_fDxStdev;
+	float m_fDxOffset;
+	float m_fDyMedia;
+	float m_fDyStdev;
+	float m_fDyOffset;
+	float m_fSinPhi;
+	float m_fSinOmega;
+	float m_fSinA;
 	void OnBnClickedCriar();
 	void OnBnClickedSalvar();
 	void OnBnClickedLer();
@@ -64,7 +64,7 @@ public:
 	// CSpinButtonCtrl m_cSpinDyo;
 
 	void OnInitDialog();
-	void show();
+	void show() const;
 	void OnEnChangeSeed();
 
 	bool m_bAutoUpdate;

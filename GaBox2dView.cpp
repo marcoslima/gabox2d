@@ -668,7 +668,6 @@ namespace GUI
 
     void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key)
     {
-        const auto pDoc = GetDocument();
         switch (key)
         {
             case sf::Keyboard::Add:
