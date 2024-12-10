@@ -18,11 +18,14 @@ namespace GUI
 
 class CWndPreviewChao
 {
+	sf::RenderWindow m_window;
 
 public:
 	CWndPreviewChao();
 	virtual ~CWndPreviewChao();
 	void SetCenter(int x, int y);
+	void show();
+	void flush();
 
 	void Invalidate(){}
 

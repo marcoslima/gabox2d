@@ -9,45 +9,63 @@ using namespace lmmath;
 
 namespace GUI
 {
-// CWndPreviewChao
+    // CWndPreviewChao
 
 
-CWndPreviewChao::CWndPreviewChao()
-{
-	m_ptCenter = CPoint(0,0);
-	m_vecTl = b2Vec2(-1,-1);
-	m_vecBr = b2Vec2( 1, 1);
-	m_zoom = 1.0;
-}
+    CWndPreviewChao::CWndPreviewChao()
+    {
+        const string name = "Environment preview";
+        m_window.create(sf::VideoMode(800, 600),
+                        name,
+                        sf::Style::Titlebar);
+        m_window.setVisible(false);
+        m_ptCenter = CPoint(0, 0);
+        m_vecTl = b2Vec2(-1, -1);
+        m_vecBr = b2Vec2(1, 1);
+        m_zoom = 1.0;
+    }
 
-CWndPreviewChao::~CWndPreviewChao()
-{
-}
+	void CWndPreviewChao::flush()
+    {
+	    sf::Event event;
+    	while (m_window.pollEvent(event))
+    	{
+
+    	}
+    	m_window.clear(sf::Color::Blue);
+    	m_window.display();
+    }
+
+    void CWndPreviewChao::show()
+    {
+        m_window.setVisible(true);
+    }
+
+    CWndPreviewChao::~CWndPreviewChao() {}
 
 
-
-// CWndPreviewChao message handlers
+    // CWndPreviewChao message handlers
 
 #define sign(a) ((a >= 0)?(1):(-1))
 
-/*
-	Por exemplo, um espa�o orientado com y positivo para cima e x positivo para a direita
+    /*
+        Por exemplo, um espa�o orientado com y positivo para cima e x positivo para a direita
 
-	Um ret�ngulo de altura negativa seria:
+        Um ret�ngulo de altura negativa seria:
 
-	-100,100
+        -100,100
 
-				100,-100
-	x,y = (-100, 100)
-	w,h = ( 200,-200)
+                    100,-100
+        x,y = (-100, 100)
+        w,h = ( 200,-200)
 
-	Para normalizar o ret�ngulo ele deve ser descrito posicionado nas coordenadas
-	menores, e ter largura e altura positivas.
+        Para normalizar o ret�ngulo ele deve ser descrito posicionado nas coordenadas
+        menores, e ter largura e altura positivas.
 
-	Assim, o correto � posicion�-lo em -100,-100 com 200,200
-	Ent�o o y do exemplo deve ser adicionado da altura negativa
-	e ent�o a altura passa � ser positiva
-*/
+        Assim, o correto � posicion�-lo em -100,-100 com 200,200
+        Ent�o o y do exemplo deve ser adicionado da altura negativa
+        e ent�o a altura passa � ser positiva
+    */
 #if 0
 void NormalizeRect(Rect& rc)
 {
@@ -77,7 +95,7 @@ void CWndPreviewChao::OnPaint()
 	Graphics gr(dc.m_hDC);
 
 	Rect rcClient;
-	Point ptScrCenter; 
+	Point ptScrCenter;
 	{
 		CRect rcc;
 		CPoint ptc;
@@ -127,7 +145,7 @@ void CWndPreviewChao::OnPaint()
 	cy = ptScrCenter.Y - m_ptCenter.y * rcWorld.Height / 1000.0;
 	cx *= dZoom;
 	cy *= dZoom;
-	
+
 	Matrix mt( dZoom	,	0		,
 		       0		,	-dZoom	,
 			   cx		,	cy		);
@@ -169,4 +187,23 @@ void CWndPreviewChao::SetCenter(int x, int y)
 }
 #endif
 
-};//namespace GUI
+    void dummy()
+    {
+        unsigned int screenWidth = 800;
+        unsigned int screenHeight = 600;
+        sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Environment preview");
+        window.setFramerateLimit(60);
+
+        while (window.isOpen())
+        {
+            sf::Event event;
+
+            window.clear();
+
+            // VIEW.DRAW
+
+            // VIEW.UPDATE
+            window.display();
+        }
+    }
+}; //namespace GUI
