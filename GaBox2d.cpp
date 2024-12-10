@@ -116,11 +116,11 @@ namespace GUI
             }
             if (ImGui::BeginMenu("Velocidade"))
             {
-                if (ImGui::MenuItem("1x")) {}
-                if (ImGui::MenuItem("2x")) {}
-                if (ImGui::MenuItem("4x")) {}
-                if (ImGui::MenuItem("10x")) {}
-                if (ImGui::MenuItem("100x")) {}
+                if (ImGui::MenuItem("1x")) {view.setVelocidade(1);}
+                if (ImGui::MenuItem("2x")) {view.setVelocidade(2);}
+                if (ImGui::MenuItem("4x")) {view.setVelocidade(4);}
+                if (ImGui::MenuItem("10x")) {view.setVelocidade(10);}
+                if (ImGui::MenuItem("100x")) {view.setVelocidade(100);}
                 ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Repetir"))
@@ -253,7 +253,8 @@ namespace GUI
             {
                 window.close();
             }
-            doc.GetCar().doStep();
+            for (int i = 0; i < view.getVelocidade(); i++)
+                doc.GetCar().doStep();
 
             ImGui::SFML::Update(window, deltaClock.restart());
             ImGui::ShowDemoWindow();
@@ -266,6 +267,7 @@ namespace GUI
             // if(ImGui::Button("Open")) dlgParams.show();
             view.Draw(window);
             ImGui::SFML::Render(window);
+
             window.display();
         }
 

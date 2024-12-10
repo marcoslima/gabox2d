@@ -16,6 +16,12 @@ public:
 	CGaBox2dView();
 
 
+	[[nodiscard]] unsigned getVelocidade() const
+	{return m_nVelocidade;}
+	void setVelocidade(const unsigned nVelocidade) // NOLINT(*-convert-member-functions-to-static)
+	{m_nVelocidade = nVelocidade;}
+
+	[[nodiscard]] bool isGaRunning() const;
 // Attributes
 private:
 	unsigned		m_nVelocidade;
@@ -51,11 +57,9 @@ public:
 	[[nodiscard]] bool isDebugGround() const {return m_bDrawDebugGround; }
 	void toggleDrawDebugGround(){m_bDrawDebugGround = !m_bDrawDebugGround; }
 
-	void OnDraw();
-
 	void ShowHelp();
 
-	bool isFollowCar() const;
+	[[nodiscard]] bool isFollowCar() const;
 
 	void toggleFollowCar();
 
