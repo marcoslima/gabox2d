@@ -392,7 +392,7 @@ namespace PHYS
         m_Jc2p2Id = b2_nullJointId;
         m_Jp1p2Id = b2_nullJointId;
 
-        _timeStep = 1.0f / 50.0f;
+        _timeStep = 1.0f / 60.0f;
         _iterations = 10;
         _bInStep = false;
         m_bDead = false;
