@@ -183,7 +183,7 @@ namespace GUI
                     const char *format)
     {
         ImGui::PushItemWidth(-1.0e-38f);
-        ImGui::DragScalar(label, ImGuiDataType_Double, p_data, v_speed, p_min, p_max, format, 1.0f);
+        ImGui::DragScalar(label, ImGuiDataType_Float, p_data, v_speed, p_min, p_max, format, 1.0f);
         ImGui::PopItemWidth();
     }
 
@@ -371,14 +371,15 @@ namespace GUI
         if (ImGui::BeginPopupModal(_wndName, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             RenderDialog();
-
             ImGui::EndPopup();
+            m_wndPreview.flush();
         }
     }
 
-    void CEditorChaoDlg::show() const
+    void CEditorChaoDlg::show()
     {
         ImGui::OpenPopup(_wndName);
+        m_wndPreview.show();
     }
 
     void CEditorChaoDlg::OnEnChangeSeed()

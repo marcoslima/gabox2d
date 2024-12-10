@@ -64,7 +64,7 @@ public:
 	// CSpinButtonCtrl m_cSpinDyo;
 
 	void OnInitDialog();
-	void show() const;
+	void show();
 	void OnEnChangeSeed();
 
 	bool m_bAutoUpdate;
