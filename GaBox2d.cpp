@@ -82,7 +82,10 @@ namespace GUI
     {
         ImGui::BeginMainMenuBar();
         dlgEditorChao.OnInitDialog();
+        dlgParams.OnInitDialog();
+
         bool bShowEditor = false;
+        bool bShowGaParams = false;
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("New", "Ctrl+N")) {}
@@ -101,7 +104,6 @@ namespace GUI
             if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
             if (ImGui::MenuItem("Ambiente"))
             {
-                // dlgEditorChao.show();
                 bShowEditor = true;
             }
             ImGui::EndMenu();
@@ -116,11 +118,26 @@ namespace GUI
             }
             if (ImGui::BeginMenu("Velocidade"))
             {
-                if (ImGui::MenuItem("1x")) {view.setVelocidade(1);}
-                if (ImGui::MenuItem("2x")) {view.setVelocidade(2);}
-                if (ImGui::MenuItem("4x")) {view.setVelocidade(4);}
-                if (ImGui::MenuItem("10x")) {view.setVelocidade(10);}
-                if (ImGui::MenuItem("100x")) {view.setVelocidade(100);}
+                if (ImGui::MenuItem("1x"))
+                {
+                    view.setVelocidade(1);
+                }
+                if (ImGui::MenuItem("2x"))
+                {
+                    view.setVelocidade(2);
+                }
+                if (ImGui::MenuItem("4x"))
+                {
+                    view.setVelocidade(4);
+                }
+                if (ImGui::MenuItem("10x"))
+                {
+                    view.setVelocidade(10);
+                }
+                if (ImGui::MenuItem("100x"))
+                {
+                    view.setVelocidade(100);
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Repetir"))
@@ -134,7 +151,7 @@ namespace GUI
         {
             if (ImGui::MenuItem("Iniciar GA..."))
             {
-                dlgParams.show();
+                bShowGaParams = true;
             }
             if (ImGui::BeginMenu("Mostrar atual"))
             {
@@ -144,25 +161,25 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
-        if(ImGui::BeginMenu("View"))
+        if (ImGui::BeginMenu("View"))
         {
-            if(ImGui::MenuItem("Follow car\tF", nullptr, view.isFollowCar()))
+            if (ImGui::MenuItem("Follow car\tF", nullptr, view.isFollowCar()))
             {
                 view.toggleFollowCar();
             }
-            if(ImGui::MenuItem("Draw Ground Debug", nullptr, view.isDebugGround()))
+            if (ImGui::MenuItem("Draw Ground Debug", nullptr, view.isDebugGround()))
             {
                 view.toggleDrawDebugGround();
             }
             ImGui::EndMenu();
         }
-        if(ImGui::BeginMenu("Help"))
+        if (ImGui::BeginMenu("Help"))
         {
-            if(ImGui::MenuItem("Show..."))
+            if (ImGui::MenuItem("Show..."))
             {
                 view.ShowHelp();
             }
-            if(ImGui::BeginMenu("Shortcuts..."))
+            if (ImGui::BeginMenu("Shortcuts..."))
             {
                 ImGui::MenuItem("Zoom in/out\t+/-");
                 ImGui::MenuItem("Pan\t<-/->");
@@ -175,6 +192,7 @@ namespace GUI
             ImGui::EndMenu();
         }
         if (bShowEditor) dlgEditorChao.show();
+        if (bShowGaParams) dlgParams.show();
         ImGui::EndMainMenuBar();
     }
 
@@ -188,8 +206,8 @@ namespace GUI
     }
 
     void DrawGui(CGaParamsDlg &dlgParams,
-                  CEditorChaoDlg &dlgEditorChao,
-                  CGaBox2dView &view)
+                 CEditorChaoDlg &dlgEditorChao,
+                 CGaBox2dView &view)
     {
         DrawMenu(dlgParams, dlgEditorChao, view);
 
@@ -258,6 +276,7 @@ namespace GUI
 
             ImGui::SFML::Update(window, deltaClock.restart());
             ImGui::ShowDemoWindow();
+
             window.clear();
 
             // VIEW.DRAW

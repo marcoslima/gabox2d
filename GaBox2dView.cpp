@@ -351,18 +351,19 @@ namespace GUI
 
     void CGaBox2dView::OnGaIniciarga()
     {
-#if 0
-          if (m_bGaRunning)
+        if (m_bGaRunning)
         {
-            // J� est� rodando, ent�o � para parar:
+#if 0
+            // Já está rodando, então é para parar:
             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
                 return;
 
             // Ok, vamos parar:
             CMessageDlg dlgMsg;
             dlgMsg.BeginMessage("Interrompendo GA...", this);
-            SetEvent(_thread_params.m_hStopGa);
-            WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);
+#endif
+            SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
+            WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
             dlgMsg.EndMessage();
 
             m_bGaRunning = false;
@@ -392,7 +393,6 @@ namespace GUI
 
         m_bGaRunning = true;
         _beginthread(fnGa, 0, (void *) &_thread_params);
-#endif
     }
 
     void CGaBox2dView::OnEditPaste()

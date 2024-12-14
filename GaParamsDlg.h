@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include "GaBox2dView.h"
 using namespace std;
 
 namespace GUI
@@ -41,11 +41,21 @@ public:
 
 class CGaParamsDlg : public ga_params_t
 {
-public:
-	CGaParamsDlg();   // standard constructor
+	const char* _wndName = "Parâmetros para o GA";
+	CGaBox2dView &_view;
 
-	void show(void);
-	void draw(void);
+public:
+	explicit CGaParamsDlg(CGaBox2dView& view);   // standard constructor
+	void OnInitDialog();
+	void show() const;
+
+	void RenderLeftGroup();
+
+	void RenderRightGroup();
+
+	void RenderButtons() const;
+
+	void RenderDialog();
 };
 
 };//namespace GUI

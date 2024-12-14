@@ -1,17 +1,33 @@
 #pragma once
 
+#include <atomic>
+
 #include "ga.h"
 #include "GaBox2dDoc.h"
 #include <SFML/Window/Keyboard.hpp>
+
+#include "GaParamsDlg.h"
 
 using namespace GA;
 
 namespace GUI
 {
+// Paramstros para o thread:
+class CThreadParams
+{
+public:
+	HANDLE		m_hStopGa	;	// TODO: Substituir por mutex?
+	HANDLE		m_hGaStopped;	// TODO: Substituir por mutex?
+	// HWND			m_wndNotify	;
+	ga_params_t		m_Params	;
+	// CGaInfo*		m_pGaInfo	;
+	CEnv			m_env		;
+};
 
 // GaBox2dView.h : interface of the CGaBox2dView class
 class CGaBox2dView final
 {
+
 public:
 	CGaBox2dView();
 
@@ -30,6 +46,7 @@ private:
 
 	bool			m_bShowInfoId;
 	bool			m_bShowInfoGaGenes;
+	CThreadParams   _thread_params;
 	bool			m_bWaitingEvolucao;
 
 	// UI:
