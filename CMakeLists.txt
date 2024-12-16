@@ -147,6 +147,7 @@ add_executable(GaBox2d
         GrCar.cpp
         CarDef.cpp
         phys.cpp
+        ga_params.h
 )
 
 

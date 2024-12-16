@@ -1,12 +1,14 @@
 #pragma once
 
 #include <atomic>
+#include <thread>
 
 #include "ga.h"
 #include "GaBox2dDoc.h"
 #include <SFML/Window/Keyboard.hpp>
 
 #include "GaParamsDlg.h"
+#include "ga_params.h"
 
 using namespace GA;
 
@@ -16,13 +18,19 @@ namespace GUI
 class CThreadParams
 {
 public:
-	HANDLE		m_hStopGa	;	// TODO: Substituir por mutex?
-	HANDLE		m_hGaStopped;	// TODO: Substituir por mutex?
+	bool 		m_bStopGa	;
+	bool 		m_bGaStopped;
+	ga_params_t m_Params	;
+	CEnv		m_env		;
+
+	// HANDLE		m_hStopGa	;	// TODO: Substituir por mutex?
+	// HANDLE		m_hGaStopped;	// TODO: Substituir por mutex?
 	// HWND			m_wndNotify	;
 	// ga_params_t		m_Params	;
 	// CGaInfo*		m_pGaInfo	;
-	CEnv			m_env		;
 };
+
+class CGaParamsDlg;
 
 // GaBox2dView.h : interface of the CGaBox2dView class
 class CGaBox2dView final
@@ -46,8 +54,11 @@ private:
 
 	bool			m_bShowInfoId;
 	bool			m_bShowInfoGaGenes;
+
 	CThreadParams   _thread_params;
 	bool			m_bWaitingEvolucao;
+	thread			_ga_thread;
+
 
 	// UI:
 	float m_ZoomFactor = 1.0f;
@@ -102,6 +113,13 @@ public:
 	void OnVelocidade4x();
 	void OnVelocidade10x();
 	void OnVelocidade100x();
+
+	void _stop_ga();
+
+	void _start_ga(const CGaParamsDlg &dlgParams);
+
+	void _show_start_ga_params();
+
 	void OnGaIniciarga();
 	void OnEditCopy() const;
 	void OnEditPaste();

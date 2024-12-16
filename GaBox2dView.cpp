@@ -6,6 +6,7 @@
 #include "SolidBrush.h"
 #include <CDT.hpp>
 #include <imgui.h>
+#include <iostream>
 
 #include "assets.h"
 
@@ -351,10 +352,7 @@ namespace GUI
 #endif
     }
 
-    void CGaBox2dView::OnGaIniciarga()
-    {
-        if (m_bGaRunning)
-        {
+    void CGaBox2dView::_stop_ga() {
 #if 0
             // Já está rodando, então é para parar:
             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
@@ -364,37 +362,48 @@ namespace GUI
             CMessageDlg dlgMsg;
             dlgMsg.BeginMessage("Interrompendo GA...", this);
 #endif
-            // SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
-            // WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
-            // dlgMsg.EndMessage();
+        // SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
+        // WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
+        // dlgMsg.EndMessage();
 
-            m_bGaRunning = false;
+        m_bGaRunning = false;
 
-            // Liberamos os eventos:
-            // CloseHandle(_thread_params.m_hStopGa);
-            // CloseHandle(_thread_params.m_hGaStopped);
+        // Liberamos os eventos:
+        // CloseHandle(_thread_params.m_hStopGa);
+        // CloseHandle(_thread_params.m_hGaStopped);
 
-            // Pronto!
+        // Pronto!
+        return;
+    }
+
+    void CGaBox2dView::_start_ga(const CGaParamsDlg &dlgParams)
+    {
+        _thread_params.m_Params = dlgParams;
+        _thread_params.m_bStopGa = false;
+        _thread_params.m_bGaStopped = false;
+        // _thread_params.m_wndNotify = m_hWnd;
+        // _thread_params.m_pGaInfo = &m_GaInfo;
+        _thread_params.m_env = GetDocument()->m_env;
+
+        m_bGaRunning = true;
+        cout << "Will start GA thread" << endl;
+        // _beginthread(fnGa, 0, (void *) &_thread_params);
+    }
+
+    void CGaBox2dView::_show_start_ga_params() {
+        // Obtemos os par�metros do GA:
+        CGaParamsDlg dlgParams(*this);
+    }
+
+    void CGaBox2dView::OnGaIniciarga()
+    {
+        if (m_bGaRunning)
+        {
+            _stop_ga();
             return;
         }
 
-
-        // Obtemos os par�metros do GA:
-        CGaParamsDlg dlgParams(*this);
-        // if (dlgParams.DoModal() != IDOK)
-        // {
-        //     return;
-        // }
-
-        // _thread_params.m_Params = dlgParams;
-        // _thread_params.m_hStopGa = CreateEvent(NULL, TRUE, FALSE,NULL);
-        // _thread_params.m_hGaStopped = CreateEvent(NULL, TRUE, FALSE,NULL);
-        // _thread_params.m_wndNotify = m_hWnd;
-        // _thread_params.m_pGaInfo = &m_GaInfo;
-        // _thread_params.m_env = GetDocument()->m_env;
-
-        m_bGaRunning = true;
-        // _beginthread(fnGa, 0, (void *) &_thread_params);
+        _show_start_ga_params();
     }
 
     void CGaBox2dView::OnEditCopy() const

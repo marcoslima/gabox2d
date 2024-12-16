@@ -115,19 +115,20 @@ namespace GUI
             }
             if (ImGui::BeginMenu("Velocidade"))
             {
-                if (ImGui::MenuItem("1x"))
+                unsigned current_vel = view.getVelocidade();
+                if (ImGui::MenuItem("1x", nullptr, current_vel == 1))
                 {
                     view.setVelocidade(1);
                 }
-                if (ImGui::MenuItem("2x"))
+                if (ImGui::MenuItem("2x", nullptr, current_vel == 2))
                 {
                     view.setVelocidade(2);
                 }
-                if (ImGui::MenuItem("4x"))
+                if (ImGui::MenuItem("4x", nullptr, current_vel == 4))
                 {
                     view.setVelocidade(4);
                 }
-                if (ImGui::MenuItem("10x"))
+                if (ImGui::MenuItem("10x", nullptr, current_vel == 10))
                 {
                     view.setVelocidade(10);
                 }

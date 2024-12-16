@@ -55,7 +55,7 @@ namespace GUI
 
         if (ImGui::Button("Iniciar"))
         {
-            _view.OnGaIniciarga();
+            _view._start_ga(*this);
             ImGui::CloseCurrentPopup();
         }
     }
