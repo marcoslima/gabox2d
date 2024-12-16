@@ -18,7 +18,7 @@ public:
 	~CCar()= default;
 	void beginSimulate(b2WorldId WorldId);
 
-	static void endSimulate();
+	void endSimulate();
 	void CreateCar(const char* szGenes = nullptr);
 	void DestroyCar();
 	bool doStep();

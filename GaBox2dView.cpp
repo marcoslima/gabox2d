@@ -5,6 +5,8 @@
 #include "Pen.h"
 #include "SolidBrush.h"
 #include <CDT.hpp>
+#include <imgui.h>
+
 #include "assets.h"
 
 using namespace DevUtils;
@@ -12,7 +14,7 @@ using namespace DevUtils;
 namespace GUI
 {
     CGaBox2dView::CGaBox2dView()
-        :   m_nVelocidade(1)
+        : m_nVelocidade(1)
           , m_bGaRunning(false)
           , m_bGaExited(false)
           , m_bShowInfoId(true)
@@ -50,7 +52,8 @@ namespace GUI
         window.draw(sky);
     }
 
-    void CGaBox2dView::_debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t &vecGround) {
+    void CGaBox2dView::_debug_draw_ground(sf::RenderWindow &window, const vec_vecs_t &vecGround)
+    {
         /////////////////////////////////////////////
         /// Debug ground: vertices
 
@@ -137,7 +140,7 @@ namespace GUI
 
         window.draw(polygon);
 
-        if(m_bDrawDebugGround) _debug_draw_ground(window, vecGround);
+        if (m_bDrawDebugGround) _debug_draw_ground(window, vecGround);
     }
 
     void CGaBox2dView::_draw_border(sf::RenderWindow &window, const CEnv &env)
@@ -162,18 +165,18 @@ namespace GUI
         const CEnv env = pDoc->m_env;
         constexpr float move_step = 1.0f;
         constexpr float zoom_step = 1.01f;
-        if(m_bZoomOut)   m_ZoomFactor = min(m_ZoomFactor * zoom_step, 8.0f);
-        if(m_bZoomIn)  m_ZoomFactor = max(m_ZoomFactor / zoom_step, 0.125f);
-        if(m_bMoveLeft) m_view_pos.x -= move_step*m_ZoomFactor;
-        if(m_bMoveRight) m_view_pos.x += move_step*m_ZoomFactor;
-        if(m_bMoveUp)   m_view_pos.y += move_step*m_ZoomFactor;
-        if(m_bMoveDown) m_view_pos.y -= move_step*m_ZoomFactor;
+        if (m_bZoomOut) m_ZoomFactor = min(m_ZoomFactor * zoom_step, 8.0f);
+        if (m_bZoomIn) m_ZoomFactor = max(m_ZoomFactor / zoom_step, 0.125f);
+        if (m_bMoveLeft) m_view_pos.x -= move_step * m_ZoomFactor;
+        if (m_bMoveRight) m_view_pos.x += move_step * m_ZoomFactor;
+        if (m_bMoveUp) m_view_pos.y += move_step * m_ZoomFactor;
+        if (m_bMoveDown) m_view_pos.y -= move_step * m_ZoomFactor;
 
         // View configuration
         const float view_x = m_view_pos.x + (m_bFollowCar ? center_mass.x : 0.0f);
         const float view_y = m_view_pos.y + (m_bFollowCar ? center_mass.y : 0.0f);
         sf::View view(sf::Vector2f(view_x, view_y),
-                      sf::Vector2f(100*m_ZoomFactor, -70*m_ZoomFactor));
+                      sf::Vector2f(100 * m_ZoomFactor, -70 * m_ZoomFactor));
         view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
         window.setView(view);
 
@@ -198,11 +201,10 @@ namespace GUI
     void CGaBox2dView::OnSimulaPlay() const
     {
         const auto pDoc = GetDocument();
-        if(pDoc->m_IsSimulating)
+        if (pDoc->m_IsSimulating)
         {
             pDoc->EndSimulation();
-        }
-        else
+        } else
         {
             pDoc->BeginSimulation();
         }
@@ -235,7 +237,7 @@ namespace GUI
         string strGenes;
         pDoc->GetCar().getGenes(strGenes);
 
-        if(pDoc->m_IsSimulating) OnSimulaPlay();
+        if (pDoc->m_IsSimulating) OnSimulaPlay();
 
         pDoc->GetCar().CreateCar(strGenes.c_str());
 
@@ -362,15 +364,15 @@ namespace GUI
             CMessageDlg dlgMsg;
             dlgMsg.BeginMessage("Interrompendo GA...", this);
 #endif
-            SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
-            WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
-            dlgMsg.EndMessage();
+            // SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
+            // WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
+            // dlgMsg.EndMessage();
 
             m_bGaRunning = false;
 
             // Liberamos os eventos:
-            CloseHandle(_thread_params.m_hStopGa);
-            CloseHandle(_thread_params.m_hGaStopped);
+            // CloseHandle(_thread_params.m_hStopGa);
+            // CloseHandle(_thread_params.m_hGaStopped);
 
             // Pronto!
             return;
@@ -378,27 +380,32 @@ namespace GUI
 
 
         // Obtemos os par�metros do GA:
-        CGaParamsDlg dlgParams;
-        if (dlgParams.DoModal() != IDOK)
-        {
-            return;
-        }
+        CGaParamsDlg dlgParams(*this);
+        // if (dlgParams.DoModal() != IDOK)
+        // {
+        //     return;
+        // }
 
-        _thread_params.m_Params = dlgParams;
-        _thread_params.m_hStopGa = CreateEvent(NULL, TRUE, FALSE,NULL);
-        _thread_params.m_hGaStopped = CreateEvent(NULL, TRUE, FALSE,NULL);
-        _thread_params.m_wndNotify = m_hWnd;
-        _thread_params.m_pGaInfo = &m_GaInfo;
-        _thread_params.m_env = GetDocument()->m_env;
+        // _thread_params.m_Params = dlgParams;
+        // _thread_params.m_hStopGa = CreateEvent(NULL, TRUE, FALSE,NULL);
+        // _thread_params.m_hGaStopped = CreateEvent(NULL, TRUE, FALSE,NULL);
+        // _thread_params.m_wndNotify = m_hWnd;
+        // _thread_params.m_pGaInfo = &m_GaInfo;
+        // _thread_params.m_env = GetDocument()->m_env;
 
         m_bGaRunning = true;
-        _beginthread(fnGa, 0, (void *) &_thread_params);
+        // _beginthread(fnGa, 0, (void *) &_thread_params);
+    }
+
+    void CGaBox2dView::OnEditCopy() const
+    {
+        ImGui::SetClipboardText(GetDocument()->GetCar().getGenes());
     }
 
     void CGaBox2dView::OnEditPaste()
     {
-#if 0
-          CString buffer;
+#ifdef WIN32
+        CString buffer;
         COleDataObject obj;
 
         if (obj.AttachClipboard())
@@ -432,22 +439,24 @@ namespace GUI
                 return;
             }
         }
+#endif
+#ifdef IMGUI_VERSION
+        const char *buffer = ImGui::GetClipboardText();
+#endif
 
         // Ok, podemos colar:
         CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
-        if (!pDoc)
-            return;
 
-        m_pdlgIdInfo->set(0, 0, 0, "nenhum");
-        if (m_nSimTimer != 0)
-            OnSimulaPlay();
+        // m_pdlgIdInfo->set(0, 0, 0, "nenhum");
+        // if (m_nSimTimer != 0)
+        //     OnSimulaPlay();
 
+        pDoc->GetCar().endSimulate();
         pDoc->GetCar().CreateCar(buffer);
+        pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
 
-        if (m_nSimTimer == 0)
-            OnSimulaPlay();
-#endif
+        // if (m_nSimTimer == 0)
+        //     OnSimulaPlay();
     }
 
     void CGaBox2dView::OnMostrarMelhor()
@@ -703,33 +712,64 @@ namespace GUI
         const auto pDoc = GetDocument();
         switch (key)
         {
+            case sf::Keyboard::Num1:
+                OnVelocidade1x();
+                break;
+            case sf::Keyboard::Num2:
+                OnVelocidade2x();
+                break;
+            case sf::Keyboard::Num4:
+                OnVelocidade4x();
+                break;
+            case sf::Keyboard::Num0:
+                OnVelocidade10x();
+                break;
+            case sf::Keyboard::Hyphen:
+                OnVelocidadeMenos();
+                break;
+            case sf::Keyboard::Equal:
+                OnVelocidadeMais();
+                break;
             case sf::Keyboard::N:
                 OnSimulaReset();
-            break;
+                break;
             case sf::Keyboard::R:
                 OnSimulaRepetir();
-            break;
+                break;
             case sf::Keyboard::Q:
                 pDoc->Quit();
                 break;
             case sf::Keyboard::Add:
                 m_bZoomIn = false;
                 break;
+
+            case sf::Keyboard::C:
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+                {
+                    OnEditCopy();
+                }
+                break;
+            case sf::Keyboard::V:
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+                {
+                    OnEditPaste();
+                }
+                break;
             case sf::Keyboard::Subtract:
                 m_bZoomOut = false;
                 break;
             case sf::Keyboard::Left:
                 m_bMoveLeft = false;
-            break;
+                break;
             case sf::Keyboard::Right:
                 m_bMoveRight = false;
-            break;
+                break;
             case sf::Keyboard::Up:
                 m_bMoveUp = false;
-            break;
+                break;
             case sf::Keyboard::Down:
                 m_bMoveDown = false;
-            break;
+                break;
             default:
                 break;
         }

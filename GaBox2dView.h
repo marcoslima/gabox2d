@@ -19,7 +19,7 @@ public:
 	HANDLE		m_hStopGa	;	// TODO: Substituir por mutex?
 	HANDLE		m_hGaStopped;	// TODO: Substituir por mutex?
 	// HWND			m_wndNotify	;
-	ga_params_t		m_Params	;
+	// ga_params_t		m_Params	;
 	// CGaInfo*		m_pGaInfo	;
 	CEnv			m_env		;
 };
@@ -103,6 +103,7 @@ public:
 	void OnVelocidade10x();
 	void OnVelocidade100x();
 	void OnGaIniciarga();
+	void OnEditCopy() const;
 	void OnEditPaste();
 	void OnMostrarMelhor();
 	void OnMostrarQualquer();

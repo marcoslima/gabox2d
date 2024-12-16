@@ -100,12 +100,9 @@ namespace GUI
         }
         if (ImGui::BeginMenu("Edit"))
         {
-            if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
-            if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
-            if (ImGui::MenuItem("Ambiente"))
-            {
-                bShowEditor = true;
-            }
+            if (ImGui::MenuItem("Copy", "Ctrl+C")) {view.OnEditCopy();}
+            if (ImGui::MenuItem("Paste", "Ctrl+V")) {view.OnEditPaste();}
+            if (ImGui::MenuItem("Ambiente")){bShowEditor = true;}
             ImGui::EndMenu();
         }
 
@@ -243,7 +240,7 @@ namespace GUI
         sf::Clock deltaClock;
         // bool bMouseDown = false;
         // sf::Vector2i ptMouse, lastPtMouse;
-        CGaParamsDlg dlgParams;
+        CGaParamsDlg dlgParams(view);
         CEditorChaoDlg dlgEditorChao;
 
         while (window.isOpen())
