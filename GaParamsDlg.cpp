@@ -8,7 +8,7 @@ namespace GUI
 {
     // CGaParamsDlg dialog
     CGaParamsDlg::CGaParamsDlg(CGaBox2dView &view)
-        : ga_params_t(60, 75, 2, 65, 0, 10, 60)
+        : params{60, 75, 2, 65, 0, 10, 60}
           , _view{view} {}
 
     void CGaParamsDlg::OnInitDialog()
@@ -28,19 +28,19 @@ namespace GUI
     void CGaParamsDlg::RenderLeftGroup()
     {
         ImGui::BeginGroup();
-        InputUint8("Population", &m_nPopulacao);
-        ImGui::SliderFloat("Crossover (%)", &m_fCrossover, 0.0f, 100.0f);
-        InputUint8("Elitism", &m_nElitismo);
-        ImGui::SliderFloat("Mutation (%)", &m_fMutacao, 0.0f, 100.0f);
+        InputUint8("Population", &params.m_nPopulacao);
+        ImGui::SliderFloat("Crossover (%)", &params.m_fCrossover, 0.0f, 100.0f);
+        InputUint8("Elitism", &params.m_nElitismo);
+        ImGui::SliderFloat("Mutation (%)", &params.m_fMutacao, 0.0f, 100.0f);
         ImGui::EndGroup();
     }
 
     void CGaParamsDlg::RenderRightGroup()
     {
         ImGui::BeginGroup();
-        InputUint8("Alienism", &m_nAlienismo);
-        InputUint8("Mutation Interval", &m_nMutInt);
-        ImGui::InputFloat("Max Time", &m_fMaxT);
+        InputUint8("Alienism", &params.m_nAlienismo);
+        InputUint8("Mutation Interval", &params.m_nMutInt);
+        ImGui::InputFloat("Max Time", &params.m_fMaxT);
         ImGui::EndGroup();
     }
 

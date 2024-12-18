@@ -7,12 +7,13 @@ namespace GUI
 {
     // CGaParamsDlg dialog
     class CGaBox2dView;
-    class CGaParamsDlg : public ga_params_t
+    class CGaParamsDlg
     {
         const char *_wndName = "Parâmetros para o GA";
         CGaBox2dView &_view;
 
     public:
+        ga_params_t params;
         explicit CGaParamsDlg(CGaBox2dView &view); // standard constructor
         CGaParamsDlg() = delete;
         void OnInitDialog();

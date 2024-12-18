@@ -18,8 +18,7 @@ namespace GUI
 class CThreadParams
 {
 public:
-	bool 		m_bStopGa	;
-	bool 		m_bGaStopped;
+	atomic_bool	m_bStopGa	;
 	ga_params_t m_Params	;
 	CEnv		m_env		;
 

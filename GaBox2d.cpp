@@ -190,7 +190,7 @@ namespace GUI
             ImGui::EndMenu();
         }
         if (bShowEditor) dlgEditorChao.show();
-        if (bShowGaParams) dlgParams.show();
+        if (bShowGaParams) view.OnGaIniciarga();
         ImGui::EndMainMenuBar();
     }
 

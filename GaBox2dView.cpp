@@ -7,6 +7,7 @@
 #include <CDT.hpp>
 #include <imgui.h>
 #include <iostream>
+#include <mutex>
 
 #include "assets.h"
 
@@ -272,8 +273,14 @@ namespace GUI
 
     void fnGa(void *pParam)
     {
+        auto tp = static_cast<CThreadParams *>(pParam);
+
+        while (!tp->m_bStopGa.load())
+        {
+            this_thread::sleep_for(chrono::seconds(3));
+        }
+
 #if 0
-        CThreadParams *tp = (CThreadParams *) pParam;
         HANDLE hStopGA = tp->m_hStopGa;
         HANDLE hGaStopped = tp->m_hGaStopped;
         HWND hWndNotify = tp->m_wndNotify;
@@ -361,38 +368,30 @@ namespace GUI
             // Ok, vamos parar:
             CMessageDlg dlgMsg;
             dlgMsg.BeginMessage("Interrompendo GA...", this);
+            dlgMsg.EndMessage();
 #endif
-        // SetEvent(_thread_params.m_hStopGa); // TODO: Substituir por mutex?
-        // WaitForSingleObject(_thread_params.m_hGaStopped, INFINITE);	// TODO: Substituir por mutex?
-        // dlgMsg.EndMessage();
 
-        m_bGaRunning = false;
-
-        // Liberamos os eventos:
-        // CloseHandle(_thread_params.m_hStopGa);
-        // CloseHandle(_thread_params.m_hGaStopped);
-
-        // Pronto!
-        return;
+        _thread_params.m_bStopGa.store(true);
+        _ga_thread.join();
     }
 
     void CGaBox2dView::_start_ga(const CGaParamsDlg &dlgParams)
     {
-        _thread_params.m_Params = dlgParams;
+        _thread_params.m_Params = dlgParams.params;
         _thread_params.m_bStopGa = false;
-        _thread_params.m_bGaStopped = false;
         // _thread_params.m_wndNotify = m_hWnd;
         // _thread_params.m_pGaInfo = &m_GaInfo;
         _thread_params.m_env = GetDocument()->m_env;
 
         m_bGaRunning = true;
-        cout << "Will start GA thread" << endl;
-        // _beginthread(fnGa, 0, (void *) &_thread_params);
+        _ga_thread = thread(fnGa, &_thread_params);
     }
 
     void CGaBox2dView::_show_start_ga_params() {
-        // Obtemos os par�metros do GA:
+        // Obtemos os parâmetros do GA:
         CGaParamsDlg dlgParams(*this);
+        dlgParams.OnInitDialog();
+        dlgParams.show();
     }
 
     void CGaBox2dView::OnGaIniciarga()
