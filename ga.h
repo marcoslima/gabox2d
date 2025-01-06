@@ -1,7 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <string>
 #include "lmFisica.h"
+#include "CRandom.h"
 using namespace std;
 using namespace LmFisica;
 
@@ -13,8 +15,8 @@ typedef vector<double> vec_double_t;
 
 namespace GA
 {
-    float random(float aMin, float aMax);
-
+    extern CRandom random;
+    
     typedef vector<string> vec_cstr_t;
     typedef pair<size_t, CCar> melhor_t;
     typedef vector<melhor_t> vec_melhores_t;
@@ -22,48 +24,48 @@ namespace GA
 
     class CGa
     {
-        // Par�metros para o algoritmo gen�tico
-        double _max_t; // Tempo m�ximo de simula��o
-        size_t _populacao; // N�mero de indiv�duos por gera��o
-        size_t _elitismo; // Quantos indiv�duos v�o para gera��o seguinte inalterados
-        size_t _alienismo; // N�mero de indiv�uos rand�micos inseridos � cada gera��o
-        size_t _mut_int; // A muta��o ser� +/- _mut_int numa letra
-        double _crossover; // Percentual de probabilidade de ocorrer crossover
-        double _mutacao; // Percentual de probabilidade de ocorrer muta��o
-        CCar m_carWinner; // Indiv�duo mais adaptado da gera��o atual (Objeto CCar)
+        // Parâmetros para o algoritmo genético
+        float  _max_t; // Tempo máximo de simulação
+        size_t _populacao; // Número de indivíduos por geração
+        size_t _elitismo; // Quantos indivíduos vão para geração seguinte inalterados
+        size_t _alienismo; // Número de indivíduos randômicos inseridos a cada geração
+        size_t _mut_int; // A mutação será +/- _mut_int numa letra
+        float  _crossover; // Percentual de probabilidade de ocorrer crossover
+        float  _mutacao; // Percentual de probabilidade de ocorrer mutação
+        CCar   m_carWinner; // Indivíduo mais adaptado da geração atual (Objeto CCar)
 
         // Acumuladores do algoritmo
-        size_t _geracao; // Gera��o atual
+        size_t _geracao; // Geração atual
 
-        // Sinaliza��o de extin��o em massa:
+        // Sinalização de extinção em massa:
         bool _bMassExtintion;
 
-        // Individuo para ser incluido na pr�xima gera��o:
+        // Individuo para ser incluido na próxima geração:
         string _strId2Include;
 
-        // Controle de acesso � estruturas internas da classe
+        // Controle de acesso às estruturas internas da classe
         // CRITICAL_SECTION	m_cs;
 
-        // Armazenamento dos indiv�duos
-        // Popula��o (objetos CCar)
+        // Armazenamento dos indivíduos
+        // População (objetos CCar)
         lst_car_t m_populacao;
 
-        // Nova popula��o (sequ�ncias de genes)
+        // Nova população (sequências de genes)
         vec_cstr_t m_nova;
 
         vec_double_t _vec_select,
-                _vec_crossover,
-                _vec_mutate,
-                _vec_advance;
+                     _vec_crossover,
+                     _vec_mutate,
+                     _vec_advance;
         // CFile _fileLog1;
         size_t _nCount;
         bool _bLogOpenned;
 
     public:
-        // Hist�rico de melhoramentos
+        // Histórico de melhoramentos
         vec_melhores_t m_melhores;
 
-        // Fun��es internas
+        // Funções internas
     private:
         void _cria_populacao();
         void _1Select();
@@ -78,31 +80,31 @@ namespace GA
 
         ~CGa();
 
-        // Especifica��o dos par�metros do GA
+        // Especificação dos parâmetros do GA
         void setParams(size_t nPopulacao = 90,
                        size_t nElitismo = 1,
-                       double crossover = 70,
-                       double mutacao = 65,
+                       float crossover = 70,
+                       float mutacao = 65,
                        size_t nAlienismo = 0,
                        size_t nMutInt = 5,
-                       double dMax_t = 60);
+                       float dMax_t = 60);
 
         // Inicia o algoritmo
         void BeginEvolve();
 
-        // Testa e ordena os indiv�duos
-        void Ordena(b2WorldId WorldId, HANDLE hStop);
+        // Testa e ordena os indivíduos
+        void Ordena(b2WorldId worldId, atomic<bool>& stop_ga);
 
-        // Seleciona, cruza, muta e passa para gera��o seguinte
+        // Seleciona, cruza, muta e passa para geração seguinte
         void Step();
 
-        // Comanda a extin��o em massa para a pr�xima gera��o
+        // Comanda a extinção em massa para a próxima geração
         void MassExtinctionEvent();
 
-        // Inclui um indiv�duo na pr�xima gera��o
+        // Inclui um indivíduo na próxima geração
         void IncludeId(string strGenes);
 
-        // Copia a popula��o para um vector
+        // Copia a população para um vector
         void CopyPopulacao(lst_car_t *pTarget);
 
         // Queries
@@ -121,6 +123,6 @@ namespace GA
             return _geracao;
         }
 
-        bool OpenLogFile();
+        // bool OpenLogFile();
     };
 }

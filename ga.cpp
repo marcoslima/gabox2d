@@ -1,32 +1,36 @@
-#if 0
-
 #include <algorithm>
 using namespace std;
-#include <mersenne.h>
-#include <cronometro.h>
+#include "CCronometro.h"
+#include "CRandom.h"
 #include "ga.h"
-
-MTRand mrand;
 
 namespace GA
 {
 
-
-float random(float aMin, float aMax)
-{
-	return (float)(aMin + mrand.rand(aMax-aMin));
-}
+CRandom random{unsigned(time(0))};
 
 CGa::CGa()
+	: _max_t(0),
+	_populacao(0),
+	_elitismo(0),
+	_alienismo(0),
+	_mut_int(0),
+	_crossover(0),
+	_mutacao(0),
+	_geracao(0),
+	_bMassExtintion(false),
+	_nCount(0)
 {
-	InitializeCriticalSection(&m_cs);
+	// InitializeCriticalSection(&m_cs);
 	_bLogOpenned = false;
 }
+
 CGa::~CGa()
 {
-	DeleteCriticalSection(&m_cs);
-	if(_bLogOpenned)
-		_fileLog1.Close();
+	// DeleteCriticalSection(&m_cs);
+
+	// if(_bLogOpenned)
+	// 	_fileLog1.Close();
 }
 
 
@@ -40,11 +44,11 @@ void CGa::_cria_populacao()
 
 void CGa::setParams(	size_t	nPopulacao	, 
 						size_t	nElitismo	, 
-						double	crossover	, 
-						double	mutacao		,
+						float	crossover	, 
+						float	mutacao		,
 						size_t	nAlienismo	,
 						size_t	nMutInt		,
-						double	dMaxT		)
+						float	dMaxT		)
 {
 	_populacao = nPopulacao	;
 	_elitismo  = nElitismo	;
@@ -57,14 +61,14 @@ void CGa::setParams(	size_t	nPopulacao	,
 
 void CGa::BeginEvolve(void)
 {
-	// Cria a popula��o:
+	// Cria a população:
 	_cria_populacao();
 
 	_bMassExtintion = false;
-	_strId2Include.Empty();
+	_strId2Include.clear();
 	_geracao	  = 1;
 
-	_fileLog1.Open("log1.txt",CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite);
+	// _fileLog1.Open("log1.txt",CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite);
 	_nCount = 0;
 	_bLogOpenned = true;
 }
@@ -75,25 +79,25 @@ bool pred(const CCar& left, const CCar& right)
    return left.getPontuacao() < right.getPontuacao();
 }
 
-void CGa::Ordena(b2World *pWorld, HANDLE hStop)
+void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 {
 
-	double pts;
+	float pts;
 
-	// Ordenamos (medi��es)
+	// Ordenamos (medições)
 	lst_car_t::iterator it;
 	for(it = m_populacao.begin();
 		it!= m_populacao.end();
 		it++)
 	{
-		it->Medir(pWorld,_max_t);
+		it->Medir(worldId, _max_t);
 
-		if(WaitForSingleObject(hStop,0) == WAIT_OBJECT_0)break;
+		if(stop_ga.load()) break;
 	}
 
 	// Ajustamos os pontos
-	double c1,c2,v,d,t;
-	double p1,p2,p3,p4,p5;
+	float c1,c2,v,d,t;
+	float p1,p2,p3,p4,p5;
 	for(it = m_populacao.begin();
 		it!= m_populacao.end();
 		it++)
@@ -149,7 +153,7 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 	}
 	else
 	{
-		if(m_melhores[m_melhores.size()-1].second.getGenesCString() != m_carWinner.getGenesCString())
+		if(m_melhores[m_melhores.size()-1].second.getGenesString() != m_carWinner.getGenesString())
 		{
 			m_melhores.push_back(melhor_t(_geracao,m_carWinner));
 		}
@@ -169,20 +173,20 @@ void CGa::_1Select(void)
 		it!= m_populacao.end() && i < _elitismo;
 		it++,i++)
 	{
-		m_nova.push_back(CString("__")+it->getGenesCString());
+		m_nova.push_back(string("__")+it->getGenesString());
 	}
 
 	// Alienismo:
 	for(i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back(CString("__")+(CCar()).getGenesCString());
+		m_nova.push_back(string("__")+(CCar()).getGenesString());
 	}
 
 	// Inclus�o arbitr�ria:
-	if(!_strId2Include.IsEmpty())
+	if(!_strId2Include.empty())
 	{
 		m_nova.push_back(_strId2Include);
-		_strId2Include.Empty();
+		_strId2Include.clear();
 	}
 
 	return;
@@ -190,22 +194,23 @@ void CGa::_1Select(void)
 
 void CGa::_2Crossover(void)
 {
-	size_t i,nId1, nId2, nSize = m_populacao.size();
+	size_t i, nId1, nId2, nSize = m_populacao.size();
 	double nStdev = nSize / 1.0;
 	size_t nMaxIndex = nSize - 1;
-	CString str1, str2, strt;
+	string str1, str2, strt;
 	size_t nCross;
+	size_t zero = 0;
 	lst_car_t::iterator it;
 
 	while(m_nova.size() < _populacao)
 	{
 		// Escolha dos pais:
-		nId1 = (size_t)fabs(mrand.randNorm(0,nStdev));
-		nId2 = (size_t)fabs(mrand.randNorm(0,nStdev));
+		nId1 = random.rand_int(zero, nSize);
+		nId2 = random.rand_int(zero, nSize);
 
 		// Clamp no range permitido
-		nId1 = __min(nMaxIndex,nId1);
-		nId2 = __min(nMaxIndex,nId2);
+		nId1 = std::min(nMaxIndex, nId1);
+		nId2 = std::min(nMaxIndex, nId2);
 
 
 		if(nId1 == nId2)
@@ -213,17 +218,17 @@ void CGa::_2Crossover(void)
 		
 		// Faz crossover?
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str1 = it->getGenesCString();
+		str1 = it->getGenesString();
 
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str2 = it->getGenesCString();
+		str2 = it->getGenesString();
 
-		if(mrand.randInt(100) < _crossover)
+		if(random.rand_int(0, 100) < _crossover)
 		{
-			nCross = 1 + mrand.randInt(GENES-2);
-			strt = str1.Left(nCross);
-			str1 = str2.Left(nCross) + str1.Right(GENES-nCross);
-			str2 = strt + str2.Right(GENES-nCross);
+			nCross = 1 + random.rand_int(zero, static_cast<size_t>(GENES-2));
+			strt = str1.substr(0, nCross);
+			str1 = str2.substr(0, nCross) + str1.substr(GENES-nCross);
+			str2 = strt + str2.substr(GENES-nCross);
 		}
 
 		m_nova.push_back(str1);
@@ -233,29 +238,38 @@ void CGa::_2Crossover(void)
 	return;
 }
 
+bool _do_mutate(float _mutacao)
+{
+	return random.random(0.0, 100.0) < _mutacao;
+}
+
 void CGa::_3Mutate(void)
 {
 	int nMut;
 	char g;
 	size_t i,nSize = m_nova.size();
+	size_t zero = 0;
+	size_t max_gene = static_cast<size_t>(GENES-1);
 	for(i = (_elitismo + _alienismo) ; i < nSize; i++)
 	{
-		if(mrand.rand(100.0) < _mutacao)
-		{
-			// Muta��o:
-			// Ponto da muta��o:
-			nMut = mrand.randInt(GENES-1);
+		if(! _do_mutate(_mutacao))
+			continue;
 
-			VERIFY(m_nova[i].Left(2) != "__");
+		// Mutação:
+		// Ponto da mutação:
+		nMut = random.rand_int(zero, max_gene);
 
-			// Intensidade e dire��o da muta��o:
-			g = (char)(m_nova[i].GetAt(nMut) + mrand.randInt((MTRand::uint32)_mut_int) * (mrand.randInt(1)?(1):(-1)));
+		// VERIFY(m_nova[i].Left(2) != "__");
 
-			if(g < 'A') g = 'A';
-			if(g > 'Z') g = 'Z';
+		// Intensidade e direção da mutação:
+		char intensidade = random.discrete_random<char>(1, _mut_int);
+		char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
+		char mutacao = intensidade * direcao;
+		g = m_nova[i][nMut] + mutacao;
 
-			m_nova[i].SetAt(nMut,g);
-		}
+		g = std::clamp(g, 'A', 'Z');
+
+		m_nova[i][nMut] = g;
 	}
 }
 
@@ -276,10 +290,10 @@ void CGa::_4AdvanceGeneration(void)
 		size_t i,nSize = m_nova.size();
 		for(i = 0; i < nSize && i < _populacao; i++)
 		{
-			if(m_nova[i].Left(2) == "__")
-				m_populacao.push_back(CCar(m_nova[i].Right(m_nova[i].GetLength()-2)));
+			if(m_nova[i].substr(0, 2) == "__")
+				m_populacao.push_back(CCar(m_nova[i].substr(m_nova[i].size()-2).c_str()));
 			else
-				m_populacao.push_back(CCar(m_nova[i]));
+				m_populacao.push_back(CCar(m_nova[i].c_str()));
 		}
 		_geracao++;
 	}
@@ -293,65 +307,17 @@ void CGa::MassExtinctionEvent(void)
 	_bMassExtintion = true;	
 }
 
-void CGa::IncludeId(CString strGenes)
+void CGa::IncludeId(string strGenes)
 {
 	_strId2Include = strGenes;
 }
 
-void CGa::Step(void)
+void CGa::Step()
 {
-	CCronometro cr;
-
-	double select,crossover,mutate,advance;
-	cr.Start();
 	_1Select();
-	select =cr.Get();
-	cr.Start();
 	_2Crossover();
-	crossover = cr.Get();
-	cr.Start();
 	_3Mutate();
-	mutate = cr.Get();
-	cr.Start();
 	_4AdvanceGeneration();
-	advance = cr.Get();
-
-	double m,s;
-	CString strLine,strPart;
-	_vec_select.push_back(select);
-	_vec_crossover.push_back(crossover);
-	_vec_mutate.push_back(mutate);
-	_vec_advance.push_back(advance);
-
-	m = Media<double,double>(_vec_select);
-	s = StdDev<double,double>(_vec_select);
-	Significativos(m,s);
-
-	strPart.Format("%f � %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_crossover);
-	s = StdDev<double,double>(_vec_crossover);
-	Significativos(m,s);
-
-	strPart.Format("%f � %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_mutate);
-	s = StdDev<double,double>(_vec_mutate);
-	Significativos(m,s);
-
-	strPart.Format("%f � %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_advance);
-	s = StdDev<double,double>(_vec_advance);
-	Significativos(m,s);
-
-	strPart.Format("%f � %f\r\n",m,s);
-	strLine += strPart;
-
-	_fileLog1.Write(strLine,strLine.GetLength());
 }
 
 void CGa::CopyPopulacao(lst_car_t *pTarget)
@@ -403,6 +369,4 @@ bool CGa::OpenLogFile(void)
 */
 
 
-};//namespace GA
-
-#endif
+}
