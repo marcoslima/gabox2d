@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.14)
 project("GaBox2d" VERSION 2.0)
 
 # Define C++ standard to use
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # Find SFML library
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
@@ -62,13 +62,17 @@ target_include_directories(imgui-sfml PUBLIC ${IMGUI_PATH})
 ## BOX2D
 # Define the path where the Box2D library will be cloned
 set(BOX2D_PATH ${CMAKE_CURRENT_BINARY_DIR}/box2d)
+message(STATUS ">>>>> BOX2D_PATH: ${BOX2D_PATH}")
+
 
 # Clone the Box2D library from its GitHub repository
 IF (NOT EXISTS "${BOX2D_PATH}")
+    message(STATUS ">>>>> Cloning Box2D library into ${BOX2D_PATH}")
     execute_process(
             COMMAND git clone https://github.com/erincatto/box2d.git ${BOX2D_PATH}
     )
 ELSE ()
+    message(STATUS ">>>>> Pulling Box2D library at ${BOX2D_PATH}")
     execute_process(
             COMMAND git pull
             WORKING_DIRECTORY ${BOX2D_PATH}
@@ -77,11 +81,13 @@ ENDIF ()
 
 # Build the Box2D library
 IF (NOT EXISTS "${BOX2D_PATH}/build")
+    message(STATUS ">>>>> Creating Box2D build directory")
     execute_process(
             COMMAND mkdir ${BOX2D_PATH}/build
     )
 ENDIF ()
 IF (NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
+    message(STATUS ">>>>> Building Box2D library")
     execute_process(
             WORKING_DIRECTORY ${BOX2D_PATH}/build
             COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Debug
@@ -93,9 +99,11 @@ IF (NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
 ENDIF ()
 
 # Add include directories for the Box2D library
+message(STATUS ">>>>> Adding Box2D include directories (${BOX2D_PATH}/include)")
 target_include_directories(imgui PUBLIC ${BOX2D_PATH}/include)
 
 # Add library directory for the Box2D library
+message(STATUS ">>>>> Adding Box2D library directory (${BOX2D_PATH}/build/src)")
 link_directories(${BOX2D_PATH}/build/src)
 ###########################################################
 
@@ -120,7 +128,7 @@ ENDIF ()
 
 # Build the CDT library
 execute_process(
-        COMMAND cmake --build -DCDT_USE_AS_COMPILED_LIBRARY=ON
+        COMMAND cmake --build -DCDT_USE_AS_COMPILED_LIBRARY=OFF
         WORKING_DIRECTORY ${CDT_PATH}/CDT/build
 )
 
@@ -140,16 +148,22 @@ add_executable(GaBox2d
         devutils.cpp
         GaBox2dView.cpp
         GaCar.cpp
+        PhysCar.h
         PhysCar.cpp
-        CNormalSeededRandom.cpp
-        CNormalSeededRandom.h
+        CRandom.h
         car.cpp
         GrCar.cpp
         CarDef.cpp
         phys.cpp
         ga_params.h
+        CCronometro.cpp
+        CCronometro.h
+        ga.cpp
+        ga.h
 )
 
+# Add definition globally
+add_definitions(-UCDT_USE_AS_COMPILED_LIBRARY)
 
 target_include_directories("GaBox2d" PUBLIC ${SFML_INCLUDE_DIRS})
 target_link_libraries("GaBox2d" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd)
