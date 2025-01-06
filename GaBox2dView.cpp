@@ -278,12 +278,15 @@ namespace GUI
 
     void fnGa(void *pParam)
     {
+        cout << "fnGa starting..." << endl;
         auto tp = static_cast<CThreadParams *>(pParam);
 
-        while (!tp->m_bStopGa.load())
-        {
-            this_thread::sleep_for(chrono::seconds(3));
-        }
+        // while (!tp->m_bStopGa.load())
+        // {
+        //     this_thread::sleep_for(chrono::seconds(3));
+        // }
+
+        // cout << "fnGa escaped the waiting." << endl;
 
 
         // HWND hWndNotify = tp->m_wndNotify;
@@ -304,6 +307,7 @@ namespace GUI
                      gaParams.m_nMutInt, // Intensidade da mutação
                      gaParams.m_fMaxT); // Tempo máximo a ser simulado
 
+        cout << "Iniciando evolução..." << endl;
         ga.BeginEvolve();
 
         CCronometro crInfo, crGa;
@@ -383,6 +387,7 @@ namespace GUI
         _thread_params.m_env = GetDocument()->m_env;
 
         m_bGaRunning = true;
+        cout << "Iniciando thread do GA..." << endl;
         _ga_thread = thread(fnGa, &_thread_params);
     }
 

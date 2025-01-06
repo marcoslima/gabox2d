@@ -1,6 +1,7 @@
 #include <random>
 #include <cstring>
 #include "GaCar.h"
+#include <stdexcept>
 
 namespace GA
 {
@@ -43,7 +44,13 @@ namespace GA
         const float inDelta = in_max - in_min;
         const float outDelta = out_max - out_min;
 
-        return out_min + (val - in_min) * outDelta / inDelta;
+        const float result = std::clamp(out_min + (val - in_min) * outDelta / inDelta, out_min, out_max);
+
+        if(result < out_min)
+        {
+            throw std::runtime_error("Valor fora do range");
+        }
+        return result;
     }
 
     float DecodeGen(const int nLen, const char *genes, const float nMin, const float nMax, size_t &nPos)
@@ -69,13 +76,14 @@ namespace GA
     CCarDef::CRodaParams DecodeRoda(const char *genes, size_t &nPos)
     {
         constexpr int nLen = 4;
+        // float x, float y, float r, float dens, float fric, float elas
         return {
-            DecodeGen(nLen, genes, -8, 8, nPos),
-            DecodeGen(nLen, genes, 2, 8, nPos),
-            DecodeGen(nLen, genes, 0.2, 3, nPos),
-            DecodeGen(nLen, genes, 0.1, 10, nPos),
-            DecodeGen(nLen, genes, 0.1, 2, nPos),
-            DecodeGen(nLen, genes, 0, 1, nPos)
+            DecodeGen(nLen, genes, -8, 8, nPos),    // x
+            DecodeGen(nLen, genes, 2, 8, nPos),     // y
+            DecodeGen(nLen, genes, 0.2, 3, nPos),   // radius
+            DecodeGen(nLen, genes, 0.1, 10, nPos),  // densidade
+            DecodeGen(nLen, genes, 0.1, 2, nPos),   // friccao
+            DecodeGen(nLen, genes, 0, 1, nPos)      // elasticidade
         };
     }
 

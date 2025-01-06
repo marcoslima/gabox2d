@@ -3,6 +3,7 @@ using namespace std;
 #include "CCronometro.h"
 #include "CRandom.h"
 #include "ga.h"
+#include <iostream>
 
 namespace GA
 {
