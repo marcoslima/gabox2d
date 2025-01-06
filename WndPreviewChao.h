@@ -7,7 +7,7 @@
 class CPoint
 {
 public:
-	CPoint(int x, int y): X(0), Y(0) {X = x; Y = y;}
+	CPoint(const int x, const int y): X(0), Y(0) {X = x; Y = y;}
 	CPoint(): X(0), Y(0) {}
 	int X;
 	int Y;
