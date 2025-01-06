@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <thread>
 
 #include "ga.h"
@@ -18,7 +17,7 @@ namespace GUI
 class CThreadParams
 {
 public:
-	atomic_bool	m_bStopGa	;
+	atomic<bool>	m_bStopGa	;
 	ga_params_t m_Params	;
 	CEnv		m_env		;
 

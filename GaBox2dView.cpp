@@ -4,12 +4,17 @@
 #include "devutils.h"
 #include "Pen.h"
 #include "SolidBrush.h"
-#include <CDT.hpp>
+#ifndef _CDT_HPP_
+    #include <CDT.hpp>
+    #define _CDT_HPP_
+#endif
 #include <imgui.h>
 #include <iostream>
 #include <mutex>
 
 #include "assets.h"
+#include "CCronometro.h"
+#include "phys.h"
 
 using namespace DevUtils;
 
@@ -280,47 +285,41 @@ namespace GUI
             this_thread::sleep_for(chrono::seconds(3));
         }
 
-#if 0
-        HANDLE hStopGA = tp->m_hStopGa;
-        HANDLE hGaStopped = tp->m_hGaStopped;
-        HWND hWndNotify = tp->m_wndNotify;
+
+        // HWND hWndNotify = tp->m_wndNotify;
         ga_params_t gaParams = tp->m_Params;
-        CGaInfo *pGaInfo = tp->m_pGaInfo;
-        b2World *pWorld = PHYS::buildWorld(&tp->m_env);
+        // CGaInfo *pGaInfo = tp->m_pGaInfo;
+        PHYS::CWorld world;
+        PHYS::buildWorld(tp->m_env, world);
 
         CGa ga;
-        // Preparamos os par�metros do GA:
-        double cross, mut;
-        gaParams.m_strMutacao.Replace(",", ".");
-        gaParams.m_strCrossover.Replace(",", ".");
+        const float cross = gaParams.m_fCrossover;
+        const float mut = gaParams.m_fMutacao;
 
-        cross = atof(gaParams.m_strCrossover);
-        mut = atof(gaParams.m_strMutacao);
-
-        ga.setParams(gaParams.m_nPopulacao, // N�mero de indiv�duos
+        ga.setParams(gaParams.m_nPopulacao, // Número de indivíduos
                      gaParams.m_nElitismo, // Tamanho do elitismo
                      cross, // Probabilidade de crossover
-                     mut, // Probabilidade de muta��o
+                     mut, // Probabilidade de mutação
                      gaParams.m_nAlienismo, // Tamanho do alienismo
-                     gaParams.m_nMutInt, // Intensidade da muta��o
-                     gaParams.m_dMaxT); // Tempo m�ximo � ser simulado
+                     gaParams.m_nMutInt, // Intensidade da mutação
+                     gaParams.m_fMaxT); // Tempo máximo a ser simulado
 
         ga.BeginEvolve();
-        size_t nSize = ga.getPopulacaoLen();
 
         CCronometro crInfo, crGa;
         crInfo.Start();
 
-        // Medi��o da velocidade gera��es por segundo:
+        // Medição da velocidade gerações por segundo:
         double gps = -1;
         int nCount = 0;
         crGa.Start();
 
-        while (WaitForSingleObject(hStopGA, 0) == WAIT_TIMEOUT)
+        while (!tp->m_bStopGa.load())
         {
-            ga.Ordena(pWorld, hStopGA);
+            ga.Ordena(world.m_WorldId, tp->m_bStopGa);
             if (crInfo.Get() > 250)
             {
+#if 0
                 pGaInfo->Lock();
                 pGaInfo->m_geracao = ga.getGeracao();
                 pGaInfo->m_gps = gps;
@@ -340,13 +339,14 @@ namespace GUI
                 pGaInfo->Release();
                 crInfo.Start();
                 PostMessage(hWndNotify,IDM_GA_INFO, 0, 0);
+#endif
             }
             ga.Step();
 
             nCount++;
             if (nCount == 10)
             {
-                gps = 10.0 / crGa.Get(CCronometro::uS);
+                // gps = 10.0 / crGa.Get();
                 nCount = 0;
                 crGa.Start();
             }
@@ -354,9 +354,8 @@ namespace GUI
             //		if(gaParams.m_b
         }
 
-        delete pWorld;
-        SetEvent(hGaStopped);
-#endif
+        // delete pWorld;
+        // SetEvent(hGaStopped);
     }
 
     void CGaBox2dView::_stop_ga() {

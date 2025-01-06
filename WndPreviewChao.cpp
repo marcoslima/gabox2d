@@ -1,9 +1,6 @@
 // WndPreviewChao.cpp : implementation file
 //
-
-#include "GaBox2d.h"
 #include "WndPreviewChao.h"
-#include <float.h>
 #include "lmmath.h"
 using namespace lmmath;
 
