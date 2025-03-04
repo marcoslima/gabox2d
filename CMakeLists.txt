@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
 
+include(FetchContent)
+
 # Define project name and version
 project("GaBox2d" VERSION 2.0)
 
 # Define C++ standard to use
 set(CMAKE_CXX_STANDARD 23)
 
+##########################################
 # Find SFML library
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 
@@ -13,6 +16,7 @@ find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 set(IMGUI_PATH ${CMAKE_CURRENT_BINARY_DIR}/imgui)
 set(IMGUI_SFML_PATH ${IMGUI_PATH}/imgui-sfml)
 
+#########################################################
 # Clone the ImGui library from its GitHub repository
 IF (NOT EXISTS "${IMGUI_PATH}")
     execute_process(
@@ -24,6 +28,7 @@ ELSE ()
     )
 ENDIF ()
 
+#####################################################################################
 # Clone the ImGui-SFML library from its GitHub repository
 IF (EXISTS "${IMGUI_SFML_PATH}")
     execute_process(
@@ -38,7 +43,19 @@ execute_process(
         WORKING_DIRECTORY "${IMGUI_SFML_PATH}"
 )
 
+#########################################
+# Fetch Catch2 test framework:
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.4.0
+)
+FetchContent_MakeAvailable(Catch2)
 
+add_executable(gabox2d_tests tests/test_car.cpp)
+target_link_libraries(gabox2d_tests PRIVATE Catch2::Catch2WithMain GaBox2d)
+
+#########################################################
 # Add the ImGui and ImGui-SFML libraries to the project
 add_library(imgui STATIC
         ${IMGUI_PATH}/imgui.cpp
@@ -133,34 +150,13 @@ execute_process(
 )
 
 # Add include directories for the CDT library
-target_include_directories(imgui PUBLIC ${CDT_PATH}/CDT/include)
+target_include_directories(imgui PUBLIC ${CDT_PATH}/CDT/include include)
 
 ###########################################################
 
-add_executable(GaBox2d
-        GaBox2d.cpp
-        GaParamsDlg.cpp
-        EditorChaoDlg.cpp
-        WndPreviewChao.cpp
-        env.cpp
-        imgui_input_uint8.cpp
-        GaBox2dDoc.cpp
-        devutils.cpp
-        GaBox2dView.cpp
-        GaCar.cpp
-        PhysCar.h
-        PhysCar.cpp
-        CRandom.h
-        car.cpp
-        GrCar.cpp
-        CarDef.cpp
-        phys.cpp
-        ga_params.h
-        CCronometro.cpp
-        CCronometro.h
-        ga.cpp
-        ga.h
-)
+file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
+
+add_executable(GaBox2d ${SOURCES})
 
 # Add definition globally
 add_definitions(-UCDT_USE_AS_COMPILED_LIBRARY)
