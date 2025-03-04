@@ -103,7 +103,7 @@ namespace PHYS
         jd.hertz = car_def.freq[param_index];
         jd.dampingRatio = car_def.damp[param_index];
         jd.enableLimit = true;
-        jd.length = b2Distance(positionA, positionB);
+        jd.length = max(b2Distance(positionA, positionB), 0.01f);
         jd.enableMotor = true;
         jd.motorSpeed = -100;
         jd.enableSpring = true;
