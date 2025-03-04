@@ -5,6 +5,8 @@ using namespace std;
 #include "ga.h"
 #include <iostream>
 
+#define VERIFY(x, msg) if(!(x)) {cout << "FAIL: " << msg << endl;}
+
 namespace GA
 {
 
@@ -80,25 +82,29 @@ bool pred(const CCar& left, const CCar& right)
    return left.getPontuacao() < right.getPontuacao();
 }
 
-void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
 {
-
-	float pts;
-
-	// Ordenamos (medições)
-	lst_car_t::iterator it;
-	for(it = m_populacao.begin();
-		it!= m_populacao.end();
-		it++)
+	for (auto& car : m_populacao) 
 	{
-		it->Medir(worldId, _max_t);
-
-		if(stop_ga.load()) break;
+		try 
+		{
+			car.Medir(worldId, _max_t);
+		} 
+		catch (const std::exception& e) 
+		{
+			std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
+		}
+	
+		// if (stop_ga.load()) break;
 	}
+}
 
-	// Ajustamos os pontos
+void CGa::_do_calc_points()
+{
+	float pts;
 	float c1,c2,v,d,t;
 	float p1,p2,p3,p4,p5;
+	lst_car_t::iterator it;
 	for(it = m_populacao.begin();
 		it!= m_populacao.end();
 		it++)
@@ -110,26 +116,25 @@ void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 		t  = it->getT()			; 
 
 		/*
-			A pontua��o � meio dif�cil por que, para ser absoluta, n�o pode
-			depender da popula��o.
-			Mas se n�o depender, � muito dif�cil normalizar as partes (c1, c2, v, d e t)
-			Sem normalizar, a dist�ncia, por exemplo, que pode ter valores grandes,
-			ser� mais importante que os outros par�metros de avalia��o.
-
-			Para resolver isso, vamos fazer o fitness como sendo a dist�ncia
-			euclidiana de um vetor composto pelos par�metros de avalia��o � um 
+			A pontuação é meio difícil porque, para ser absoluta, não pode
+			depender da população.
+			Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t).
+			Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
+			será mais importante que os outros parâmetros de avaliação.
+			
+			Para resolver isso, vamos fazer o fitness como sendo a distância
+			euclidiana de um vetor composto pelos parâmetros de avaliação a um 
 			vetor constante ideal.
 			
-			O vetor ser� (c1, c2, v, d, t).
-			O vetor objetivo ideal ser�: (t_max,t_max,1000,1000,0).
+			O vetor será (c1, c2, v, d, t).
+			O vetor objetivo ideal será: (t_max, t_max, 1000, 1000, 0).
 			Ou seja, 
-				. o tempo de contato das rodas � o m�ximo poss�vel
-				. A velocidade � a m�xima poss�vel
-				. A dist�ncia percorrida � a m�xima poss�vel
-				. O tempo gasto � o m�nimo. no caso nem � poss�vel, pois � zero.
-
-			Para n�o gastar um sqrt � toa, faremos o quadrado da dist�ncia.
-		*/
+				. o tempo de contato das rodas é o máximo possível
+				. A velocidade é a máxima possível
+				. A distância percorrida é a máxima possível
+				. O tempo gasto é o mínimo. No caso, nem é possível, pois é zero.
+			
+			Para não gastar um sqrt à toa, faremos o quadrado da distância.		*/
 
 		p1 = _max_t - c1;
 		p2 = _max_t - c2;
@@ -144,9 +149,26 @@ void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 
 		it->setPontos(pts);
 	}
+}
 
+void CGa::_do_sort()
+{
+	cout << "n: " << m_populacao.size() << endl;
 	m_populacao.sort(pred);
+}
 
+void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
+{
+	cout << "measuring..." << endl;
+	_do_measures(worldId, stop_ga);
+
+	cout << "calculating points..." << endl;
+	_do_calc_points();
+
+	cout << "sorting..." << endl;
+	_do_sort();
+
+#if 0
 	m_carWinner = *(m_populacao.begin());
 	if(m_melhores.size() == 0)
 	{
@@ -159,37 +181,46 @@ void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 			m_melhores.push_back(melhor_t(_geracao,m_carWinner));
 		}
 	}
+#endif
 
 	return;
 }
 
-void CGa::_1Select(void)
+void CGa::_do_elitism()
 {
-	size_t i;
-
-	// A popula��o j� est� ordenada.
-	// Elitismo:
 	lst_car_t::iterator it;
+	size_t i;
 	for(it = m_populacao.begin(),i = 0;
 		it!= m_populacao.end() && i < _elitismo;
 		it++,i++)
 	{
 		m_nova.push_back(string("__")+it->getGenesString());
 	}
+}
 
-	// Alienismo:
-	for(i = 0; i < _alienismo; i++)
+void CGa::_do_alienism()
+{
+	for(size_t i = 0; i < _alienismo; i++)
 	{
 		m_nova.push_back(string("__")+(CCar()).getGenesString());
 	}
+}
 
-	// Inclus�o arbitr�ria:
+void CGa::_do_manual_include()
+{
 	if(!_strId2Include.empty())
 	{
 		m_nova.push_back(_strId2Include);
 		_strId2Include.clear();
 	}
+}
 
+void CGa::_1Select(void)
+{
+	// A população já está ordenada.
+	_do_elitism();
+	_do_alienism();
+	_do_manual_include();
 	return;
 }
 
@@ -232,6 +263,8 @@ void CGa::_2Crossover(void)
 			str2 = strt + str2.substr(GENES-nCross);
 		}
 
+		VERIFY(str1.size() == GENES, "Crossover: str1.size() == GENES, found: " << str1.size() );
+		VERIFY(str2.size() == GENES, "Crossover: str2.size() == GENES, found: " << str2.size() );
 		m_nova.push_back(str1);
 		m_nova.push_back(str2);
 	}
@@ -246,7 +279,7 @@ bool _do_mutate(float _mutacao)
 
 void CGa::_3Mutate(void)
 {
-	int nMut;
+	size_t nMut;
 	char g;
 	size_t i,nSize = m_nova.size();
 	size_t zero = 0;
@@ -260,7 +293,8 @@ void CGa::_3Mutate(void)
 		// Ponto da mutação:
 		nMut = random.rand_int(zero, max_gene);
 
-		// VERIFY(m_nova[i].Left(2) != "__");
+		VERIFY(m_nova[i].substr(0, 2) != "__", "Mutate: m_nova[i].Left(2) != \"__\"" );
+		VERIFY(m_nova[i].size() == GENES, "Mutate: m_nova[i].size() == GENES, found: " << m_nova[i].size() );
 
 		// Intensidade e direção da mutação:
 		char intensidade = random.discrete_random<char>(1, _mut_int);
@@ -276,10 +310,10 @@ void CGa::_3Mutate(void)
 
 void CGa::_4AdvanceGeneration(void)
 {
-	// Nova gera��o:
+	// Nova geração:
 	m_populacao.clear();
 
-	// Se for para fazer extin��o em massa, criamos aleat�rios no lugar:
+	// Se for para fazer extinção em massa, criamos aleatórios no lugar:
 	if(_bMassExtintion)
 	{
 		_cria_populacao();

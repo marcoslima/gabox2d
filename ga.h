@@ -67,6 +67,12 @@ namespace GA
 
         // Funções internas
     private:
+        void _do_elitism();
+        void _do_alienism();
+        void _do_manual_include();
+        void _do_measures(b2WorldId worldId, atomic<bool> &stop_ga);
+        void _do_calc_points();
+        void _do_sort();
         void _cria_populacao();
         void _1Select();
         void _2Crossover();
