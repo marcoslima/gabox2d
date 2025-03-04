@@ -39,8 +39,8 @@ namespace PHYS
         chainDef.count = vecVertices.size(); // NOLINT(*-narrowing-conversions)
         // chainDef.customColor = b2_colorSteelBlue;
         chainDef.isLoop = true;
-        chainDef.friction = 1.0f;
-        chainDef.restitution = 0.0f;
+        // chainDef.friction = 1.0f;
+        // chainDef.restitution = 0.0f;
 
         return chainDef;
     }
@@ -54,8 +54,8 @@ namespace PHYS
         b2Body_SetUserData(world.m_GroundId, &ID_GROUND);
 
         auto shapeDef = b2DefaultChainDef();
-        shapeDef.friction = 1.0f;
-        shapeDef.restitution = 0.0f;
+        // shapeDef.friction = 1.0f;
+        // shapeDef.restitution = 0.0f;
         shapeDef.points = vecVertices.data();
         shapeDef.count = static_cast<int32_t>(vecVertices.size());
         shapeDef.isLoop = true;
