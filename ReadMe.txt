@@ -1,36 +1,36 @@
 Namespaces do projeto:
 
-1. GUI - Interface gr·fica do programa
-	O que È GUI?
+1. GUI - Interface gr√°fica do programa
+	O que √© GUI?
 	- Dezenhar qualquer coisa;
-	- Obter par‚metros do usu·rio;
+	- Obter par√¢metros do usu√°rio;
 	
-2. GA  - Algoritimo GenÈtico
-	O que È GA?
-	- DefiniÁ„o de indivÌduos;
-	- Cruzamento, seleÁ„o, etc;
-3. Physics - SimulaÁ„o fÌsica do programa
-	O que È Physics?
+2. GA  - Algoritimo Gen√©tico
+	O que √© GA?
+	- Defini√ß√£o de indiv√≠duos (genes);
+	- Cruzamento, sele√ß√£o, etc;
+3. Physics - Simula√ß√£o f√≠sica do programa
+	O que √© Physics?
 	- Acho que tudo relacionado ao box2d, por enquanto. 
-		Ser· que depois podemos trocar por um ODE, por exemplo? ehehehe
+		Ser√° que depois podemos trocar por um ODE, por exemplo? ehehehe
 
 
 A classe CCar tem elementos de GA e elementos de GUI. Como resolver/separar?
 
-Criamos uma classe que sÛ tem GA e uma classe derivada desta que inclui o GUI.
+Criamos uma classe que s√≥ tem GA e uma classe derivada desta que inclui o GUI.
 
 Classe puramente GA: CCar
-	Pode ser usado para evoluir os carros, mas n„o pode ser dezenhado.
+	Pode ser usado para evoluir os carros, mas n√£o pode ser dezenhado.
 	
 Classe derivada com GUI: CGrCar
 	
-IndivÌduo GA:
+Indiv√≠duo GA:
 CGaCar.
 
 Dezenhador do carro:
 CGrCar.
 
-FÌsica do carro:
+F√≠sica do carro:
 CPhysCar.
 
 O carro completo:

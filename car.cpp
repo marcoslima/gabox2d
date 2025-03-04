@@ -1,111 +1,110 @@
-#include <stdafx.h>
 #include "car.h"
 
+#include <iostream>
 
-CCar::CCar()
-:	  CGaCar()
-	, CPhysCar()
-	, CGrCar()
+
+CCar::CCar() = default;
+
+CCar::CCar(const char *szGenes)
+    : CGaCar(szGenes) {}
+
+void CCar::beginSimulate(const b2WorldId WorldId)
 {
+    // Desinstanciamento
+    _destroy();
+
+    // Decodificamos os genes (genes -> carro | string -> CCarDef)
+    _decode();
+
+    // Instanciamento
+    _create(WorldId, _carro);
+
+    // Inicializamos a simulaÃ§Ã£o fÃ­sica:
+    _init_simulation_vars();
 }
 
-CCar::CCar(const char* szGenes)
-: CGaCar(szGenes)
+void CCar::endSimulate()
 {
+    // Liberamos os recursos da phys:
+    _phys_end_simulate();
 }
 
-void CCar::beginSimulate(b2World *pWorld)
+void CCar::CreateCar(const char *szGenes)
 {
-	// Desinstanciamento
-	_destroy();
+    if (b2World_IsValid(m_World.m_WorldId) && b2Body_IsValid(m_Roda1Id))
+        _destroy();
 
-	// Decodificamos os genes (genes -> carro | string -> CCarDef)
-	_decode();
-
-	// Instanciamento
-	_create(pWorld,_carro);
-
-	// Inicializamos a simulação física:
-	_phys_begin_simulate();
+    _init();
+    CGaCar::CreateCar(szGenes);
 }
 
-void CCar::endSimulate(void)
+void CCar::DestroyCar()
 {
-	// Liberamos os recursos da phys:
-	_phys_end_simulate();
+    _destroy();
 }
 
-void CCar::CreateCar(const char* szGenes)
+bool CCar::doStep()
 {
-	if(_pWorld && _pRoda1)
-		_destroy();
+    const bool bRet = _simulation_step();
 
-	_init();
-	CGaCar::CreateCar(szGenes);
+    UpdateGraphicsData();
+
+    return bRet;
 }
 
-void CCar::DestroyCar(void)
+void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
 {
-	_destroy();
+    // b2CircleShape *circle = (b2CircleShape*)pRoda->GetShapeList();
+    b2ShapeId shapes[1];
+    b2Body_GetShapes(RodaId, shapes, 1);
+
+    // b2Vec2	pos  = pRoda->GetPosition() + circle->GetLocalPosition();
+    const auto posRoda = b2Body_GetPosition(RodaId);
+    auto [posCircle, radius] = b2Shape_GetCircle(shapes[0]);
+    // cout << "Translating circle: " << posCircle.x << " " << posCircle.y << " " << radius << endl;
+    const auto [x, y] = posRoda + posCircle;
+    grCircle.center = PointF(x, y);
+    grCircle.radius = radius;
 }
 
-bool CCar::doStep(void)
+void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::gr_roda_t &grRoda, const bool bContact)
 {
-	bool bRet = _simulation_step();
+    TranslateCircle(RodaId, grRoda.circle);
 
-	Phys2Gr();
-
-	return bRet;
+    const auto rotation = b2Body_GetRotation(RodaId);
+    grRoda.angle = b2Rot_GetAngle(rotation);
+    grRoda.touch = bContact;
 }
 
-void TranslateCircle(b2Body* pRoda, GUI::CGrCar::circle_t& grCircle)
+void TranslatePeso(const b2BodyId PesoId, GUI::CGrCar::gr_peso_t &grPeso, const bool bBroke)
 {
-	b2CircleShape *circle = (b2CircleShape*)pRoda->GetShapeList();
-	b2Vec2	pos  = pRoda->GetPosition() + circle->GetLocalPosition();
-
-	grCircle.c = PointF(pos.x,pos.y);
-	grCircle.r = circle->GetRadius();
+    TranslateCircle(PesoId, grPeso.circle);
+    grPeso.broke = bBroke;
 }
 
-void TranslateRoda(b2Body* pRoda, GUI::CGrCar::roda_t& grRoda, bool bContact)
+void CCar::UpdateGraphicsData()
 {
-	TranslateCircle(pRoda,grRoda.c);
-	grRoda.angle = pRoda->GetAngle();
-	grRoda.touch = bContact;
+    TranslateRoda(m_Roda1Id, _roda1, m_bContactR1);
+    TranslateRoda(m_Roda2Id, _roda2, m_bContactR2);
+    TranslatePeso(m_Peso1Id, _peso1, m_bDead);
+    TranslatePeso(m_Peso2Id, _peso2, m_bDead);
+    const auto [x, y] = getCenter();
+    _cm = PointF(x, y);
+    _broke = m_bDead;
 }
 
-void TranslatePeso(b2Body* pPeso, GUI::CGrCar::peso_t& grPeso, bool bBroke)
+void CCar::Medir(const b2WorldId WorldId, const double max_t)
 {
-	TranslateCircle(pPeso,grPeso.c);
-	grPeso.broke = bBroke;
-}
+    beginSimulate(WorldId);
+    const float x0 = getCenter().x;
+    for (int k = 0; _t < max_t; k++)
+    {
+        if (!doStep())
+            break;
+    }
+    const float x = getCenter().x;
+    m_t = _t;
+    Destroy();
 
-void CCar::Phys2Gr(void)
-{
-	TranslateRoda(_pRoda1,_roda1,m_bContactR1);
-	TranslateRoda(_pRoda2,_roda2,m_bContactR2);
-	TranslatePeso(_pPeso1,_peso1,m_bDead);
-	TranslatePeso(_pPeso2,_peso2,m_bDead);
-	b2Vec2 cm = getCenter();
-	_cm = PointF(cm.x,cm.y);
-	_broke = m_bDead;
-}
-
-void CCar::Medir(b2World* pWorld, double max_t)
-{
-	float32 x0,x;
-	int k;
-	
-	beginSimulate(pWorld);
-	x0 = getCenter().x;
-	for(k = 0;  _t < max_t; k++)
-	{
-		if(!doStep())
-			break;
-	}
-	x = getCenter().x;
-	m_t = _t;
-	Destroy();
-
-	m_distancia = x - x0;
+    m_distancia = x - x0;
 }

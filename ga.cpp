@@ -1,31 +1,39 @@
-#include <stdafx.h>
 #include <algorithm>
 using namespace std;
-#include <mersenne.h>
-#include <cronometro.h>
+#include "CCronometro.h"
+#include "CRandom.h"
 #include "ga.h"
+#include <iostream>
 
-MTRand mrand;
+#define VERIFY(x, msg) if(!(x)) {cout << "FAIL: " << msg << endl;}
 
 namespace GA
 {
 
-
-float random(float aMin, float aMax)
-{
-	return (float)(aMin + mrand.rand(aMax-aMin));
-}
+CRandom random{unsigned(time(0))};
 
 CGa::CGa()
+	: _max_t(0),
+	_populacao(0),
+	_elitismo(0),
+	_alienismo(0),
+	_mut_int(0),
+	_crossover(0),
+	_mutacao(0),
+	_geracao(0),
+	_bMassExtintion(false),
+	_nCount(0)
 {
-	InitializeCriticalSection(&m_cs);
+	// InitializeCriticalSection(&m_cs);
 	_bLogOpenned = false;
 }
+
 CGa::~CGa()
 {
-	DeleteCriticalSection(&m_cs);
-	if(_bLogOpenned)
-		_fileLog1.Close();
+	// DeleteCriticalSection(&m_cs);
+
+	// if(_bLogOpenned)
+	// 	_fileLog1.Close();
 }
 
 
@@ -39,11 +47,11 @@ void CGa::_cria_populacao()
 
 void CGa::setParams(	size_t	nPopulacao	, 
 						size_t	nElitismo	, 
-						double	crossover	, 
-						double	mutacao		,
+						float	crossover	, 
+						float	mutacao		,
 						size_t	nAlienismo	,
 						size_t	nMutInt		,
-						double	dMaxT		)
+						float	dMaxT		)
 {
 	_populacao = nPopulacao	;
 	_elitismo  = nElitismo	;
@@ -56,14 +64,14 @@ void CGa::setParams(	size_t	nPopulacao	,
 
 void CGa::BeginEvolve(void)
 {
-	// Cria a população:
+	// Cria a populaÃ§Ã£o:
 	_cria_populacao();
 
 	_bMassExtintion = false;
-	_strId2Include.Empty();
+	_strId2Include.clear();
 	_geracao	  = 1;
 
-	_fileLog1.Open("log1.txt",CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite);
+	// _fileLog1.Open("log1.txt",CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite);
 	_nCount = 0;
 	_bLogOpenned = true;
 }
@@ -74,25 +82,29 @@ bool pred(const CCar& left, const CCar& right)
    return left.getPontuacao() < right.getPontuacao();
 }
 
-void CGa::Ordena(b2World *pWorld, HANDLE hStop)
+void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
 {
-
-	double pts;
-
-	// Ordenamos (medições)
-	lst_car_t::iterator it;
-	for(it = m_populacao.begin();
-		it!= m_populacao.end();
-		it++)
+	for (auto& car : m_populacao) 
 	{
-		it->Medir(pWorld,_max_t);
-
-		if(WaitForSingleObject(hStop,0) == WAIT_OBJECT_0)break;
+		try 
+		{
+			car.Medir(worldId, _max_t);
+		} 
+		catch (const std::exception& e) 
+		{
+			std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
+		}
+	
+		// if (stop_ga.load()) break;
 	}
+}
 
-	// Ajustamos os pontos
-	double c1,c2,v,d,t;
-	double p1,p2,p3,p4,p5;
+void CGa::_do_calc_points()
+{
+	float pts;
+	float c1,c2,v,d,t;
+	float p1,p2,p3,p4,p5;
+	lst_car_t::iterator it;
 	for(it = m_populacao.begin();
 		it!= m_populacao.end();
 		it++)
@@ -104,43 +116,59 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 		t  = it->getT()			; 
 
 		/*
-			A pontuação é meio difícil por que, para ser absoluta, não pode
-			depender da população.
-			Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t)
-			Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
-			será mais importante que os outros parâmetros de avaliação.
-
-			Para resolver isso, vamos fazer o fitness como sendo a distância
-			euclidiana de um vetor composto pelos parâmetros de avaliação à um 
+			A pontuaÃ§Ã£o Ã© meio difÃ­cil porque, para ser absoluta, nÃ£o pode
+			depender da populaÃ§Ã£o.
+			Mas se nÃ£o depender, Ã© muito difÃ­cil normalizar as partes (c1, c2, v, d e t).
+			Sem normalizar, a distÃ¢ncia, por exemplo, que pode ter valores grandes,
+			serÃ¡ mais importante que os outros parÃ¢metros de avaliaÃ§Ã£o.
+			
+			Para resolver isso, vamos fazer o fitness como sendo a distÃ¢ncia
+			euclidiana de um vetor composto pelos parÃ¢metros de avaliaÃ§Ã£o a um 
 			vetor constante ideal.
 			
-			O vetor será (c1, c2, v, d, t).
-			O vetor objetivo ideal será: (t_max,t_max,1000,1000,0).
+			O vetor serÃ¡ (c1, c2, v, d, t).
+			O vetor objetivo ideal serÃ¡: (t_max, t_max, 1000, 1000, 0).
 			Ou seja, 
-				. o tempo de contato das rodas é o máximo possível
-				. A velocidade é a máxima possível
-				. A distância percorrida é a máxima possível
-				. O tempo gasto é o mínimo. no caso nem é possível, pois é zero.
-
-			Para não gastar um sqrt à toa, faremos o quadrado da distância.
-		*/
+				. o tempo de contato das rodas Ã© o mÃ¡ximo possÃ­vel
+				. A velocidade Ã© a mÃ¡xima possÃ­vel
+				. A distÃ¢ncia percorrida Ã© a mÃ¡xima possÃ­vel
+				. O tempo gasto Ã© o mÃ­nimo. No caso, nem Ã© possÃ­vel, pois Ã© zero.
+			
+			Para nÃ£o gastar um sqrt Ã  toa, faremos o quadrado da distÃ¢ncia.		*/
 
 		p1 = _max_t - c1;
 		p2 = _max_t - c2;
 		p3 = 1000 - v;
 		p4 = 1000 - d;
-		p5 = t; // 0 - t = -t, mas como será ao quadrado, deixa t mesmo.
+		p5 = t; // 0 - t = -t, mas como serï¿½ ao quadrado, deixa t mesmo.
 
 		pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
 		
-		// Se quebrou, vale um décimo de um que não quebrou:
+		// Se quebrou, vale um dï¿½cimo de um que nï¿½o quebrou:
 		if(it->m_bDead) pts *= 10;
 
 		it->setPontos(pts);
 	}
+}
 
+void CGa::_do_sort()
+{
+	cout << "n: " << m_populacao.size() << endl;
 	m_populacao.sort(pred);
+}
 
+void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
+{
+	cout << "measuring..." << endl;
+	_do_measures(worldId, stop_ga);
+
+	cout << "calculating points..." << endl;
+	_do_calc_points();
+
+	cout << "sorting..." << endl;
+	_do_sort();
+
+#if 0
 	m_carWinner = *(m_populacao.begin());
 	if(m_melhores.size() == 0)
 	{
@@ -148,63 +176,73 @@ void CGa::Ordena(b2World *pWorld, HANDLE hStop)
 	}
 	else
 	{
-		if(m_melhores[m_melhores.size()-1].second.getGenesCString() != m_carWinner.getGenesCString())
+		if(m_melhores[m_melhores.size()-1].second.getGenesString() != m_carWinner.getGenesString())
 		{
 			m_melhores.push_back(melhor_t(_geracao,m_carWinner));
 		}
 	}
+#endif
 
 	return;
 }
 
-void CGa::_1Select(void)
+void CGa::_do_elitism()
 {
-	size_t i;
-
-	// A população já está ordenada.
-	// Elitismo:
 	lst_car_t::iterator it;
+	size_t i;
 	for(it = m_populacao.begin(),i = 0;
 		it!= m_populacao.end() && i < _elitismo;
 		it++,i++)
 	{
-		m_nova.push_back(CString("__")+it->getGenesCString());
+		m_nova.push_back(string("__")+it->getGenesString());
 	}
+}
 
-	// Alienismo:
-	for(i = 0; i < _alienismo; i++)
+void CGa::_do_alienism()
+{
+	for(size_t i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back(CString("__")+(CCar()).getGenesCString());
+		m_nova.push_back(string("__")+(CCar()).getGenesString());
 	}
+}
 
-	// Inclusão arbitrária:
-	if(!_strId2Include.IsEmpty())
+void CGa::_do_manual_include()
+{
+	if(!_strId2Include.empty())
 	{
 		m_nova.push_back(_strId2Include);
-		_strId2Include.Empty();
+		_strId2Include.clear();
 	}
+}
 
+void CGa::_1Select(void)
+{
+	// A populaÃ§Ã£o jÃ¡ estÃ¡ ordenada.
+	_do_elitism();
+	_do_alienism();
+	_do_manual_include();
 	return;
 }
 
 void CGa::_2Crossover(void)
 {
-	size_t i,nId1, nId2, nSize = m_populacao.size();
+	size_t i, nId1, nId2, nSize = m_populacao.size();
 	double nStdev = nSize / 1.0;
 	size_t nMaxIndex = nSize - 1;
-	CString str1, str2, strt;
+	string str1, str2, strt;
 	size_t nCross;
+	size_t zero = 0;
 	lst_car_t::iterator it;
 
 	while(m_nova.size() < _populacao)
 	{
 		// Escolha dos pais:
-		nId1 = (size_t)fabs(mrand.randNorm(0,nStdev));
-		nId2 = (size_t)fabs(mrand.randNorm(0,nStdev));
+		nId1 = random.rand_int(zero, nSize);
+		nId2 = random.rand_int(zero, nSize);
 
 		// Clamp no range permitido
-		nId1 = __min(nMaxIndex,nId1);
-		nId2 = __min(nMaxIndex,nId2);
+		nId1 = std::min(nMaxIndex, nId1);
+		nId2 = std::min(nMaxIndex, nId2);
 
 
 		if(nId1 == nId2)
@@ -212,19 +250,21 @@ void CGa::_2Crossover(void)
 		
 		// Faz crossover?
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str1 = it->getGenesCString();
+		str1 = it->getGenesString();
 
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str2 = it->getGenesCString();
+		str2 = it->getGenesString();
 
-		if(mrand.randInt(100) < _crossover)
+		if(random.rand_int(0, 100) < _crossover)
 		{
-			nCross = 1 + mrand.randInt(GENES-2);
-			strt = str1.Left(nCross);
-			str1 = str2.Left(nCross) + str1.Right(GENES-nCross);
-			str2 = strt + str2.Right(GENES-nCross);
+			nCross = 1 + random.rand_int(zero, static_cast<size_t>(GENES-2));
+			strt = str1.substr(0, nCross);
+			str1 = str2.substr(0, nCross) + str1.substr(GENES-nCross);
+			str2 = strt + str2.substr(GENES-nCross);
 		}
 
+		VERIFY(str1.size() == GENES, "Crossover: str1.size() == GENES, found: " << str1.size() );
+		VERIFY(str2.size() == GENES, "Crossover: str2.size() == GENES, found: " << str2.size() );
 		m_nova.push_back(str1);
 		m_nova.push_back(str2);
 	}
@@ -232,38 +272,48 @@ void CGa::_2Crossover(void)
 	return;
 }
 
+bool _do_mutate(float _mutacao)
+{
+	return random.random(0.0, 100.0) < _mutacao;
+}
+
 void CGa::_3Mutate(void)
 {
-	int nMut;
+	size_t nMut;
 	char g;
 	size_t i,nSize = m_nova.size();
+	size_t zero = 0;
+	size_t max_gene = static_cast<size_t>(GENES-1);
 	for(i = (_elitismo + _alienismo) ; i < nSize; i++)
 	{
-		if(mrand.rand(100.0) < _mutacao)
-		{
-			// Mutação:
-			// Ponto da mutação:
-			nMut = mrand.randInt(GENES-1);
+		if(! _do_mutate(_mutacao))
+			continue;
 
-			VERIFY(m_nova[i].Left(2) != "__");
+		// MutaÃ§Ã£o:
+		// Ponto da mutaÃ§Ã£o:
+		nMut = random.rand_int(zero, max_gene);
 
-			// Intensidade e direção da mutação:
-			g = (char)(m_nova[i].GetAt(nMut) + mrand.randInt((MTRand::uint32)_mut_int) * (mrand.randInt(1)?(1):(-1)));
+		VERIFY(m_nova[i].substr(0, 2) != "__", "Mutate: m_nova[i].Left(2) != \"__\"" );
+		VERIFY(m_nova[i].size() == GENES, "Mutate: m_nova[i].size() == GENES, found: " << m_nova[i].size() );
 
-			if(g < 'A') g = 'A';
-			if(g > 'Z') g = 'Z';
+		// Intensidade e direÃ§Ã£o da mutaÃ§Ã£o:
+		char intensidade = random.discrete_random<char>(1, _mut_int);
+		char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
+		char mutacao = intensidade * direcao;
+		g = m_nova[i][nMut] + mutacao;
 
-			m_nova[i].SetAt(nMut,g);
-		}
+		g = std::clamp(g, 'A', 'Z');
+
+		m_nova[i][nMut] = g;
 	}
 }
 
 void CGa::_4AdvanceGeneration(void)
 {
-	// Nova geração:
+	// Nova geraÃ§Ã£o:
 	m_populacao.clear();
 
-	// Se for para fazer extinção em massa, criamos aleatórios no lugar:
+	// Se for para fazer extinÃ§Ã£o em massa, criamos aleatÃ³rios no lugar:
 	if(_bMassExtintion)
 	{
 		_cria_populacao();
@@ -275,10 +325,10 @@ void CGa::_4AdvanceGeneration(void)
 		size_t i,nSize = m_nova.size();
 		for(i = 0; i < nSize && i < _populacao; i++)
 		{
-			if(m_nova[i].Left(2) == "__")
-				m_populacao.push_back(CCar(m_nova[i].Right(m_nova[i].GetLength()-2)));
+			if(m_nova[i].substr(0, 2) == "__")
+				m_populacao.push_back(CCar(m_nova[i].substr(m_nova[i].size()-2).c_str()));
 			else
-				m_populacao.push_back(CCar(m_nova[i]));
+				m_populacao.push_back(CCar(m_nova[i].c_str()));
 		}
 		_geracao++;
 	}
@@ -292,65 +342,17 @@ void CGa::MassExtinctionEvent(void)
 	_bMassExtintion = true;	
 }
 
-void CGa::IncludeId(CString strGenes)
+void CGa::IncludeId(string strGenes)
 {
 	_strId2Include = strGenes;
 }
 
-void CGa::Step(void)
+void CGa::Step()
 {
-	CCronometro cr;
-
-	double select,crossover,mutate,advance;
-	cr.Start();
 	_1Select();
-	select =cr.Get();
-	cr.Start();
 	_2Crossover();
-	crossover = cr.Get();
-	cr.Start();
 	_3Mutate();
-	mutate = cr.Get();
-	cr.Start();
 	_4AdvanceGeneration();
-	advance = cr.Get();
-
-	double m,s;
-	CString strLine,strPart;
-	_vec_select.push_back(select);
-	_vec_crossover.push_back(crossover);
-	_vec_mutate.push_back(mutate);
-	_vec_advance.push_back(advance);
-
-	m = Media<double,double>(_vec_select);
-	s = StdDev<double,double>(_vec_select);
-	Significativos(m,s);
-
-	strPart.Format("%f ± %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_crossover);
-	s = StdDev<double,double>(_vec_crossover);
-	Significativos(m,s);
-
-	strPart.Format("%f ± %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_mutate);
-	s = StdDev<double,double>(_vec_mutate);
-	Significativos(m,s);
-
-	strPart.Format("%f ± %f, ",m,s);
-	strLine += strPart;
-
-	m = Media<double,double>(_vec_advance);
-	s = StdDev<double,double>(_vec_advance);
-	Significativos(m,s);
-
-	strPart.Format("%f ± %f\r\n",m,s);
-	strLine += strPart;
-
-	_fileLog1.Write(strLine,strLine.GetLength());
 }
 
 void CGa::CopyPopulacao(lst_car_t *pTarget)
@@ -360,7 +362,7 @@ void CGa::CopyPopulacao(lst_car_t *pTarget)
 }
 
 
-// TODO: Mover esta função para um lugar mais apropriado
+// TODO: Mover esta funï¿½ï¿½o para um lugar mais apropriado
 /*
 bool CGa::OpenLogFile(void)
 {
@@ -382,8 +384,8 @@ bool CGa::OpenLogFile(void)
 							"set terminal jpeg font arial 26 size 1400,750;\n"
 							"set grid xtics x2tics ytics y2tics;\n"
 							"show label;\n"
-							"set xlabel \"Geração\";\n"
-							"set ylabel \"Pontuação\";\n"
+							"set xlabel \"Geraï¿½ï¿½o\";\n"
+							"set ylabel \"Pontuaï¿½ï¿½o\";\n"
 							"set output \"%s.jpg\";\n"
 							"plot	\"%s\" with lines title  \"fit\";\n"
 							, strFile,strDat);
@@ -402,4 +404,4 @@ bool CGa::OpenLogFile(void)
 */
 
 
-};//namespace GA
+}

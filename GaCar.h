@@ -1,6 +1,4 @@
-#ifndef __GACAR_H__
-#define __GACAR_H__
-
+#pragma once
 #include <string>
 #include "CarDef.h"
 
@@ -12,52 +10,67 @@ using namespace MODEL;
 
 namespace GA
 {
+    class CGaCar
+    {
+    public:
+        // Codificado
+        string _genes;
 
-class CGaCar
-{
-// Tipos internos:
-public:
+        // Decodificado
+        CCarDef _carro;
 
-// O carro em si
-public:
-	// Codificado
-	string _genes;
+        // Suporte ao algoritmo genï¿½tico:
+        double _pontos;
 
-	// Decodificado
-	CCarDef	_carro;
+        // Internas
+    protected:
+        void _generate_random_genes();
 
-// Suporte ao algoritmo genético:
-public:
-	double	_pontos				;
+        // Decodifica o carro dos genes criando-o nas definiÃ§Ãµes
+        void _decode();
 
-// Internas
-protected:
-	void _generate_random_genes(void);
+    public:
+        CGaCar();
 
-	// Decodifica o carro dos genes criando-o nas definições
-	void _decode(void);
+        explicit CGaCar(const char *szGenes);
 
-public:
-	CGaCar();
-	CGaCar(const char* szGenes);
-	~CGaCar(void);
-	void getGenes(string& genes);
-	void getGenes(CString& genes);
-	inline const char *getGenes(void){return _genes.c_str();}
-	inline char getGene(size_t nIndex){return _genes[nIndex];}
-	inline void setGene(size_t nIndex, char gen){_genes[nIndex] = gen;}
-	string getGenesString(void);
-	CString getGenesCString(void);
-	double getPontuacao(void) const {return _pontos;}
-	void setGenes(const char *genes);
-	void setPontos(double pontos){_pontos = pontos;}
-	void CreateCar(const char *genes = NULL);
+        ~CGaCar();
 
-	// Processo evolutivo:
-	void Crossover(CGaCar& other);
+        void getGenes(string &genes) const;
 
-};
+        [[nodiscard]] const char *getGenes() const
+        {
+            return _genes.c_str();
+        }
 
-}; // namespace GA
+        [[nodiscard]] char getGene(const size_t nIndex) const
+        {
+            return _genes[nIndex];
+        }
 
-#endif //__GACAR_H__
+        void setGene(const size_t nIndex, const char gen)
+        {
+            _genes[nIndex] = gen;
+        }
+
+        [[nodiscard]] string getGenesString() const;
+
+        [[nodiscard]] double getPontuacao() const
+        {
+            return _pontos;
+        }
+
+        void setGenes(const char *genes);
+
+        void setPontos(const double pontos)
+        {
+            _pontos = pontos;
+        }
+
+        void CreateCar(const char *genes = nullptr);
+
+
+        // Processo evolutivo:
+        void Crossover(CGaCar &other);
+    };
+}

@@ -1,51 +1,47 @@
-#ifndef __CARDEF_H__
-#define __CARDEF_H__
+#pragma once
 
 namespace MODEL
 {
 class CCarDef
 {
 public:
-	class CCircle
+	class CCircleParams
 	{
 	public:
-		double x;
-		double y;
-		double raio;
+		float x;
+		float y;
+		float raio;
 	};
 
-	class CBody
+	class CBodyParams
 	{
 	public:
-		double densidade;
-		double friccao;
-		double elasticidade;
+		float densidade;
+		float friccao;
+		float elasticidade;
 	};
 
-	class CRoda
+	class CRodaParams
 	{
 	public:
-		CCircle c;
-		CBody	b;
-	public:
-		CRoda();
-		CRoda(double x, double y, double r, double dens, double fric, double elas);
+		CCircleParams circle;
+		CBodyParams	body;
+
+		CRodaParams();
+		CRodaParams(float x, float y, float r, float dens, float fric, float elas);
 	};
+
+	CRodaParams	_roda1		;
+	CRodaParams	_roda2		;
+	CRodaParams	_peso1		;
+	CRodaParams	_peso2		;
+	float	_torque[4]	;
+	float	_freq  [6]	;
+	float	_damp  [6]	;
 
 public:
-	CRoda	_roda1		;
-	CRoda	_roda2		;
-	CRoda	_peso1		;
-	CRoda	_peso2		;
-	double	_torque[4]	;
-	double	_freq  [6]	;
-	double	_damp  [6]	;
-
-public:
-	CCarDef(void);
-	~CCarDef(void);
+	CCarDef();
+	~CCarDef();
 };
 
-};//namespace MODEL
-
-#endif //__CARDEF_H__
+}

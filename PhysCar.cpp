@@ -1,459 +1,436 @@
-#include "StdAfx.h"
-#include "physcar.h"
+#include "PhysCar.h"
+
+#include <iostream>
+#include <numeric>
+#include <ostream>
+
+#include "phys.h"
+
 
 namespace PHYS
 {
-int ID_RODA1 = 1;
-int ID_RODA2 = 2;
-int ID_PESO1 = 3;
-int ID_PESO2 = 4;
-int ID_GROUND = 5;
+    constexpr int MAX_NO_CONTACT_TIME_SECONDS = 4;
+
+    void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
+    {
+        copy(begin(carro._torque), end(carro._torque), begin(car_def.torque));
+        copy(begin(carro._freq), end(carro._freq), begin(car_def.freq));
+        copy(begin(carro._damp), end(carro._damp), begin(car_def.damp));
+    }
+
+    b2_roda_ou_peso_def _translate_roda(const CCarDef::CRodaParams &roda)
+    {
+        b2_roda_ou_peso_def ret;
+        ret.b2_body_def = b2DefaultBodyDef();
+        ret.b2_body_def.position = b2Vec2(roda.circle.x, roda.circle.y);
+        ret.b2_body_def.type = b2_dynamicBody;
+        ret.b2_circle.radius = roda.circle.raio;
+        ret.b2_circle.center = b2Vec2(0, 0);
+
+        return ret;
+    }
+
+    car_t _translate_rodas_e_pesos(const CCarDef &carro)
+    {
+        car_t car_def;
+        car_def.R1 = _translate_roda(carro._roda1);
+        car_def.R2 = _translate_roda(carro._roda2);
+        car_def.P1 = _translate_roda(carro._peso1);
+        car_def.P2 = _translate_roda(carro._peso2);
+        _copy_dyn_params(carro, car_def);
+        return car_def;
+    }
+
+    CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
+    {
+        _init();
+    }
+
+    CPhysCar::~CPhysCar() = default;
+
+    b2BodyId CreateRoda(const b2WorldId WorldId,
+                        const b2_roda_ou_peso_def &car_def,
+                        const CCarDef::CRodaParams &roda,
+                        void *IdBody)
+    {
+        const b2BodyId RodaId = b2CreateBody(WorldId, &car_def.b2_body_def);
+        b2ShapeDef shape_def = b2DefaultShapeDef();
+        shape_def.friction = roda.body.friccao;
+        shape_def.density = roda.body.densidade;
+        shape_def.restitution = roda.body.elasticidade;
+
+        b2CreateCircleShape(RodaId, &shape_def, &car_def.b2_circle);
+        b2Body_SetUserData(RodaId, IdBody);
+
+        return RodaId;
+    }
 
 
-b2Vec2 TranslateVec(vec2_t a)
-{
-	return b2Vec2(a.x,a.y);
+    void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def)
+    {
+        //////////////////////////////////////////////
+        // Cria√ß√£o dos objetos:
+        m_Roda1Id = CreateRoda(m_World.m_WorldId, car_def.R1, carro._roda1, &ID_RODA1);
+        m_Roda2Id = CreateRoda(m_World.m_WorldId, car_def.R2, carro._roda2, &ID_RODA2);
+        m_Peso1Id = CreateRoda(m_World.m_WorldId, car_def.P1, carro._peso1, &ID_PESO1);
+        m_Peso2Id = CreateRoda(m_World.m_WorldId, car_def.P2, carro._peso2, &ID_PESO2);
+    }
+
+    void CPhysCar::_set_torques(const car_t &car_def)
+    {
+        // Torques:
+        _trqA = car_def.torque[0];
+        _trqB = car_def.torque[1];
+        _trqC = car_def.torque[2];
+        _trqD = car_def.torque[3];
+    }
+
+    b2JointId CPhysCar::_create_joint(const b2BodyId bodyA,
+                                      const b2BodyId bodyB,
+                                      const car_t &car_def,
+                                      const int param_index) const
+    {
+        b2DistanceJointDef jd;
+        const b2Vec2 positionA = b2Body_GetPosition(bodyA);
+        const b2Vec2 positionB = b2Body_GetPosition(bodyB);
+
+        jd = b2DefaultDistanceJointDef();
+        jd.bodyIdA = bodyA;
+        jd.bodyIdB = bodyB;
+        jd.localAnchorA = b2Vec2(0, 0); //anchorA;
+        jd.localAnchorB = b2Vec2(0, 0); //anchorB;
+        jd.collideConnected = false;
+        jd.hertz = car_def.freq[param_index];
+        jd.dampingRatio = car_def.damp[param_index];
+        jd.enableLimit = true;
+        jd.length = max(b2Distance(positionA, positionB), 0.01f);
+        jd.enableMotor = true;
+        jd.motorSpeed = -100;
+        jd.enableSpring = true;
+        jd.maxLength = jd.length * 1.1f;
+        jd.minLength = jd.length * 0.9f;
+        return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
+    }
+
+    void CPhysCar::_create_joints(const car_t &car_def)
+    {
+        m_Jc1c2Id = _create_joint(m_Roda1Id, m_Roda2Id, car_def, 0);
+        m_Jc1p1Id = _create_joint(m_Roda1Id, m_Peso1Id, car_def, 1);
+        m_Jc1p2Id = _create_joint(m_Roda1Id, m_Peso2Id, car_def, 2);
+        m_Jc2p1Id = _create_joint(m_Roda2Id, m_Peso1Id, car_def, 3);
+        m_Jc2p2Id = _create_joint(m_Roda2Id, m_Peso2Id, car_def, 4);
+        m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, car_def, 5);
+    }
+
+    void CPhysCar::_create(const b2WorldId WorldId, const CCarDef &carro)
+    {
+        _verificar_step();
+        if (b2World_IsValid(WorldId))
+            _destroy();
+
+        m_World.m_WorldId = WorldId;
+        const car_t car_def = _translate_rodas_e_pesos(carro);
+        _create_rodas_e_pesos(carro, car_def);
+        _create_joints(car_def);
+        _set_torques(car_def);
+    }
+
+    // Executa um passo da simula√ß√£o e retorna false se o carro morreu.
+    bool CPhysCar::_simulation_step()
+    {
+        _bInStep = true;
+
+        _simulation_pre_tick();
+        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
+        _simulation_pos_tick();
+
+        _bInStep = false;
+        return !m_bDead;
+    }
+
+    void CPhysCar::_init_simulation_vars()
+    {
+        _x0 = getCenter();
+        _t = 0;
+
+        m_bContactR1 = false;
+        m_bContactR2 = false;
+
+        m_contatoR1 = 0;
+        m_contatoR2 = 0;
+        m_acum_contatoR1 = 0;
+        m_acum_contatoR2 = 0;
+
+        m_vm = 0;
+        m_distancia = 0;
+
+        _last_contact_r1 = 0;
+        _last_contact_r2 = 0;
+    }
+
+    void CPhysCar::_phys_end_simulate()
+    {
+        // Nothing to do.
+    }
+
+
+    void CPhysCar::_simulation_pre_tick() const
+    {
+        if (m_bDead) return;
+
+        if (m_bContactR1)
+            b2Body_ApplyTorque(m_Roda1Id, (_trqA + _trqB) * b2Body_GetMass(m_Roda1Id), true);
+
+        if (m_bContactR2)
+            b2Body_ApplyTorque(m_Roda2Id, (_trqC + _trqD) * b2Body_GetMass(m_Roda2Id), true);
+    }
+
+    void CPhysCar::_register_contact_times()
+    {
+        if (m_bContactR1)
+        {
+            m_acum_contatoR1 += _timeStep;
+            _last_contact_r1 = _t;
+        }
+
+        if (m_bContactR2)
+        {
+            m_acum_contatoR2 += _timeStep;
+            _last_contact_r2 = _t;
+        }
+
+        _no_contact_time_r1 = _t - _last_contact_r1;
+        _no_contact_time_r2 = _t - _last_contact_r2;
+    }
+
+    void CPhysCar::_process_no_contact_time()
+    {
+        const float smallest_no_contact_time = std::min(_no_contact_time_r1, _no_contact_time_r2);
+        if (smallest_no_contact_time <= MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            return;
+        }
+
+        if (_no_contact_time_r1 > MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            m_bDead = true;
+            m_dead_reason = "No contact R1";
+        }
+        if (_no_contact_time_r2 > MAX_NO_CONTACT_TIME_SECONDS)
+        {
+            m_bDead = true;
+            m_dead_reason = "No contact R2";
+        }
+    }
+
+    void showTouch(const string &name, const bool bContact, const float touch_strength)
+    {
+        cout << name << " Touch(" << bContact << "): " << touch_strength << endl;
+    }
+
+    void applyTouchIfBody(const b2BodyId bodyId,
+                          const b2BodyId targetBody,
+                          bool &targetFlag,
+                          const string &targetName,
+                          const bool bContact,
+                          const float touch_strength)
+    {
+        if (B2_ID_EQUALS(bodyId, targetBody))
+        {
+            showTouch(targetName, bContact, touch_strength);
+            targetFlag = bContact;
+        }
+    }
+
+    void CPhysCar::_process_touch_on_body(const b2BodyId bodyId, const bool bContact, const float touch_strength)
+    {
+        applyTouchIfBody(bodyId, m_Roda1Id, m_bContactR1, "R1", bContact, touch_strength);
+        applyTouchIfBody(bodyId, m_Roda2Id, m_bContactR2, "R2", bContact, touch_strength);
+    }
+
+    void CPhysCar::_process_contact_data(const b2ContactData &contactData, const b2BodyId bodyId)
+    {
+        const b2Manifold manifold = contactData.manifold;
+        const b2Vec2 normal = manifold.normal;
+        const float touch_strength = b2AbsFloat(b2Length(normal));
+        const bool isContact = touch_strength > 0.9f;
+        _process_touch_on_body(bodyId, isContact, touch_strength);
+    }
+
+    bool is_body_contacting(const b2BodyId bodyId)
+    {
+        const int count = b2Body_GetShapeCount(bodyId);
+        vector<b2ShapeId> shapes(count);
+        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
+        if (shape_count == 0) return false;
+
+        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
+        vector<b2ContactData> contactData(contact_capacity);
+        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
+
+        return contact_count > 0;
+    }
+
+    void CPhysCar::_test_peso(const b2BodyId pesoId, const string &name)
+    {
+        if (is_body_contacting(pesoId))
+        {
+            m_bDead = true;
+            m_dead_reason = name;
+        }
+    }
+
+    void CPhysCar::_test_contacts()
+    {
+        _test_peso(m_Peso1Id, "Peso 1");
+        _test_peso(m_Peso2Id, "Peso 2");
+        m_bContactR1 = is_body_contacting(m_Roda1Id);
+        m_bContactR2 = is_body_contacting(m_Roda2Id);
+    }
+
+    void CPhysCar::_process_contacts()
+    {
+        if (m_bDead) return;
+
+        _test_contacts();
+        _register_contact_times();
+        _process_no_contact_time();
+    }
+
+    void destroyJoint(b2JointId &targetJoint)
+    {
+        b2DestroyJoint(targetJoint);
+        targetJoint = b2_nullJointId;
+    }
+
+    void CPhysCar::_remove_joints_if_dead()
+    {
+        if (!m_bDead || !b2Joint_IsValid(m_Jp1p2Id)) return;
+
+        destroyJoint(m_Jc1c2Id);
+        destroyJoint(m_Jc1p1Id);
+        destroyJoint(m_Jc1p2Id);
+        destroyJoint(m_Jc2p1Id);
+        destroyJoint(m_Jc2p2Id);
+        destroyJoint(m_Jp1p2Id);
+    }
+
+    void CPhysCar::_register_distance_travelled()
+    {
+        m_distancia = std::max(getCenter().x - _x0.x, 0.0f);
+    }
+
+    void CPhysCar::_calc_average_velocity()
+    {
+        m_vm = _t != 0.0f ? m_distancia / _t : 0.0f;
+    }
+
+    void CPhysCar::_register_time_step()
+    {
+        _t += _timeStep;
+    }
+
+    void CPhysCar::_register_contacts()
+    {
+        m_contatoR1 = m_acum_contatoR1;
+        m_contatoR2 = m_acum_contatoR2;
+    }
+
+    void CPhysCar::_simulation_pos_tick()
+    {
+        _process_contacts();
+        _remove_joints_if_dead();
+        _register_contacts();
+        _register_distance_travelled();
+        _calc_average_velocity();
+        _register_time_step();
+    }
+
+
+    b2Vec2 CPhysCar::getCenter() const
+    {
+        const vector pos = {
+            b2Body_GetPosition(m_Roda1Id),
+            b2Body_GetPosition(m_Roda2Id),
+            b2Body_GetPosition(m_Peso1Id),
+            b2Body_GetPosition(m_Peso2Id)
+        };
+        const vector massa = {
+            b2Body_GetMass(m_Roda1Id),
+            b2Body_GetMass(m_Roda2Id),
+            b2Body_GetMass(m_Peso1Id),
+            b2Body_GetMass(m_Peso2Id)
+        };
+        const float totalMass = reduce(massa.begin(), massa.end(), 0.0f);
+        const float invMass = 1.0f / totalMass;
+        const b2Vec2 numerator = transform_reduce(
+            pos.begin(),
+            pos.end(),
+            massa.begin(),
+            b2Vec2{0, 0},
+            plus(),
+            [](const b2Vec2 &p, const float &m)
+            {
+                return m * p;
+            }
+        );
+        const b2Vec2 cm = numerator * invMass;
+        return cm;
+    }
+
+    void CPhysCar::_init()
+    {
+        m_Roda1Id = b2_nullBodyId;
+        m_Roda2Id = b2_nullBodyId;
+        m_Peso1Id = b2_nullBodyId;
+        m_Peso2Id = b2_nullBodyId;
+
+        m_Jc1c2Id = b2_nullJointId;
+        m_Jc1p1Id = b2_nullJointId;
+        m_Jc1p2Id = b2_nullJointId;
+        m_Jc2p1Id = b2_nullJointId;
+        m_Jc2p2Id = b2_nullJointId;
+        m_Jp1p2Id = b2_nullJointId;
+
+        _timeStep = 1.0f / 60.0f;
+        _iterations = 10;
+        _bInStep = false;
+        m_bDead = false;
+        m_dead_reason = "Alive";
+    }
+
+    void CPhysCar::_destroy()
+    {
+        if (!b2World_IsValid(m_World.m_WorldId))
+            return;
+
+        _verificar_step();
+
+        if (!b2Body_IsValid(m_Roda1Id))
+            return;
+
+        // Consideraremos que todos os corpos existem se um deles existir
+        b2DestroyBody(m_Roda1Id);
+        b2DestroyBody(m_Roda2Id);
+        b2DestroyBody(m_Peso1Id);
+        b2DestroyBody(m_Peso2Id);
+        // _pWorld->SetContactListener(NULL);
+
+        // NULLamos tudo:
+        _init();
+    }
+
+    void CPhysCar::_verificar_step()
+    {
+#if 0 // TODO: Verificar se √© necess√°rio ap√≥s convers√£o.
+          if (_bInStep)
+        {
+            // Aguardamos atÔøΩ 5 segundos antes de prosseguir:
+            for (int i = 0; i < 500 || !_bInStep; i++)
+            {
+                Sleep(10);
+            }
+        }
+#endif
+    }
 }
-
-b2World* buildWorld(CEnv* env)
-{
-	vec_vecs_t GroundPoly = env->get_vecs();
-
-	b2World *pWorld;
-	b2AABB ab2AABB;
-	ab2AABB.lowerBound.Set(env->_tlx,env->_bry);
-	ab2AABB.upperBound.Set(env->_brx,env->_tly);
-
-	b2Vec2 gravity(0.0f, -10.0f);
-	bool doSleep = true;
-	pWorld = new b2World(ab2AABB,gravity,doSleep);
-
-	b2BodyDef groundBodyDef;
-	groundBodyDef.position.Set(0.0f, 0.0f);	
-
-	b2Body *pGround = pWorld->CreateBody(&groundBodyDef);
-
-	b2PolygonDef groundShapeDef;
-	groundShapeDef.SetAsBox(30.0f, 1.0f);
-	groundShapeDef.friction = 1.0;
-	groundShapeDef.restitution = 0.0;
-
-	groundShapeDef.vertexCount = 4;
-
-	size_t k,nSize = GroundPoly.size();
-	b2Vec2 pt;
-	b2Vec2 lpt = TranslateVec(GroundPoly[0]);
-	for(k = 1; k < nSize; k++)
-	{
-		pt = TranslateVec(GroundPoly[k]);
-		groundShapeDef.vertices[0] = lpt;
-		groundShapeDef.vertices[1].Set(lpt.x,env->_bry);
-		groundShapeDef.vertices[2].Set(pt.x,env->_bry);
-		groundShapeDef.vertices[3] = pt;
-
-		pGround->CreateShape(&groundShapeDef);
-
-		lpt = pt;
-	}
-
-	// Limitadores dos boundary's:
-	// Parede direita:
-
-	groundShapeDef.vertices[0].Set(env->_brx-3,env->_tly);
-	groundShapeDef.vertices[1].Set(env->_brx-3,env->_bry);
-	groundShapeDef.vertices[2].Set(env->_brx,env->_bry);
-	groundShapeDef.vertices[3].Set(env->_brx,env->_tly);
-	pGround->CreateShape(&groundShapeDef);
-
-	// Teto
-	groundShapeDef.vertices[0].Set(env->_tlx,env->_tly-3);
-	groundShapeDef.vertices[1].Set(env->_brx,env->_tly-3);
-	groundShapeDef.vertices[2].Set(env->_brx,env->_tly);
-	groundShapeDef.vertices[3].Set(env->_tlx,env->_tly);
-	pGround->CreateShape(&groundShapeDef);
-
-	// Parede esquerda:
-	groundShapeDef.vertices[0].Set(env->_tlx,env->_tly);
-	groundShapeDef.vertices[1].Set(env->_tlx,env->_bry);
-	groundShapeDef.vertices[2].Set(env->_tlx+3,env->_bry);
-	groundShapeDef.vertices[3].Set(env->_tlx+3,env->_tly);
-	pGround->CreateShape(&groundShapeDef);
-
-	pGround->SetUserData((void*)&ID_GROUND);
-
-	return pWorld;
-}
-
-
-b2_def_t TranslateRoda(const CCarDef::CRoda& roda)
-{
-	b2_def_t ret;
-	ret.bd.position.Set(roda.c.x,roda.c.y);
-	ret.sd.radius		= roda.c.raio			;
-	ret.sd.density		= roda.b.densidade		;
-	ret.sd.friction		= roda.b.friccao		;
-	ret.sd.restitution	= roda.b.elasticidade	;
-
-	return ret;
-}
-
-CPhysCar::CPhysCar(void)
-{
-	_init();
-}
-
-CPhysCar::~CPhysCar(void)
-{
-}
-
-void CPhysCar::_create(b2World *pWorld, CCarDef carro)
-{
-	_verificar_step();
-	if(_pWorld != NULL)
-		_destroy();
-
-	_car_def.R1 = TranslateRoda(carro._roda1);
-	_car_def.R2 = TranslateRoda(carro._roda2);
-	_car_def.P1 = TranslateRoda(carro._peso1);
-	_car_def.P2 = TranslateRoda(carro._peso2);
-	for(int i = 0; i < 6; i++)
-	{
-		if(i < 4) _car_def.torque[i] = carro._torque[i];
-		_car_def.freq[i] = carro._freq[i];
-		_car_def.damp[i] = carro._damp[i];
-	}
-
-	// Pesos s„o tambÈm sensores:
-//	_car_def.P1.sd.isSensor = true;
-//	_car_def.P2.sd.isSensor = true;
-
-
-	_pWorld = pWorld;
-
-	//////////////////////////////////////////////
-	// CriaÁ„o dos objetos:
-	_pRoda1 = _pWorld->CreateBody(&_car_def.R1.bd);
-	_pRoda1->CreateShape(&_car_def.R1.sd);
-	_pRoda1->SetMassFromShapes();
-	_pRoda1->SetUserData((void *)&ID_RODA1);
-
-	_pRoda2 = _pWorld->CreateBody(&_car_def.R2.bd);
-	_pRoda2->CreateShape(&_car_def.R2.sd);
-	_pRoda2->SetMassFromShapes();
-	_pRoda2->SetUserData((void *)&ID_RODA2);
-
-	_pPeso1 = _pWorld->CreateBody(&_car_def.P1.bd);
-	_pPeso1->CreateShape(&_car_def.P1.sd);
-	_pPeso1->SetBullet(true);
-	_pPeso1->SetMassFromShapes();
-	_pPeso1->SetUserData((void *)&ID_PESO1);
-
-	_pPeso2 = _pWorld->CreateBody(&_car_def.P2.bd);
-	_pPeso2->CreateShape(&_car_def.P2.sd);
-	_pPeso2->SetBullet(true);
-	_pPeso2->SetMassFromShapes();
-	_pPeso2->SetUserData((void *)&ID_PESO2);
-
-
-	/////////////////
-	// Joints:
-	b2DistanceJointDef jd;
-	int j = 0;
-	jd.Initialize(_pRoda1, _pRoda2, _pRoda1->GetWorldCenter(), _pRoda2->GetWorldCenter());
-	jd.collideConnected = true;
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	
-	_pJc1c2 = _pWorld->CreateJoint(&jd);
-
-	jd.Initialize(_pRoda1, _pPeso1, _pRoda1->GetWorldCenter(), _pPeso1->GetWorldCenter());
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	_pJc1p1 = _pWorld->CreateJoint(&jd);
-
-	jd.Initialize(_pRoda1, _pPeso2, _pRoda1->GetWorldCenter(), _pPeso2->GetWorldCenter());
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	_pJc1p2 = _pWorld->CreateJoint(&jd);
-
-	jd.Initialize(_pRoda2, _pPeso1, _pRoda2->GetWorldCenter(), _pPeso1->GetWorldCenter());
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	_pJc2p1 = _pWorld->CreateJoint(&jd);
-
-	jd.Initialize(_pRoda2, _pPeso2, _pRoda2->GetWorldCenter(), _pPeso2->GetWorldCenter());
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	_pJc2p2 = _pWorld->CreateJoint(&jd);
-
-	jd.Initialize(_pPeso1, _pPeso2, _pPeso1->GetWorldCenter(), _pPeso2->GetWorldCenter());
-	jd.dampingRatio = _car_def.damp[j];
-	jd.frequencyHz  = _car_def.freq[j++];
-	_pJp1p2 = _pWorld->CreateJoint(&jd);
-
-	// Torques:
-	_trqA = _car_def.torque[0];
-	_trqB = _car_def.torque[1];
-	_trqC = _car_def.torque[2];
-	_trqD = _car_def.torque[3];
-}
-
-
-#define ISBODY(s1,s2,id) (s1 == id  || s2 == id)
-void CContactListener::Add(const b2ContactPoint* point)
-{
-	int s1 = *((int *)point->shape1->GetBody()->GetUserData());
-	int s2 = *((int *)point->shape2->GetBody()->GetUserData());
-
-	bool bGround = ISBODY(s1,s2,ID_GROUND);
-	bool bR1	 = ISBODY(s1,s2,ID_RODA1 );
-	bool bR2	 = ISBODY(s1,s2,ID_RODA2 );
-	bool bP1	 = ISBODY(s1,s2,ID_PESO1 );
-	bool bP2	 = ISBODY(s1,s2,ID_PESO2 );
-
-	if((bGround && (bP1 || bP2)) || (bR1 && bR2) )
-		m_bDead = true;
-
-	m_cVel = point->velocity;
-	m_cPos = point->position;
-/*
-	if(point->velocity.Length() > 100.0)
-	{
-		m_bDead = true;
-	}
-*/
-}
-
-void CContactListener::Persist(const b2ContactPoint* point)
-{
-	int s1 = *((int *)point->shape1->GetBody()->GetUserData());
-	int s2 = *((int *)point->shape2->GetBody()->GetUserData());
-
-	bool bGround = ISBODY(s1,s2,ID_GROUND);
-	bool bR1	 = ISBODY(s1,s2,ID_RODA1 );
-	bool bR2	 = ISBODY(s1,s2,ID_RODA2 );
-
-	if(bGround)
-	{
-		m_bContactR1 |= bR1;
-		m_bContactR2 |= bR2;
-	}
-}
-
-// Executa um passo da simulaÁ„o e retorna false se o carro morreu.
-bool CPhysCar::_simulation_step(void)
-{
-	_bInStep = true;
-	_simulation_pre_tick();
-
-	_cl.m_bDead      = false;
-	_cl.m_bContactR1 = false;
-	_cl.m_bContactR2 = false;
-
-	_pWorld->Step(_timeStep,_iterations);
-
-	// Est· vivo ainda?
-	m_bDead |= _cl.m_bDead;
-	_cVel = _cl.m_cVel;
-	_cPos = _cl.m_cPos;
-	m_bContactR1 = _cl.m_bContactR1;
-	m_bContactR2 = _cl.m_bContactR2;
-
-	// Contato das rodas:
-	if(m_bContactR1)
-	{
-		m_acum_contatoR1 += _timeStep;
-		_last_contact_r1 = _t;
-	}
-	if(m_bContactR2)
-	{
-		m_acum_contatoR2 += _timeStep;
-		_last_contact_r2 = _t;
-	}
-
-	_no_contact_time_r1 = _t - _last_contact_r1;
-	_no_contact_time_r2 = _t - _last_contact_r2;
-
-	if(_no_contact_time_r1 > 2 || _no_contact_time_r2 > 2)
-	{
-		m_bDead = true;
-	}
-
-	if(m_bDead && _pJp1p2)
-	{
-		_pWorld->DestroyJoint(_pJc1c2);
-		_pWorld->DestroyJoint(_pJc1p1);
-		_pWorld->DestroyJoint(_pJc1p2);
-		_pWorld->DestroyJoint(_pJc2p1);
-		_pWorld->DestroyJoint(_pJc2p2);
-		_pWorld->DestroyJoint(_pJp1p2);
-
-		_pJc1c2 = NULL;
-		_pJc1p1 = NULL;
-		_pJc1p2 = NULL;
-		_pJc2p1 = NULL;
-		_pJc2p2 = NULL;
-		_pJp1p2 = NULL;
-	}
-
-	m_contatoR1 = m_acum_contatoR1;
-	m_contatoR2 = m_acum_contatoR2;
-
-	b2Vec2 x = getCenter();
-	m_distancia = x.x - _x0.x;
-	if(m_distancia < 0)
-		m_distancia = 0;
-
-
-	if(_t != 0)
-	{
-		m_vm = m_distancia / _t;
-	}
-	else
-	{
-		m_vm = 0;
-	}
-
-	_t += _timeStep;
-
-	_bInStep = false;
-	return !m_bDead;	
-}
-
-void CPhysCar::_phys_begin_simulate(void)
-{
-	ASSERT(_pWorld != NULL);
-	ASSERT(_pRoda1 != NULL);
-
-	_x0 = getCenter();
-	_t	 = 0;
-
-	_pWorld->SetContactListener(&_cl);
-
-	m_contatoR1 = 0;
-	m_contatoR2 = 0;
-	m_acum_contatoR1 = 0;
-	m_acum_contatoR2 = 0;
-
-	m_vm = 0;
-	m_distancia = 0;
-
-	_last_contact_r1 = 0;
-	_last_contact_r2 = 0;
-}
-
-void CPhysCar::_phys_end_simulate(void)
-{
-	_pWorld->SetContactListener(NULL);
-}
-
-
-void CPhysCar::_simulation_pre_tick(void)
-{
-	float32 dx,dy;
-	float32 fAngulo;
-
-	dx = _pRoda2->GetPosition().x - _pRoda1->GetPosition().x;
-	dy = _pRoda2->GetPosition().y - _pRoda1->GetPosition().y;
-	if(dx == 0)
-	{
-		fAngulo = M_PI_2 * (dy > 0)?(1):(-1);
-	}
-	else
-	{
-		fAngulo = atan(dy/dx);	
-	}
-
-	if(fAngulo > M_PI_2)
-		fAngulo -= M_PI_2;
-	if(fAngulo < -M_PI_2)
-		fAngulo += M_PI_2;
-
-	_angle = fAngulo * (180 / M_PI);
-
-	if(!m_bDead)
-	{
-		if(m_bContactR1)
-			_pRoda1->ApplyTorque((_trqA+_trqB) * _pRoda1->GetMass());
-
-		if(m_bContactR2)
-			_pRoda2->ApplyTorque((_trqC+_trqD) * _pRoda2->GetMass());
-	}
-}
-
-
-b2Vec2 CPhysCar::getCenter(void)
-{
-	b2Vec2 pos[5];
-	float32 massa[4];
-
-	pos[0] = _pRoda1->GetPosition();
-	pos[1] = _pRoda2->GetPosition();
-	pos[2] = _pPeso1->GetPosition();
-	pos[3] = _pPeso2->GetPosition();
-
-	massa[0] = _pRoda1->GetMass();
-	massa[1] = _pRoda2->GetMass();
-	massa[2] = _pPeso1->GetMass();
-	massa[3] = _pPeso2->GetMass();
-
-	pos[4] = (massa[0]*pos[0] + massa[1]*pos[1] + massa[2]*pos[2] + massa[3]*pos[3]);
-	pos[4] *= (float32)1.0/(float32)(massa[0]+massa[1]+massa[2]+massa[3]);
-
-	return pos[4];
-}
-
-void CPhysCar::_init(void)
-{
-	_pRoda1 = NULL;
-	_pRoda2 = NULL;
-	_pPeso1 = NULL;
-	_pPeso2 = NULL;
-
-	_pJc1c2 = NULL;
-	_pJc1p1 = NULL;
-	_pJc1p2 = NULL;
-	_pJc2p1 = NULL;
-	_pJc2p2 = NULL;
-	_pJp1p2 = NULL;
-
-	_pWorld = NULL;
-
-	_timeStep = 1.0f/50.0f;
-	_iterations = 10;
-	_bInStep = false;
-	_bBroke = false;
-	m_bDead = false;
-}
-
-void CPhysCar::_destroy(void)
-{
-	if(_pWorld == NULL)
-		return;
-
-	_verificar_step();
-
-	// Consideraremos que todos os corpos existem se um deles existir
-	_pWorld->DestroyBody(_pRoda1);
-	_pWorld->DestroyBody(_pRoda2);
-	_pWorld->DestroyBody(_pPeso1);
-	_pWorld->DestroyBody(_pPeso2);
-	_pWorld->SetContactListener(NULL);
-
-	// NULLamos tudo:
-	_init();
-}
-
-void CPhysCar::_verificar_step(void)
-{
-	if(_bInStep)
-	{
-		// Aguardamos atÈ 5 segundos antes de prosseguir:
-		for(int i = 0; i < 500 || !_bInStep; i++)
-		{
-			Sleep(10);
-		}
-	}
-}
-
-};//namespace PHYS

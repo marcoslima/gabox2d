@@ -1,83 +1,73 @@
 // GaParamsDlg.cpp : implementation file
 //
-
-#include "stdafx.h"
-#include "GaBox2d.h"
+#include <imgui.h>
 #include "GaParamsDlg.h"
-
-
-// Codificação genética do carro:
-/*
-
-Para a base 26 temos: 
-
-  dígitos	números
-	1			 26
-	2			676
-	3		 17.576
-	4		456.976
-	5	 11.881.376
-	6	308.915.776
-
-
-@@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@@ @@
---- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
- x   y   r   d   f  res  x   y   r   d   f  res  x   y   r   d   f  res  x   y   r   d   f  res TQ
-	R O D A   1			    R O D A   2			    P E S O   1			    P E S O  2			
-
-
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@@@@@@@
-@@@@
-
-78 digitos
-
-x e y da roda 1:
--5 <= x <= 5
-Precisão: 3 casas decimais: [-5000, 5000] -> 10000 unique numbers
-
-raio: entre 0.2 e 1 -> 4 casas -> 2000 - 10000 = 8000
-densidade: entre 0.1 e 1 -> 4 casas
-friction: entre 0 e 1 -> 4 casas
-restitution: entre 0 e 1 -> 4 casas
-Torque: entre 1 e 20 -> 1 casa: 10 - 200 = 190
-*/
+#include "imgui_input8.h"
 
 namespace GUI
 {
-// CGaParamsDlg dialog
-IMPLEMENT_DYNAMIC(CGaParamsDlg, CDialog)
-CGaParamsDlg::CGaParamsDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CGaParamsDlg::IDD, pParent)
-	, ga_params_t(60,"75",2,"65",0,10,60.0)
-{
+    // CGaParamsDlg dialog
+    CGaParamsDlg::CGaParamsDlg(CGaBox2dView &view)
+        : params{60, 75, 2, 65, 0, 10, 60}
+          , _view{view} {}
+
+    void CGaParamsDlg::OnInitDialog()
+    {
+        if (ImGui::BeginPopupModal(_wndName, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            RenderDialog();
+            ImGui::EndPopup();
+        }
+    }
+
+    void CGaParamsDlg::show() const
+    {
+        ImGui::OpenPopup(_wndName);
+    }
+
+    void CGaParamsDlg::RenderLeftGroup()
+    {
+        ImGui::BeginGroup();
+        InputUint8("Population", &params.m_nPopulacao);
+        ImGui::SliderFloat("Crossover (%)", &params.m_fCrossover, 0.0f, 100.0f);
+        InputUint8("Elitism", &params.m_nElitismo);
+        ImGui::SliderFloat("Mutation (%)", &params.m_fMutacao, 0.0f, 100.0f);
+        ImGui::EndGroup();
+    }
+
+    void CGaParamsDlg::RenderRightGroup()
+    {
+        ImGui::BeginGroup();
+        InputUint8("Alienism", &params.m_nAlienismo);
+        InputUint8("Mutation Interval", &params.m_nMutInt);
+        ImGui::InputFloat("Max Time", &params.m_fMaxT);
+        ImGui::EndGroup();
+    }
+
+    void CGaParamsDlg::RenderButtons() const
+    {
+        if (ImGui::Button("Cancelar"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Iniciar"))
+        {
+            _view._start_ga(*this);
+            ImGui::CloseCurrentPopup();
+        }
+    }
+
+    void CGaParamsDlg::RenderDialog()
+    {
+        RenderLeftGroup();
+
+        ImGui::SameLine();
+
+        RenderRightGroup();
+
+        RenderButtons();
+    }
 }
-
-CGaParamsDlg::~CGaParamsDlg()
-{
-}
-
-void CGaParamsDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_POPULACAO, m_nPopulacao);
-	DDX_Text(pDX, IDC_CROSSOVER, m_strCrossover);
-	DDX_Text(pDX, IDC_ELITISMO, m_nElitismo);
-	DDX_Text(pDX, IDC_MUTACAO, m_strMutacao);
-	DDX_Text(pDX, IDC_ALIENISMO, m_nAlienismo);
-	DDX_Text(pDX, IDC_MUT_INT, m_nMutInt);
-	DDX_Text(pDX, IDC_MAX_T, m_dMaxT);
-}
-
-
-BEGIN_MESSAGE_MAP(CGaParamsDlg, CDialog)
-END_MESSAGE_MAP()
-
-
-// CGaParamsDlg message handlers
-};//namespace GUI

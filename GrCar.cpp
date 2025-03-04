@@ -1,82 +1,151 @@
-#include "StdAfx.h"
-#include ".\grcar.h"
+#include "GrCar.h"
+
+#include <cmath>
+#include <box2d/box2d.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/System/Vector2.hpp>
+
+#include "Pen.h"
+#include "SolidBrush.h"
+#include "assets.h"
+
 namespace GUI
 {
-CGrCar::CGrCar(void)
-{
+    CGrCar::CGrCar() = default;
+
+    CGrCar::~CGrCar() = default;
+
+    void DrawTickLine(sf::RenderWindow &window,
+                      const sf::Vector2f p1,
+                      const sf::Vector2f p2,
+                      const CPen &pen)
+    {
+        const auto line_length = static_cast<float>(sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2)));
+        const auto line_height = pen.getWidth();
+        const auto angle = static_cast<float>(atan2(p2.y - p1.y, p2.x - p1.x));
+
+        sf::RectangleShape line(sf::Vector2f(line_length, line_height));
+        line.setOutlineColor(sf::Color::Transparent);
+        line.setOutlineThickness(0);
+        CSolidBrush(pen.getColor()).apply(line);
+        line.setOrigin(line_length / 2.0f, line_height / 2.0f);
+        line.setPosition((p1 + p2) / 2.0f);
+        line.rotate(angle * 180.0f / static_cast<float>(M_PI));
+        window.draw(line);
+    }
+
+    void DrawLine(sf::RenderWindow &window,
+                  const sf::Vector2f p1,
+                  const sf::Vector2f p2,
+                  const sf::Color color)
+    {
+        // Draw a line from p1 to p2 with color
+        const sf::Vertex line[] = {
+            sf::Vertex(p1, color),
+            sf::Vertex(p2, color)
+        };
+        window.draw(line, 2, sf::Lines);
+    }
+
+    void DrawRoda(sf::RenderWindow &window,
+                  const CGrCar::gr_circle_t &c,
+                  const float angle,
+                  const CPen &pen,
+                  const CSolidBrush &brush,
+                  const bool draw_angle = true)
+    {
+        sf::CircleShape circle_shape(c.radius);
+        circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo.
+        pen.apply(circle_shape);
+        brush.apply(circle_shape);
+        window.draw(circle_shape);
+
+        if(!draw_angle) return;
+
+        DrawTickLine(window,
+            c.center, c.center + sf::Vector2f(c.radius * cos(angle),
+                c.radius * sin(angle)),
+                pen);
+    }
+
+    void CGrCar::Draw(sf::RenderWindow &window) const
+    {
+        // Rodas 1 e 2
+        const CSolidBrush bshRoda(sf::Color(128, 128, 128));
+        const CSolidBrush bshRodaC(sf::Color(255, 255, 255));
+
+        const CPen penRoda(sf::Color(64, 64, 64), 0.2);
+        const CPen penRodaC(sf::Color(0, 0, 0), 0.2);
+
+        auto text_font = sf::Font();
+        // load it from linux file:
+        text_font.loadFromFile(TTF_FONT_FILE);
+        sf::Text text;
+        text.setFont(text_font);
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::Black);
+        text.setScale(0.05f, -0.05f);
+        text.setOrigin(12, 12);
+
+        // Roda 1
+        const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
+        const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
+        DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
+        text.setPosition(_roda1.circle.center.x, _roda1.circle.center.y);
+        text.setString("R1");
+        window.draw(text);
+
+
+        // Roda 2
+        pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
+        pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
+        DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
+        text.setPosition(_roda2.circle.center.x, _roda2.circle.center.y);
+        text.setString("R2");
+        window.draw(text);
+
+        // Pesos 1 e 2
+        const CSolidBrush bshNull(sf::Color(0, 0, 0, 0));
+        const CPen penPeso(sf::Color(255, 0, 0), 0.2);
+        // penPeso.SetDashStyle(DashStyleDot);
+
+        DrawRoda(window, _peso1.circle, 3 * M_PI, penPeso, bshNull, false);
+        DrawRoda(window, _peso2.circle, 3 * M_PI, penPeso, bshNull, false);
+
+        // Joints:
+        const CPen penJoint(sf::Color(150, 150, 150), 0.2f);
+
+        if (!_broke)
+        {
+            DrawTickLine(window, _peso1.circle.center, _peso2.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _peso2.circle.center, penJoint);
+            DrawTickLine(window, _roda2.circle.center, _peso1.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _roda2.circle.center, penJoint);
+            DrawTickLine(window, _roda1.circle.center, _peso1.circle.center, penJoint);
+            DrawTickLine(window, _roda2.circle.center, _peso2.circle.center, penJoint);
+        }
+
+
+        // Centro de massa:
+        CPen penCm(sf::Color(0, 0, 0), 0.1);
+        sf::Color crCm(0, 0, 0);
+        CSolidBrush bshCm(sf::Color::Transparent);
+
+        DrawLine(window,
+                 PointF(_cm.x - 0.5f, _cm.y - 0.5f),
+                 PointF(_cm.x + 0.5f, _cm.y + 0.5f), crCm);
+        DrawLine(window,
+                 PointF(_cm.x - 0.5f, _cm.y + 0.5f),
+                 PointF(_cm.x + 0.5f, _cm.y - 0.5f), crCm);
+
+        sf::CircleShape shapeCm(0.5f);
+        shapeCm.setPosition(_cm.x - .5f, _cm.y - .5f);
+        penCm.apply(shapeCm);
+        bshCm.apply(shapeCm);
+        window.draw(shapeCm);
+
+        shapeCm.setRadius(0.8f);
+        shapeCm.setPosition(_cm.x - .8f, _cm.y - .8f);
+        window.draw(shapeCm);
+    }
 }
-
-CGrCar::~CGrCar(void)
-{
-}
-
-void DrawRoda(Graphics* pGr, CGrCar::circle_t& c, double angle, Pen* pPen, SolidBrush *pBrush)
-{
-	RectF rcBall(c.c.X-c.r,c.c.Y-c.r,2*c.r,2*c.r);
-	pGr->FillEllipse(pBrush,rcBall);
-	pGr->DrawEllipse(pPen,rcBall);
-
-	if(angle < 2*M_PI)
-		pGr->DrawLine(pPen,c.c,PointF(c.c.X + c.r * cos(angle), c.c.Y + c.r * sin(angle)));
-}
-
-void CGrCar::Draw(Graphics* pGr)
-{
-	// Rodas 1 e 2
-	SolidBrush	bshRoda(Color(128,128,128)),
-				bshRodaC(Color(255,255,255));
-	
-	Pen penRoda (Color(64,64,64),0.3),
-		penRodaC(Color(0,0,0),0.3);
-
-	SolidBrush *pBsh;
-	Pen *pPen;
-
-	// Roda 1
-	pBsh = (_roda1.touch)?(&bshRodaC):(&bshRoda);
-	pPen = (_roda1.touch)?(&penRodaC):(&penRoda);
-	DrawRoda(pGr,_roda1.c,_roda1.angle,pPen,pBsh);
-
-	// Roda 2
-	pBsh = (_roda2.touch)?(&bshRodaC):(&bshRoda);
-	pPen = (_roda2.touch)?(&penRodaC):(&penRoda);
-	DrawRoda(pGr,_roda2.c,_roda2.angle,pPen,pBsh);
-
-	// Pesos 1 e 2
-	SolidBrush bshNull(Color(0,0,0,0));
-	Pen penPeso(Color(255,0,0),0.3);
-	penPeso.SetDashStyle(DashStyleDot);
-
-	DrawRoda(pGr,_peso1.c,3*M_PI,&penPeso,&bshNull);
-	DrawRoda(pGr,_peso2.c,3*M_PI,&penPeso,&bshNull);
-
-	// Joints:
-	Pen penJoint(Color(200,200,200),0.3);
-
-	if(!_broke)
-	{
-		pGr->DrawLine(&penJoint,_peso1.c.c,_peso2.c.c);
-		pGr->DrawLine(&penJoint,_roda1.c.c,_peso2.c.c);
-		pGr->DrawLine(&penJoint,_roda2.c.c,_peso1.c.c);
-		pGr->DrawLine(&penJoint,_roda1.c.c,_roda2.c.c);
-		pGr->DrawLine(&penJoint,_roda1.c.c,_peso1.c.c);
-		pGr->DrawLine(&penJoint,_roda2.c.c,_peso2.c.c);
-	}
-
-
-	// Centro de massa:
-	Pen penCm(Color(0,0,0),0);
-
-	PointF ptCm = _cm;
-	pGr->DrawLine(&penCm,PointF(ptCm.X-0.5,ptCm.Y-0.5),
-						 PointF(ptCm.X+0.5,ptCm.Y+0.5));
-	pGr->DrawLine(&penCm,PointF(ptCm.X-0.5,ptCm.Y+0.5),
-						 PointF(ptCm.X+0.5,ptCm.Y-0.5));
-
-	RectF rcCm(ptCm.X-.25,ptCm.Y-.25,.5,.5);
-	pGr->DrawEllipse(&penCm,rcCm);
-	rcCm.Inflate(.3,.3);
-	pGr->DrawEllipse(&penCm,rcCm);
-}
-
-};//namespace GUI

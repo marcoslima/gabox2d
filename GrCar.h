@@ -3,9 +3,11 @@
 
 #include "CarDef.h"
 
-#include <atlimage.h>
-#include <gdiplus.h>
-using namespace Gdiplus;
+#define CImage int
+#define Graphics int
+#include <SFML/Graphics.hpp>
+
+#define PointF sf::Vector2f
 
 namespace GUI
 {
@@ -18,42 +20,40 @@ static bool		g_bImgFailed = false;
 class CGrCar
 {
 public:
-	CGrCar(void);
-	~CGrCar(void);
+	CGrCar();
+	~CGrCar();
 
 	// Draw
-	void Draw(Graphics *pGr);
+	void Draw(sf::RenderWindow& window) const;
 
-	// Draw offline (carro não criado, apenas com os def's)
-	void DrawOffline(Graphics *pGr);
-public:
-	typedef struct tagCircle
+	using gr_circle_t = struct tagCircle
 	{
-		PointF	c;
-		double	r;
-	} circle_t;
-	typedef struct tagRoda
+		PointF	center;
+		float	radius{};
+	};
+
+	using gr_roda_t = struct tagRoda
 	{
-		circle_t	c		;
-		bool		touch	;
-		double		angle	;
+		gr_circle_t	circle		;
+		bool		touch{}	;
+		float		angle{}	;
 
-	} roda_t;
+	};
 
-	typedef struct tagPeso
+	using gr_peso_t = struct tagPeso
 	{
-		circle_t	c		;
-		bool		broke	;
-	} peso_t;
+		gr_circle_t	circle		;
+		bool		broke{}	;
+	};
 
-	roda_t	_roda1	;
-	roda_t	_roda2	;
-	peso_t	_peso1	;
-	peso_t	_peso2	;
-	PointF	_cm		;
-	bool	_broke	;
+	gr_roda_t	_roda1	= {};
+	gr_roda_t	_roda2	= {};
+	gr_peso_t	_peso1	= {};
+	gr_peso_t	_peso2	= {};
+	PointF	_cm		= {};
+	bool	_broke	= {};
 };
 
-};//namespace GUI
+}
 
 #endif //__GRCAR_H__

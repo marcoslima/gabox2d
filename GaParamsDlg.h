@@ -1,57 +1,31 @@
-#ifndef __GAPARAMSDLG_H__
-#define __GAPARAMSDLG_H__
+#pragma once
+#include "ga_params.h"
+#include "GaBox2dView.h"
+using namespace std;
 
 namespace GUI
 {
-// CGaParamsDlg dialog
-class ga_params_t
-{
-public:
-	UINT	m_nPopulacao	;
-	CString m_strCrossover	;
-	UINT	m_nElitismo		;
-	CString m_strMutacao	;
-	UINT	m_nAlienismo	;
-	UINT	m_nMutInt		;
-	double	m_dMaxT			;
+    // CGaParamsDlg dialog
+    class CGaBox2dView;
+    class CGaParamsDlg
+    {
+        const char *_wndName = "Parâmetros para o GA";
+        CGaBox2dView &_view;
 
-public:
-	ga_params_t(
-		UINT	nPopulacao	,
-		CString strCrossover	,
-		UINT	nElitismo		,
-		CString strMutacao	,
-		UINT	nAlienismo	,
-		UINT	nMutInt		,
-		double	dMaxT			)
-	{
-		m_nPopulacao	= nPopulacao	;
-		m_strCrossover	= strCrossover	;
-		m_nElitismo		= nElitismo		;
-		m_strMutacao	= strMutacao	;
-		m_nAlienismo	= nAlienismo	;
-		m_nMutInt		= nMutInt		;
-		m_dMaxT			= dMaxT			;
-	}
+    public:
+        ga_params_t params;
+        explicit CGaParamsDlg(CGaBox2dView &view); // standard constructor
+        CGaParamsDlg() = delete;
+        void OnInitDialog();
 
-	ga_params_t(){}
-};
+        void show() const;
 
-class CGaParamsDlg : public CDialog, public ga_params_t
-{
-	DECLARE_DYNAMIC(CGaParamsDlg)
+        void RenderLeftGroup();
 
-public:
-	CGaParamsDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CGaParamsDlg();
+        void RenderRightGroup();
 
-// Dialog Data
-	enum { IDD = IDD_PARAMETROS_GA };
+        void RenderButtons() const;
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-};
-};//namespace GUI
-#endif //__GAPARAMSDLG_H__
+        void RenderDialog();
+    };
+}; //namespace GUI

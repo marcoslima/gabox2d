@@ -1,146 +1,103 @@
-// GaBox2dDoc.cpp : implementation of the CGaBox2dDoc class
-//
-
-#include "stdafx.h"
-#include "GaBox2d.h"
-
 #include "GaBox2dDoc.h"
+
+#include <iostream>
+#include <mutex>
 #include "EditorChaoDlg.h"
-#include ".\gabox2ddoc.h"
+#include "phys.h"
+
 
 namespace GUI
 {
+    // CGaBox2dDoc
+    // CGaBox2dDoc construction/destruction
+    CGaBox2dDoc::CGaBox2dDoc()
+        : m_env() {}
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
+    CGaBox2dDoc::~CGaBox2dDoc()
+    {
+        if (!b2World_IsValid(m_World.m_WorldId))
+            b2DestroyWorld(m_World.m_WorldId);
+    }
 
-// CGaBox2dDoc
-IMPLEMENT_DYNCREATE(CGaBox2dDoc, CDocument)
+    b2Vec2 operator*(const b2Vec2 left, const double mul)
+    {
+        return b2Vec2(left.x * static_cast<float>(mul), left.y * static_cast<float>(mul));
+    }
 
-BEGIN_MESSAGE_MAP(CGaBox2dDoc, CDocument)
-	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
-	ON_COMMAND(ID_EDIT_EDITARCH, OnEditEditarch)
-END_MESSAGE_MAP()
+    bool CGaBox2dDoc::OnNewDocument(const CEnv &env)
+    {
+        const auto seed = static_cast<unsigned>(time(nullptr));
+        srand(seed); // NOLINT(*-msc51-cpp)
 
+        // CEditorChaoDlg dlgChao;
+        // if(dlgChao.DoModal() == IDCANCEL)
+        // {
+        // 	return FALSE;
+        // }
 
-// CGaBox2dDoc construction/destruction
+        // m_env = dlgChao.m_World;
+        m_env = env;
 
-CGaBox2dDoc::CGaBox2dDoc()
-{
-	m_pWorld = NULL;
+        _start_world();
+
+        return true;
+    }
+
+    void CGaBox2dDoc::OnEditCopy() const
+    {
+        string strGenes;
+        m_car.getGenes(strGenes);
+
+        // Código para copiar para a área de transferência
+        // TODO: Implementar para Linux ou genérico
+        // ...
+    }
+
+    void CGaBox2dDoc::_start_world()
+    {
+        buildWorld(m_env, m_World);
+        m_vecGround = m_env.get_vecs();
+        m_car.beginSimulate(m_World.m_WorldId);
+    }
+
+    void CGaBox2dDoc::OnEditEditarch()
+    {
+        // TODO: chamar editor de chão aqui.
+        // CEditorChaoDlg dlg;
+        // if(dlg.DoModal() != IDOK)
+        // 	return;
+
+        // m_car.Destroy();
+        // delete m_pWorld;
+
+        // m_env = dlg.m_World;
+
+        _start_world();
+
+        // POSITION pos = GetFirstViewPosition();
+        // GetNextView(pos)->Invalidate();
+    }
+
+    void CGaBox2dDoc::BeginSimulation()
+    {
+        m_IsSimulating = true;
+        m_car.beginSimulate(m_World.m_WorldId);
+    }
+
+    void CGaBox2dDoc::EndSimulation()
+    {
+        m_IsSimulating = false;
+        m_car.endSimulate();
+    }
+
+    PointF CGaBox2dDoc::GetCenter() const
+    {
+        auto [x, y] = m_car.getCenter();
+        return PointF(x, y);
+    }
+
+    void CGaBox2dDoc::Quit()
+    {
+        m_bQuit = true;
+    }
 }
-
-CGaBox2dDoc::~CGaBox2dDoc()
-{
-	if(m_pWorld != NULL)
-		delete m_pWorld;
-}
-
-b2Vec2 operator*(b2Vec2 left, double mul)
-{
-	return b2Vec2(left.x*(float)mul, left.y*(float)mul);
-}
-
-BOOL CGaBox2dDoc::OnNewDocument()
-{
-	if (!CDocument::OnNewDocument())
-		return FALSE;
-
-	srand((unsigned)time(NULL));
-
-	CEditorChaoDlg dlgChao;
-	if(dlgChao.DoModal() == IDCANCEL)
-	{
-		return FALSE;
-	}
-
-	m_env = dlgChao.m_World;
-
-	m_pWorld = PHYS::buildWorld(&m_env);
-	m_vecGround = m_env.get_vecs();
-
-	m_car.beginSimulate(m_pWorld);
-
-	return TRUE;
-}
-
-// CGaBox2dDoc serialization
-void CGaBox2dDoc::Serialize(CArchive& ar)
-{
-	if (ar.IsStoring())
-	{
-		// TODO: add storing code here
-	}
-	else
-	{
-		// TODO: add loading code here
-	}
-}
-
-
-// CGaBox2dDoc diagnostics
-
-#ifdef _DEBUG
-void CGaBox2dDoc::AssertValid() const
-{
-	CDocument::AssertValid();
-}
-
-void CGaBox2dDoc::Dump(CDumpContext& dc) const
-{
-	CDocument::Dump(dc);
-}
-#endif //_DEBUG
-
-
-void CGaBox2dDoc::OnEditCopy()
-{
-	CString strGenes;
-	m_car.getGenes(strGenes);
-
-	COleDataSource*	pSource = new COleDataSource();
-	CSharedFile	sf(GMEM_MOVEABLE|GMEM_DDESHARE|GMEM_ZEROINIT);
-
-	sf.Write(strGenes, strGenes.GetLength());
-
-	HGLOBAL hMem = sf.Detach();
-	if (!hMem) return;
-	pSource->CacheGlobalData(CF_TEXT, hMem);
-	pSource->SetClipboard();
-}
-
-void CGaBox2dDoc::OnEditEditarch()
-{
-	CEditorChaoDlg dlg;
-	if(dlg.DoModal() != IDOK)
-		return;
-	
-	m_car.Destroy();
-	delete m_pWorld;
-
-	m_env = dlg.m_World;
-	m_pWorld = PHYS::buildWorld(&m_env);
-	m_vecGround = m_env.get_vecs();
-	m_car.beginSimulate(m_pWorld);
-
-	POSITION pos = GetFirstViewPosition();
-	GetNextView(pos)->Invalidate();
-}
-
-void CGaBox2dDoc::BeginSimulation(void)
-{
-	m_car.beginSimulate(m_pWorld);
-}
-void CGaBox2dDoc::EndSimulation(void)
-{
-	m_car.endSimulate();
-}
-
-PointF	CGaBox2dDoc::GetCenter(void)
-{
-	b2Vec2 pos = m_car.getCenter();
-	return PointF(pos.x,pos.y);
-}
-
-};//namespace GUI
