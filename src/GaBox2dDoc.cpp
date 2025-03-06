@@ -10,9 +10,9 @@ namespace GUI
 {
     // CGaBox2dDoc
     // CGaBox2dDoc construction/destruction
-    CGaBox2dDoc::CGaBox2dDoc(CRandomProvider random_provider)
+    CGaBox2dDoc::CGaBox2dDoc()
         : m_env() 
-        , m_car(random_provider) {}
+        , m_car() {}
 
     CGaBox2dDoc::~CGaBox2dDoc()
     {

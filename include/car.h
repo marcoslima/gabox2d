@@ -4,7 +4,6 @@
 #include "GrCar.h"
 #include <vector>
 #include <list>
-#include <random_provider.h>
 
 using namespace std;
 
@@ -14,9 +13,9 @@ class CCar :
 	public GUI::CGrCar
 {
 public:
-	CCar(CRandomProvider random_provider);
+	CCar();
 
-	explicit CCar(CRandomProvider random_provider, const char* szGenes);
+	explicit CCar(const char* szGenes);
 	~CCar()= default;
 	void beginSimulate(b2WorldId WorldId);
 

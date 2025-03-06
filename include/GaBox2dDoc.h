@@ -2,7 +2,6 @@
 #include "car.h"
 #include "ga.h"
 #include "env.h"
-#include <random_provider.h>
 
 namespace GUI
 {
@@ -12,7 +11,7 @@ extern vec_vecs_t	g_vecGroundPoints;
 class CGaBox2dDoc final
 {
 public:
-	CGaBox2dDoc(CRandomProvider random_provider);
+	CGaBox2dDoc();
 
 
 // Attributes

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "CarDef.h"
-#include <random_provider.h>
+#include <global_random.h>
 
 using namespace std;
 using namespace MODEL;
@@ -23,8 +23,6 @@ namespace GA
         // Suporte ao algoritmo gen�tico:
         double _pontos;
 
-        CRandomProvider _random_provider;
-
         // Internas
     protected:
         void _generate_random_genes();
@@ -33,10 +31,9 @@ namespace GA
         void _decode();
 
     public:
-        CGaCar(CRandomProvider random_provider);
+        CGaCar();
 
-        explicit CGaCar(CRandomProvider random_provider, 
-                        const char *szGenes);
+        explicit CGaCar(const char *szGenes);
 
         ~CGaCar();
 

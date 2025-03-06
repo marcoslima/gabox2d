@@ -1,6 +1,7 @@
 #include <cstring>
 #include "GaCar.h"
 #include <stdexcept>
+#include <global_random.h>
 
 
 namespace GA
@@ -68,18 +69,15 @@ namespace GA
         };
     }
 
-    CGaCar::CGaCar(CRandomProvider random_provider)
+    CGaCar::CGaCar()
         : _pontos(0)
-        , _random_provider(random_provider)
     {
         _generate_random_genes();
     }
 
-    CGaCar::CGaCar(CRandomProvider random_provider, 
-                   const char *szGenes)
+    CGaCar::CGaCar(const char *szGenes)
         : _genes(szGenes)
-          , _pontos(0) 
-          , _random_provider(random_provider) {}
+        , _pontos(0) {}
 
     CGaCar::~CGaCar() = default;
 
@@ -89,7 +87,7 @@ namespace GA
 
         for (int i = 0; i < GENES; i++)
         {
-            _genes.push_back(_random_provider.randChar('A', 'Z'));
+            _genes.push_back(random.discrete_random('A', 'Z'));
         }
     }
 
@@ -180,7 +178,7 @@ namespace GA
 
     void CGaCar::Crossover(CGaCar &other)
     {
-        const size_t nCross = 1 + _random_provider.randInt(GENES - 2);
+        const size_t nCross = 1 + GA::random.rand_int(0, GENES - 2);
 
         for (size_t i = nCross; i < GENES; i++)
         {

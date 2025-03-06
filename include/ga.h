@@ -3,7 +3,8 @@
 #include <atomic>
 #include <string>
 #include "lmfisica.h"
-#include "CRandom.h"
+#include "global_random.h"
+
 
 using namespace std;
 using namespace LmFisica;
@@ -16,8 +17,6 @@ typedef vector<double> vec_double_t;
 
 namespace GA
 {
-    extern CRandom random;
-    
     typedef vector<string> vec_cstr_t;
     typedef pair<size_t, CCar> melhor_t;
     typedef vector<melhor_t> vec_melhores_t;

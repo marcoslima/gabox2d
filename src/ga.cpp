@@ -9,8 +9,7 @@ using namespace std;
 
 namespace GA
 {
-
-CRandom random{unsigned(time(0))};
+	CRandom random(unsigned(time(nullptr)));
 
 CGa::CGa()
 	: _max_t(0),

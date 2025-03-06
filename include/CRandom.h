@@ -10,6 +10,11 @@ private:
 public:
     explicit CRandom(unsigned seed): generator(seed) {}
     
+    void set_seed(unsigned seed)
+    {
+        generator.seed(seed);
+    }
+
     template <typename T>
     T real_random(T aMin, T aMax) const
     {
@@ -56,6 +61,7 @@ template double CRandom::real_random(double aMin, double aMax) const;
 template float CRandom::real_random(float aMin, float aMax) const;
 template char CRandom::discrete_random(char aMin, char aMax) const;
 template size_t CRandom::discrete_random(size_t aMin, size_t aMax) const;
+template int CRandom::discrete_random(int aMin, int aMax) const;
 
 // Explicit instantiation of Normal distribution for double and float:
 template double CRandom::normal_random(double mean, double stddev);
