@@ -1,23 +1,9 @@
 #pragma once
-#include <cstdint>
+#include <GaBox2dApp.h>
 
 namespace GUI
 {
-// CGaBox2dApp:
-// See GaBox2d.cpp for the implementation of this class
-//
 
-class CGaBox2dApp
-{
-	uint64_t screenWidth = 1920;
-	uint64_t screenHeight = 1080;
+	extern CGaBox2dApp theApp;
 
-public:
-	CGaBox2dApp();
-
-	int run();
 };
-
-extern CGaBox2dApp theApp;
-
-};//namespace GUI

@@ -5,6 +5,8 @@
 #include "ga.h"
 #include "GaBox2dDoc.h"
 #include <SFML/Window/Keyboard.hpp>
+#undef CDT_USE_AS_COMPILED_LIBRARY
+#include <CDT.hpp>
 
 #include "GaParamsDlg.h"
 #include "ga_params.h"

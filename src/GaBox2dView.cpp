@@ -4,10 +4,6 @@
 #include "devutils.h"
 #include "Pen.h"
 #include "SolidBrush.h"
-#ifndef _CDT_HPP_
-    #include <CDT.hpp>
-    #define _CDT_HPP_
-#endif
 #include <imgui.h>
 #include <iostream>
 #include <mutex>

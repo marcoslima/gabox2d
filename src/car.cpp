@@ -3,10 +3,11 @@
 #include <iostream>
 
 
-CCar::CCar() = default;
+CCar::CCar(CRandomProvider random_provider)
+    : CGaCar(random_provider) {}
 
-CCar::CCar(const char *szGenes)
-    : CGaCar(szGenes) {}
+CCar::CCar(CRandomProvider random_provider, const char *szGenes)
+    : CGaCar(random_provider, szGenes) {}
 
 void CCar::beginSimulate(const b2WorldId WorldId)
 {

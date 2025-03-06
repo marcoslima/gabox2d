@@ -1,7 +1,7 @@
-#include <random>
 #include <cstring>
 #include "GaCar.h"
 #include <stdexcept>
+
 
 namespace GA
 {
@@ -15,25 +15,6 @@ namespace GA
         11881376.0f,
         308915776.0f
     };
-
-    template<typename T>
-    T rand(const T min, const T max)
-    {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::uniform_int_distribution dis(min, max);
-        return dis(gen);
-    }
-
-    int randInt(const int max)
-    {
-        return rand<int>(0, max);
-    }
-
-    char randChar(const char min, const char max)
-    {
-        return rand<char>(min, max);
-    }
 
     float map_values(const float in_min,
                       const float in_max,
@@ -87,14 +68,18 @@ namespace GA
         };
     }
 
-    CGaCar::CGaCar(): _pontos(0)
+    CGaCar::CGaCar(CRandomProvider random_provider)
+        : _pontos(0)
+        , _random_provider(random_provider)
     {
         _generate_random_genes();
     }
 
-    CGaCar::CGaCar(const char *szGenes)
+    CGaCar::CGaCar(CRandomProvider random_provider, 
+                   const char *szGenes)
         : _genes(szGenes)
-          , _pontos(0) {}
+          , _pontos(0) 
+          , _random_provider(random_provider) {}
 
     CGaCar::~CGaCar() = default;
 
@@ -104,7 +89,7 @@ namespace GA
 
         for (int i = 0; i < GENES; i++)
         {
-            _genes.push_back(randChar('A', 'Z'));
+            _genes.push_back(_random_provider.randChar('A', 'Z'));
         }
     }
 
@@ -195,7 +180,7 @@ namespace GA
 
     void CGaCar::Crossover(CGaCar &other)
     {
-        const size_t nCross = 1 + randInt(GENES - 2);
+        const size_t nCross = 1 + _random_provider.randInt(GENES - 2);
 
         for (size_t i = nCross; i < GENES; i++)
         {

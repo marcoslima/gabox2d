@@ -4,6 +4,7 @@
 #include <string>
 #include "lmfisica.h"
 #include "CRandom.h"
+
 using namespace std;
 using namespace LmFisica;
 
@@ -32,7 +33,7 @@ namespace GA
         size_t _mut_int; // A mutação será +/- _mut_int numa letra
         float  _crossover; // Percentual de probabilidade de ocorrer crossover
         float  _mutacao; // Percentual de probabilidade de ocorrer mutação
-        CCar   m_carWinner; // Indivíduo mais adaptado da geração atual (Objeto CCar)
+        // CCar   m_carWinner; // Indivíduo mais adaptado da geração atual (Objeto CCar)
 
         // Acumuladores do algoritmo
         size_t _geracao; // Geração atual
@@ -114,10 +115,10 @@ namespace GA
         void CopyPopulacao(lst_car_t *pTarget);
 
         // Queries
-        CCar getWinner()
-        {
-            return m_carWinner;
-        }
+        // CCar getWinner()
+        // {
+        //     return m_carWinner;
+        // }
 
         [[nodiscard]] size_t getPopulacaoLen() const
         {
