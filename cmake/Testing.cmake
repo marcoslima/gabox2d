@@ -73,7 +73,6 @@ if(GABOX2D_BUILD_TESTS)
                       --exclude=".*_deps\.*"
                       --html --html-details
                       -o ${CMAKE_BINARY_DIR}/coverage/index.html
-                      -v
         
         # Also output text summary to console
         COMMAND gcovr --root ${CMAKE_SOURCE_DIR}
