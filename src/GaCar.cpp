@@ -35,15 +35,19 @@ namespace GA
         return result;
     }
 
-    float DecodeGen(const int nLen, const char *genes, const float nMin, const float nMax, size_t &nPos)
+    float DecodeGen(const int nLen, 
+                    const char *genes, 
+                    const float nMin, 
+                    const float nMax, 
+                    size_t &nPos)
     {
         float dVal = 0;
+        constexpr char A = 'A';
         for (int i = 0; i < nLen; i++)
         {
             // dVal += (*(genes+(nPos++)) - 'A') * d26[i]; // Linha original
             const char* addr = genes + nPos++;
             const char ch = *addr;
-            constexpr char A = 'A';
             const float mul = static_cast<float>(ch) - A;
             dVal += mul * d26[i];
         }

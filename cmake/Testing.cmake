@@ -40,10 +40,9 @@ if(GABOX2D_BUILD_TESTS)
       ${CMAKE_SOURCE_DIR}/include
   )
 
-  # Enable code coverage if requested
-  option(GABOX2D_ENABLE_COVERAGE "Enable code coverage for tests" OFF)
   if(GABOX2D_ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+      message(STATUS "Code coverage enabled")
       target_compile_options(gabox2d_tests PRIVATE --coverage)
       target_link_options(gabox2d_tests PRIVATE --coverage)
     else()
@@ -59,13 +58,30 @@ if(GABOX2D_BUILD_TESTS)
 
   # Add custom target for running tests with coverage
   if(GABOX2D_ENABLE_COVERAGE)
+    message(STATUS "gcovr root: ${CMAKE_SOURCE_DIR}")
     add_custom_target(coverage
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/coverage
-      COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} gcovr --root ${CMAKE_SOURCE_DIR} --exclude tests/ --html --html-details -o coverage/index.html
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      COMMENT "Generating code coverage report"
-      DEPENDS gabox2d_tests
-    )
+        # Run tests first to generate coverage data
+        COMMAND $<TARGET_FILE:gabox2d_tests>
+        
+        # Generate HTML report with gcovr
+        COMMAND gcovr --root ${CMAKE_SOURCE_DIR}
+                      --object-directory=${CMAKE_BINARY_DIR}
+                      --exclude=".*imgui\.*"
+                      --exclude=".*cdt\.*"
+                      --exclude=".*box2d\.*"
+                      --exclude=".*_deps\.*"
+                      --html --html-details
+                      -o ${CMAKE_BINARY_DIR}/coverage/index.html
+                      -v
+        
+        # Also output text summary to console
+        COMMAND gcovr --root ${CMAKE_SOURCE_DIR}
+                      --object-directory=${CMAKE_BINARY_DIR}
+        
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating code coverage report..."
+    )    
   endif()
 endif()
 
