@@ -13,6 +13,7 @@ add_library(GaBox2dLib
     src/GaBox2dDoc.cpp 
     src/GaBox2dView.cpp 
     src/GaCar.cpp 
+    src/ga_car_helpers.cpp
     src/GaInfoDlg.cpp 
     src/GaParamsDlg.cpp 
     src/GrCar.cpp 
@@ -43,6 +44,7 @@ add_library(GaBox2dLib
     include/GaBox2dDoc.h
     include/GaBox2dView.h
     include/GaCar.h
+    include/ga_car_helpers.h
     include/GaInfoDlg.h
     include/GaParamsDlg.h
     include/GrCar.h

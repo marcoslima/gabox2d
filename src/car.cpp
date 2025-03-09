@@ -32,13 +32,19 @@ void CCar::endSimulate()
     m_phys_car.phys_end_simulate();
 }
 
-void CCar::CreateCar(const char *szGenes)
+void CCar::CreateFromGenes(const char *szGenes)
 {
     m_phys_car.destroy();
 
     m_phys_car.init();
 
-    m_ga_car.CreateCar(szGenes);
+    m_ga_car.CreateCarFromGenes(szGenes);
+}
+
+void CCar::CreateCar()
+{
+    m_phys_car.reset();
+    m_ga_car.CreateCar();
 }
 
 void CCar::DestroyCar()
@@ -141,5 +147,5 @@ void CCar::calc_fitness(double max_t)
 
 string CCar::getGenesString() const
 {
-    return m_ga_car.getGenesString();
+    return m_ga_car.getGenes();
 }

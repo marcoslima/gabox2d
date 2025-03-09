@@ -65,6 +65,7 @@ namespace PHYS
         void create(b2WorldId WorldId, const CCarDef& carro);
 
         void destroy();
+        void reset();
 
         void init_simulation_vars();
         static void phys_end_simulate();

@@ -37,13 +37,6 @@ namespace GA
 
         ~CGaCar();
 
-        void getGenes(string &genes) const;
-
-        [[nodiscard]] const char *getGenes() const
-        {
-            return _genes.c_str();
-        }
-
         [[nodiscard]] char getGene(const size_t nIndex) const
         {
             return _genes[nIndex];
@@ -54,7 +47,7 @@ namespace GA
             _genes[nIndex] = gen;
         }
 
-        [[nodiscard]] string getGenesString() const;
+        [[nodiscard]] string getGenes() const;
 
         [[nodiscard]] double getPontuacao() const
         {
@@ -68,7 +61,8 @@ namespace GA
             _pontos = pontos;
         }
 
-        void CreateCar(const char *genes = nullptr);
+        void CreateCarFromGenes(const char *genes = nullptr);
+        void CreateCar();
 
 
         // Processo evolutivo:

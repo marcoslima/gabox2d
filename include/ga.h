@@ -11,8 +11,6 @@ using namespace LmFisica;
 
 #include "car.h"
 
-#define HANDLE void*
-
 typedef vector<double> vec_double_t;
 
 namespace GA

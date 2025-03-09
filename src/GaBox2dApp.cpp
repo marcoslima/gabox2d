@@ -189,7 +189,7 @@ namespace GUI
         ImGui::Begin("Info");
         ImGui::Text("Dead reason: %s", view.getDeadReason().c_str());
         ImGui::Text("Time: %f", view.GetDocument()->GetCar().m_phys_car.getT());
-        ImGui::Text("Genes: %s", view.GetDocument()->GetCar().m_ga_car.getGenes());
+        ImGui::Text("Genes: %s", view.GetDocument()->GetCar().m_ga_car.getGenes().c_str());
         ImGui::End();
     }
 

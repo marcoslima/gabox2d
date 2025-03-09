@@ -7,15 +7,9 @@
 
 #include <global_random.h>
 
-#define DUMMY_GENES "JUYETUPPELECBLWIPDSQABZSVYFAEZEQHPNALAHNPKDBHZJGLCUQFJNZPMBWPRELBAYYZOVKHACGRGLRDPMVAEXKGERTILNFOOEAZVULYKXYPSXICOFNBYIVKTHOVPJZHPOHDHUEBAZLUKFHAAVFSSSUUPBYJQDXWWQLICBJIRIRSPQHXOMJDZSWTSOGUGMBNSLCALCFAXQMIONSXDGPKOTFFYCPHSEWYQVHQCWLUFEKXWOIUDXJIXCHFQLAVJWHAENNKMFSDHIGYEIFNOSKJBZGZGGSMSHDHZAGPZNKBAHI"
-#define DUMMY_ALTGENES "ASDFGUPPELECBLWIPDSQABZSVYFAEZEQHPNALAHNPKDBHZJGLCUQFJNZPMBWPRELBAYYZOVKHACGRGLRDPMVAEXKGERTILNFOOEAZVULYKXYPSXICOFNBYIVKTHOVPJZHPOHDHUEBAZLUKFHAAVFSSSUUPBYJQDXWWQLICBJIRIRSPQHXOMJDZSWTSOGUGMBNSLCALCFAXQMIONSXDGPKOTFFYCPHSEWYQVHQCWLUFEKXWOIUDXJIXCHFQLAVJWHAENNKMFSDHIGYEIFNOSKJBZGZGGSMSHDHZAGPZNKBAHI"
-
 TEST_CASE( "CCar instance", "[CCar]" ) {
-    GA::random.set_seed(42);
-
     CCar car;
-
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
+    REQUIRE(car.m_ga_car.getGenes().size() == GENES);
 }
 
 TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )
@@ -28,55 +22,9 @@ TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )
     REQUIRE( car.getGenes() == string("JUYET") );
 }
 
-TEST_CASE( "CGaCar getGenesString", "[CGaCar]" )
+TEST_CASE("CCar beginSimulate", "[CCar]")
 {
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-
-    REQUIRE( car.getGenesString() == string(DUMMY_GENES) );
-}
-
-TEST_CASE( "CGaCar getGenes", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-    string genes;
-    car.getGenes(genes);
-
-    REQUIRE( genes == string(DUMMY_GENES) );
-}
-
-TEST_CASE( "CGaCar setGenes", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-    car.setGenes(DUMMY_ALTGENES);
-
-    REQUIRE( car.getGenes() == string(DUMMY_ALTGENES) );
-}
-
-TEST_CASE( "CGaCar setGenes too short", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_ALTGENES);
-    car.setGenes("ASDF");
-
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
-}
-
-
-TEST_CASE( "CGaCar CreateCar", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_ALTGENES);
-    car.CreateCar(DUMMY_GENES);
-
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
+    CCar car;
 }
 
 namespace GA

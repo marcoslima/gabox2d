@@ -399,6 +399,12 @@ namespace PHYS
         m_dead_reason = "Alive";
     }
 
+    void CPhysCar::reset()
+    {
+        destroy();
+        init();
+    }
+
     void CPhysCar::destroy()
     {
         if (!b2World_IsValid(m_World.m_WorldId))

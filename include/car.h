@@ -22,7 +22,8 @@ public:
 	void beginSimulate(b2WorldId WorldId);
 
 	void endSimulate();
-	void CreateCar(const char* szGenes = nullptr);
+	void CreateFromGenes(const char* szGenes = nullptr);
+	void CreateCar();
 	void DestroyCar();
 	bool doStep();
 	void UpdateGraphicsData();
@@ -40,7 +41,7 @@ public:
 		return m_ga_car.getPontuacao();
 	}
 
-	const char* getGenes() const
+	string getGenes() const
 	{
 		return m_ga_car.getGenes();
 	}
