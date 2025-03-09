@@ -100,54 +100,7 @@ void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
 
 void CGa::_do_calc_points()
 {
-	float pts;
-	float c1,c2,v,d,t;
-	float p1,p2,p3,p4,p5;
-	lst_car_t::iterator it;
-	for(it = m_populacao.begin();
-		it!= m_populacao.end();
-		it++)
-	{
-		c1 = it->m_contatoR1	;
-		c2 = it->m_contatoR2	;
-		v  = it->m_vm			;
-		d  = it->m_distancia	;
-		t  = it->getT()			; 
-
-		/*
-			A pontuação é meio difícil porque, para ser absoluta, não pode
-			depender da população.
-			Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t).
-			Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
-			será mais importante que os outros parâmetros de avaliação.
-			
-			Para resolver isso, vamos fazer o fitness como sendo a distância
-			euclidiana de um vetor composto pelos parâmetros de avaliação a um 
-			vetor constante ideal.
-			
-			O vetor será (c1, c2, v, d, t).
-			O vetor objetivo ideal será: (t_max, t_max, 1000, 1000, 0).
-			Ou seja, 
-				. o tempo de contato das rodas é o máximo possível
-				. A velocidade é a máxima possível
-				. A distância percorrida é a máxima possível
-				. O tempo gasto é o mínimo. No caso, nem é possível, pois é zero.
-			
-			Para não gastar um sqrt à toa, faremos o quadrado da distância.		*/
-
-		p1 = _max_t - c1;
-		p2 = _max_t - c2;
-		p3 = 1000 - v;
-		p4 = 1000 - d;
-		p5 = t; // 0 - t = -t, mas como ser� ao quadrado, deixa t mesmo.
-
-		pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
-		
-		// Se quebrou, vale um d�cimo de um que n�o quebrou:
-		if(it->m_bDead) pts *= 10;
-
-		it->setPontos(pts);
-	}
+	for(auto it = m_populacao.begin(); it!= m_populacao.end(); it++) it->calc_fitness(_max_t);
 }
 
 void CGa::_do_sort()

@@ -2,6 +2,7 @@
 #include "GaCar.h"
 #include <stdexcept>
 #include <global_random.h>
+#include <iostream>
 
 
 namespace GA
@@ -109,7 +110,13 @@ namespace GA
     void CGaCar::setGenes(const char *genes)
     {
         if (genes == nullptr || strlen(genes) != GENES)
+        {
+            std::cerr << "Genes inválidos, gerando genes aleatórios" << std::endl;
+            std::cerr << "Genes: " << genes << std::endl;
+            std::cerr << "Tamanho: " << strlen(genes) << std::endl;
+            std::cerr << "Tamanho esperado: " << GENES << std::endl;
             _generate_random_genes();
+        }
         else
             _genes = genes;
     }

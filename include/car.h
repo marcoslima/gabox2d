@@ -27,6 +27,11 @@ public:
 	bool doStep();
 	void UpdateGraphicsData();
 	void Medir(b2WorldId WorldId, double max_t);
+	string getGenes(void);
+	[[nodiscard]] b2Vec2 getCenter() const;
+	void calc_fitness(double max_t);
+	string getGenesString() const;
+
 
 	///////////////////////////////////
 	// Down Interfaces

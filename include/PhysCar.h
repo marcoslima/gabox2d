@@ -73,7 +73,7 @@ namespace PHYS
         void init();
 
         // semi-constantes
-    protected:
+    public:
         float _timeStep;
         int32_t _iterations;
 

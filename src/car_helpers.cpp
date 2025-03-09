@@ -1,9 +1,9 @@
 #include <car_helpers.h>
 
 
-void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
+GUI::CGrCar::gr_circle_t TranslateCircle(const b2BodyId RodaId)
 {
-    // b2CircleShape *circle = (b2CircleShape*)pRoda->GetShapeList();
+    GUI::CGrCar::gr_circle_t grCircle;
     b2ShapeId shapes[1];
     b2Body_GetShapes(RodaId, shapes, 1);
 
@@ -12,19 +12,27 @@ void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
     const auto [x, y] = posRoda + posCircle;
     grCircle.center = PointF(x, y);
     grCircle.radius = radius;
+
+    return grCircle;
 }
 
-void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::gr_roda_t &grRoda, const bool bContact)
+GUI::CGrCar::gr_roda_t TranslateRoda(const b2BodyId RodaId, const bool bContact)
 {
-    TranslateCircle(RodaId, grRoda.circle);
+    GUI::CGrCar::gr_roda_t grRoda;
+    grRoda.circle = TranslateCircle(RodaId);
 
     const auto rotation = b2Body_GetRotation(RodaId);
     grRoda.angle = b2Rot_GetAngle(rotation);
     grRoda.touch = bContact;
+
+    return grRoda;
 }
 
-void TranslatePeso(const b2BodyId PesoId, GUI::CGrCar::gr_peso_t &grPeso, const bool bBroke)
+GUI::CGrCar::gr_peso_t TranslatePeso(const b2BodyId PesoId, const bool bBroke)
 {
-    TranslateCircle(PesoId, grPeso.circle);
+    GUI::CGrCar::gr_peso_t grPeso;
+    grPeso.circle = TranslateCircle(PesoId);
     grPeso.broke = bBroke;
+
+    return grPeso;
 }

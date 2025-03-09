@@ -46,8 +46,7 @@ namespace GUI
 
     void CGaBox2dDoc::OnEditCopy() const
     {
-        string strGenes;
-        m_car.getGenes(strGenes);
+        string strGenes = m_car.getGenes();
 
         // Código para copiar para a área de transferência
         // TODO: Implementar para Linux ou genérico

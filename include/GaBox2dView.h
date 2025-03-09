@@ -138,7 +138,7 @@ public:
 
 	[[nodiscard]] string getDeadReason() const
 	{
-		return GetDocument()->GetCar().m_dead_reason;
+		return GetDocument()->GetCar().m_phys_car.m_dead_reason;
 	}
 };
 
