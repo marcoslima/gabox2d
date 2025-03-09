@@ -119,7 +119,7 @@ namespace GA
         setGenes(genes);
     }
 
-    void CGaCar::_decode()
+    void CGaCar::decode()
     {
 #if 1
         size_t nPos = 0;

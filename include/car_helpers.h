@@ -1,3 +1,5 @@
+#pragma once
+
 #include <car.h>
 
 void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle);

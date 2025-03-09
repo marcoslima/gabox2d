@@ -38,10 +38,8 @@ namespace PHYS
 
     class CPhysCar
     {
+    // public data
     public:
-        CPhysCar();
-        ~CPhysCar();
-
         // Instanciamento do carro no box2d
         b2BodyId m_Roda1Id;
         b2BodyId m_Roda2Id;
@@ -57,6 +55,22 @@ namespace PHYS
 
         CWorld m_World;
         string m_dead_reason;
+
+    // Public Methods
+    public:
+        CPhysCar();
+        ~CPhysCar();
+
+        // Usa as definições decodificadas para criar o objeto em si no box2d
+        void create(b2WorldId WorldId, const CCarDef& carro);
+
+        void destroy();
+
+        void init_simulation_vars();
+        static void phys_end_simulate();
+        bool simulation_step();
+
+        void init();
 
         // semi-constantes
     protected:
@@ -119,8 +133,6 @@ namespace PHYS
         static void _verificar_step();
 
     protected:
-        void _init();
-
         void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
 
         void _set_torques(const car_t &car_def);
@@ -128,17 +140,6 @@ namespace PHYS
         [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
 
         void _create_joints(const car_t &car_def);
-
-        // Usa as definições decodificadas para criar o objeto em si no box2d
-        void _create(b2WorldId WorldId, const CCarDef& carro);
-
-        void _destroy();
-
-        void _init_simulation_vars();
-
-        static void _phys_end_simulate();
-
-        bool _simulation_step();
 
 
         // Suporte à simulação no Box2d
@@ -173,7 +174,7 @@ namespace PHYS
 
         void Destroy()
         {
-            _destroy();
+            destroy();
         }
 
         bool m_bDead;

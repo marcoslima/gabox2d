@@ -4,49 +4,51 @@
 
 
 CCar::CCar()
-    : CGaCar() {}
+    : m_ga_car()
+    , m_phys_car()
+    , m_gr_car() {}
 
 CCar::CCar(const char *szGenes)
-    : CGaCar(szGenes) {}
+    : m_ga_car(szGenes) {}
 
 void CCar::beginSimulate(const b2WorldId WorldId)
 {
     // Desinstanciamento
-    _destroy();
+    m_phys_car.destroy();
 
     // Decodificamos os genes (genes -> carro | string -> CCarDef)
-    _decode();
+    m_ga_car.decode();
 
     // Instanciamento
-    _create(WorldId, _carro);
+    m_phys_car.create(WorldId, m_ga_car._carro);
 
     // Inicializamos a simulação física:
-    _init_simulation_vars();
+    m_phys_car.init_simulation_vars();
 }
 
 void CCar::endSimulate()
 {
     // Liberamos os recursos da phys:
-    _phys_end_simulate();
+    m_phys_car.phys_end_simulate();
 }
 
 void CCar::CreateCar(const char *szGenes)
 {
-    if (b2World_IsValid(m_World.m_WorldId) && b2Body_IsValid(m_Roda1Id))
-        _destroy();
+    m_phys_car.destroy();
 
-    _init();
-    CGaCar::CreateCar(szGenes);
+    m_phys_car.init();
+
+    m_ga_car.CreateCar(szGenes);
 }
 
 void CCar::DestroyCar()
 {
-    _destroy();
+    m_phys_car.destroy();
 }
 
 bool CCar::doStep()
 {
-    const bool bRet = _simulation_step();
+    const bool bRet = m_phys_car.simulation_step();
 
     UpdateGraphicsData();
 

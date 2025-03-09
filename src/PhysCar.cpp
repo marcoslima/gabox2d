@@ -43,7 +43,7 @@ namespace PHYS
 
     CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
     {
-        _init();
+        init();
     }
 
     CPhysCar::~CPhysCar() = default;
@@ -122,11 +122,11 @@ namespace PHYS
         m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, car_def, 5);
     }
 
-    void CPhysCar::_create(const b2WorldId WorldId, const CCarDef &carro)
+    void CPhysCar::create(const b2WorldId WorldId, const CCarDef &carro)
     {
         _verificar_step();
         if (b2World_IsValid(WorldId))
-            _destroy();
+            destroy();
 
         m_World.m_WorldId = WorldId;
         const car_t car_def = _translate_rodas_e_pesos(carro);
@@ -136,7 +136,7 @@ namespace PHYS
     }
 
     // Executa um passo da simulação e retorna false se o carro morreu.
-    bool CPhysCar::_simulation_step()
+    bool CPhysCar::simulation_step()
     {
         _bInStep = true;
 
@@ -148,7 +148,7 @@ namespace PHYS
         return !m_bDead;
     }
 
-    void CPhysCar::_init_simulation_vars()
+    void CPhysCar::init_simulation_vars()
     {
         _x0 = getCenter();
         _t = 0;
@@ -168,7 +168,7 @@ namespace PHYS
         _last_contact_r2 = 0;
     }
 
-    void CPhysCar::_phys_end_simulate()
+    void CPhysCar::phys_end_simulate()
     {
         // Nothing to do.
     }
@@ -378,7 +378,7 @@ namespace PHYS
         return cm;
     }
 
-    void CPhysCar::_init()
+    void CPhysCar::init()
     {
         m_Roda1Id = b2_nullBodyId;
         m_Roda2Id = b2_nullBodyId;
@@ -399,7 +399,7 @@ namespace PHYS
         m_dead_reason = "Alive";
     }
 
-    void CPhysCar::_destroy()
+    void CPhysCar::destroy()
     {
         if (!b2World_IsValid(m_World.m_WorldId))
             return;
@@ -417,7 +417,7 @@ namespace PHYS
         // _pWorld->SetContactListener(NULL);
 
         // NULLamos tudo:
-        _init();
+        init();
     }
 
     void CPhysCar::_verificar_step()

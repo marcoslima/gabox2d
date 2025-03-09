@@ -27,11 +27,11 @@ namespace GA
     protected:
         void _generate_random_genes();
 
-        // Decodifica o carro dos genes criando-o nas definições
-        void _decode();
-
     public:
         CGaCar();
+
+        // Decodifica o carro dos genes criando-o nas definições
+        void decode();
 
         explicit CGaCar(const char *szGenes);
 

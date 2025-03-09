@@ -1,4 +1,4 @@
-#include <car_helpers.h>>
+#include <car_helpers.h>
 
 
 void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
