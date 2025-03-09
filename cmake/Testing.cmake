@@ -25,6 +25,7 @@ if(GABOX2D_BUILD_TESTS)
     ${CMAKE_SOURCE_DIR}/tests/test_ga.cpp
     ${CMAKE_SOURCE_DIR}/tests/test_car.cpp
     ${CMAKE_SOURCE_DIR}/tests/test_random.cpp
+    ${CMAKE_SOURCE_DIR}/tests/test_doublex.cpp
   )
 
   # Link against the main project and Catch2

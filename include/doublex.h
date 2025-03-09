@@ -63,7 +63,7 @@ public:
 	doublex operator =(const int    other);
 
 // Compara��es:
-//	bool operator < (const doublex  other);
+	bool operator < (const doublex  other);
 	bool operator > (const doublex& other);
 	bool operator <=(const doublex& other);
 	bool operator >=(const doublex& other);
@@ -108,8 +108,6 @@ doublex log(const doublex& numero, double base = 10.0);
 doublex operator *(double left, doublex right);
 bool operator <(double left, doublex right);
 bool operator >(double left, doublex right);
-
-bool operator <(doublex left, doublex right);
 
 
 // Fun��es especializadas doublex:

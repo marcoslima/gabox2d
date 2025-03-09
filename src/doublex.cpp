@@ -74,17 +74,14 @@ doublex doublex::operator /(doublex other) const
 // Pot�ncia:
 doublex doublex::operator^(doublex other) const
 {
-	if(other.S() == 0)
-		return *this ^ other.V();
-	else
-		return	doublex(pow(dV,other.dV),
-					::sqrt
-					(
-						pow(dS * other.dV * pow(dV,other.dV-1),2.0)
-						+
-						pow(pow(dV,other.dV)*::log(dV)*other.dS, 2.0)
-					)
-				);
+	return	doublex(pow(dV,other.dV),
+				::sqrt
+				(
+					pow(dS * other.dV * pow(dV,other.dV-1),2.0)
+					+
+					pow(pow(dV,other.dV)*::log(dV)*other.dS, 2.0)
+				)
+			);
 }
 
 doublex doublex::operator +=(const doublex& other)
@@ -209,12 +206,10 @@ doublex doublex::operator =(const int    other)
 }
 
 // Compara��es:
-/*
 bool doublex::operator <(const doublex other)
 {
 	return dV < other.dV;
 }
-*/
 bool doublex::operator >(const doublex& other)
 {
 	return dV > other.dV;
@@ -238,11 +233,6 @@ bool doublex::operator !=(const doublex& other)
 
 ////////////////////////////////////////////////////////
 // Overloads fora da classe:
-bool operator <(doublex left, doublex right)
-{
-	return left.V() < right.V();
-}
-
 doublex sqrt(doublex aVal)
 {
 	return doublex(::sqrt(aVal.V()),aVal.S()*::sqrt(1.0/aVal.V()));
@@ -318,7 +308,11 @@ doublex operator *(double left, doublex right)
 
 doublex mod(const doublex& left, const doublex& right)
 {
-	return doublex(fmod(left.V(),right.V()),::sqrt(pow(left.S(),2.0)+pow(right.S(),2.0)));
+	return doublex
+	(
+		fmod(left.V(),right.V()),
+		::sqrt(pow(left.S(), 2.0) + pow(right.S(), 2.0))
+	);
 }
 
 doublex log(const doublex& numero, double base)
@@ -330,7 +324,7 @@ doublex log(const doublex& numero, double base)
 string doublex::str(void)
 {
 	static char szFmt[64];
-	sprintf(szFmt,"%f � %f", dV, dS);
+	sprintf(szFmt,"%f ± %f", dV, dS);
 	return string(szFmt);
 }
 
