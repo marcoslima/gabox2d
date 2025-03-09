@@ -1,5 +1,6 @@
 add_library(GaBox2dLib
     src/car.cpp 
+    src/car_helpers.cpp
     src/CarDef.cpp 
     src/CCronometro.cpp 
     src/devutils.cpp 
@@ -26,6 +27,7 @@ add_library(GaBox2dLib
 
     include/assets.h
     include/car.h
+    include/car_helpers.h
     include/CarDef.h
     include/CCronometro.h
     include/CRandom.h
