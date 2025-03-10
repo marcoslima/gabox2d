@@ -1,6 +1,7 @@
 #pragma once
+
 #include <string>
-#include "CarDef.h"
+#include <CarDef.h>
 #include <global_random.h>
 
 using namespace std;
@@ -20,7 +21,7 @@ namespace GA
         // Decodificado
         CCarDef _carro;
 
-        // Suporte ao algoritmo gen�tico:
+        // Suporte ao algoritmo genético:
         double _pontos;
 
         // Internas
@@ -29,43 +30,15 @@ namespace GA
 
     public:
         CGaCar();
-
-        // Decodifica o carro dos genes criando-o nas definições
-        void decode();
-
         explicit CGaCar(const char *szGenes);
-
         ~CGaCar();
 
-        [[nodiscard]] char getGene(const size_t nIndex) const
-        {
-            return _genes[nIndex];
-        }
-
-        void setGene(const size_t nIndex, const char gen)
-        {
-            _genes[nIndex] = gen;
-        }
-
         [[nodiscard]] string getGenes() const;
-
-        [[nodiscard]] double getPontuacao() const
-        {
-            return _pontos;
-        }
-
+        [[nodiscard]] double getPontuacao() const;
+        void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
         void setGenes(const char *genes);
-
-        void setPontos(const double pontos)
-        {
-            _pontos = pontos;
-        }
-
+        void setPontos(const double pontos);
         void CreateCarFromGenes(const char *genes = nullptr);
         void CreateCar();
-
-
-        // Processo evolutivo:
-        void Crossover(CGaCar &other);
     };
 }

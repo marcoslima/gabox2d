@@ -35,6 +35,11 @@ namespace GA
         return _genes;
     }
 
+    double CGaCar::getPontuacao() const
+    {
+        return _pontos;
+    }
+
     void CGaCar::setGenes(const char *genes)
     {
         if (strlen(genes) != GENES)
@@ -42,8 +47,13 @@ namespace GA
             cout << "Invalid genes size: " << strlen(genes) << endl;
             return;
         }
-        
+
         _genes = genes;
+    }
+
+    void CGaCar::setPontos(const double pontos)
+    {
+        _pontos = pontos;
     }
 
     void CGaCar::CreateCarFromGenes(const char *genes)
@@ -77,18 +87,6 @@ namespace GA
             if (i < 4) _carro._torque[i] = DecodeGen(nLen, _genes.c_str(), -dFp, dFp, nPos);
             _carro._freq[i] = DecodeGen(nLen, _genes.c_str(), dMinFreq, dMaxFreq, nPos);
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
-        }
-    }
-
-    void CGaCar::Crossover(CGaCar &other)
-    {
-        const size_t nCross = 1 + GA::random.rand_int(0, GENES - 2);
-
-        for (size_t i = nCross; i < GENES; i++)
-        {
-            const char tmp = getGene(i);
-            setGene(i, other.getGene(i));
-            other.setGene(i, tmp);
         }
     }
 }
