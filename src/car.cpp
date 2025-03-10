@@ -34,17 +34,14 @@ void CCar::endSimulate()
 
 void CCar::CreateFromGenes(const char *szGenes)
 {
-    m_phys_car.destroy();
-
-    m_phys_car.init();
-
+    m_phys_car.reset();
     m_ga_car.CreateCarFromGenes(szGenes);
 }
 
-void CCar::CreateCar()
+void CCar::CreateRandomCar()
 {
     m_phys_car.reset();
-    m_ga_car.CreateCar();
+    m_ga_car.CreateRandomCar();
 }
 
 void CCar::DestroyCar()

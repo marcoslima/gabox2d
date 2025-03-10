@@ -23,7 +23,7 @@ public:
 
 	void endSimulate();
 	void CreateFromGenes(const char* szGenes = nullptr);
-	void CreateCar();
+	void CreateRandomCar();
 	void DestroyCar();
 	bool doStep();
 	void UpdateGraphicsData();

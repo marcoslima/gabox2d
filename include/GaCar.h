@@ -41,6 +41,6 @@ namespace GA
 
         void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
         void CreateCarFromGenes(const char *genes = nullptr);
-        void CreateCar();
+        void CreateRandomCar();
     };
 }

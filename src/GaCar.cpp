@@ -61,7 +61,7 @@ namespace GA
         setGenes(genes);
     }
 
-    void CGaCar::CreateCar()
+    void CGaCar::CreateRandomCar()
     {
         _generate_random_genes();
     }

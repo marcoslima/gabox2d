@@ -219,7 +219,7 @@ namespace GUI
         if (!pDoc)
             return;
 
-        pDoc->GetCar().CreateCar();
+        pDoc->GetCar().CreateRandomCar();
         pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
     }
 
