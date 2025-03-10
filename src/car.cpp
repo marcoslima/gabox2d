@@ -3,13 +3,10 @@
 #include <iostream>
 
 
-CCar::CCar()
-    : m_ga_car()
-    , m_phys_car()
-    , m_gr_car() {}
-
-CCar::CCar(const char *szGenes)
-    : m_ga_car(szGenes) {}
+CCar::CCar(GA::CGaCar ga_car, PHYS::CPhysCar phys_car, GUI::CGrCar gr_car)
+    : m_ga_car(ga_car)
+    , m_phys_car(phys_car)
+    , m_gr_car(gr_car) {}
 
 void CCar::beginSimulate(const b2WorldId WorldId)
 {
@@ -142,11 +139,6 @@ void CCar::calc_fitness(double max_t)
     m_ga_car.setPontos(pts);
 }
 
-string CCar::getGenesString() const
-{
-    return m_ga_car.getGenes();
-}
-
 double CCar::getPontuacao() const
 {
     return m_ga_car.getPontuacao();
@@ -175,4 +167,16 @@ void CCar::Draw(sf::RenderWindow &window) const
 void CCar::CreateCarFromGenes(const char *genes)
 {
     m_ga_car.CreateCarFromGenes(genes);
+}
+
+CCar createCarFromGenes(string genes, GA::CGaCar ga_car, PHYS::CPhysCar phys_car, GUI::CGrCar gr_car)
+{
+    CCar car(ga_car, phys_car, gr_car);
+    car.CreateFromGenes(genes.c_str());
+    return car;
+}
+
+CCar createRandomCar(GA::CGaCar ga_car, PHYS::CPhysCar phys_car, GUI::CGrCar gr_car)
+{
+    return CCar(ga_car, phys_car, gr_car);
 }

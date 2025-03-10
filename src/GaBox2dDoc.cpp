@@ -12,7 +12,7 @@ namespace GUI
     // CGaBox2dDoc construction/destruction
     CGaBox2dDoc::CGaBox2dDoc()
         : m_env() 
-        , m_car() {}
+        , m_car(createRandomCar()) {}
 
     CGaBox2dDoc::~CGaBox2dDoc()
     {

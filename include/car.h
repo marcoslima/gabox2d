@@ -15,12 +15,11 @@ private:
 	GUI::CGrCar m_gr_car;
 
 public:
-	CCar();
+	CCar(GA::CGaCar ga_car, PHYS::CPhysCar phys_car, GUI::CGrCar gr_car);
 
-	explicit CCar(const char* szGenes);
 	~CCar()= default;
-	void beginSimulate(b2WorldId WorldId);
 
+	void beginSimulate(b2WorldId WorldId);
 	void endSimulate();
 	void CreateFromGenes(const char* szGenes = nullptr);
 	void CreateRandomCar();
@@ -31,7 +30,6 @@ public:
 	string getGenes(void);
 	[[nodiscard]] b2Vec2 getCenter() const;
 	void calc_fitness(double max_t);
-	string getGenesString() const;
 
 
 	///////////////////////////////////
@@ -46,3 +44,10 @@ public:
 
 typedef vector<CCar> vec_car_t;
 typedef list<CCar> lst_car_t;
+CCar createCarFromGenes(string genes, 
+					    GA::CGaCar ga_car = GA::CGaCar(), 
+					    PHYS::CPhysCar phys_car = PHYS::CPhysCar(), 
+					    GUI::CGrCar gr_car = GUI::CGrCar());
+CCar createRandomCar(GA::CGaCar ga_car = GA::CGaCar(), 
+					 PHYS::CPhysCar phys_car = PHYS::CPhysCar(), 
+					 GUI::CGrCar gr_car = GUI::CGrCar());

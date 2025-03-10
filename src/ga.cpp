@@ -41,7 +41,7 @@ void CGa::_cria_populacao()
 	m_populacao.clear();
 
 	for(size_t i = 0; i < _populacao; i++)
-		m_populacao.push_back(CCar());
+		m_populacao.push_back(createRandomCar());
 }
 
 void CGa::setParams(	size_t	nPopulacao	, 
@@ -146,7 +146,7 @@ void CGa::_do_elitism()
 		it!= m_populacao.end() && i < _elitismo;
 		it++,i++)
 	{
-		m_nova.push_back(string("__")+it->getGenesString());
+		m_nova.push_back(it->getGenes());
 	}
 }
 
@@ -154,7 +154,7 @@ void CGa::_do_alienism()
 {
 	for(size_t i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back(string("__")+(CCar()).getGenesString());
+		m_nova.push_back(createRandomCar().getGenes());
 	}
 }
 
@@ -202,10 +202,10 @@ void CGa::_2Crossover(void)
 		
 		// Faz crossover?
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str1 = it->getGenesString();
+		str1 = it->getGenes();
 
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str2 = it->getGenesString();
+		str2 = it->getGenes();
 
 		if(random.rand_int(0, 100) < _crossover)
 		{
@@ -245,9 +245,6 @@ void CGa::_3Mutate(void)
 		// Ponto da mutação:
 		nMut = random.rand_int(zero, max_gene);
 
-		VERIFY(m_nova[i].substr(0, 2) != "__", "Mutate: m_nova[i].Left(2) != \"__\"" );
-		VERIFY(m_nova[i].size() == GENES, "Mutate: m_nova[i].size() == GENES, found: " << m_nova[i].size() );
-
 		// Intensidade e direção da mutação:
 		char intensidade = random.discrete_random<char>(1, _mut_int);
 		char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
@@ -277,10 +274,7 @@ void CGa::_4AdvanceGeneration(void)
 		size_t i,nSize = m_nova.size();
 		for(i = 0; i < nSize && i < _populacao; i++)
 		{
-			if(m_nova[i].substr(0, 2) == "__")
-				m_populacao.push_back(CCar(m_nova[i].substr(m_nova[i].size()-2).c_str()));
-			else
-				m_populacao.push_back(CCar(m_nova[i].c_str()));
+			m_populacao.push_back(createCarFromGenes(m_nova[i]));
 		}
 		_geracao++;
 	}
