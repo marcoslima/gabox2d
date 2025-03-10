@@ -9,7 +9,7 @@ using namespace std;
 
 class CCar 
 {
-public:
+private:
 	GA::CGaCar m_ga_car; 
 	PHYS::CPhysCar m_phys_car;
 	GUI::CGrCar m_gr_car;
@@ -36,15 +36,12 @@ public:
 
 	///////////////////////////////////
 	// Down Interfaces
-	double getPontuacao() const
-	{
-		return m_ga_car.getPontuacao();
-	}
-
-	string getGenes() const
-	{
-		return m_ga_car.getGenes();
-	}
+	double getPontuacao() const;
+	string getGenes() const;
+	string deadReason() const;
+	double getT() const;
+	void Draw(sf::RenderWindow &window) const;	
+	void CreateCarFromGenes(const char *genes);
 };
 
 typedef vector<CCar> vec_car_t;

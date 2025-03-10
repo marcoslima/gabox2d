@@ -187,7 +187,7 @@ namespace GUI
         _draw_sky(window, env);
         _draw_ground(window);
         _draw_border(window, env);
-        pDoc->GetCar().m_gr_car.Draw(window);
+        pDoc->GetCar().Draw(window);
     }
 
     CGaBox2dDoc *CGaBox2dView::GetDocument() const
@@ -237,11 +237,11 @@ namespace GUI
     {
         CGaBox2dDoc *pDoc = GetDocument();
 
-        string strGenes = pDoc->GetCar().m_ga_car.getGenes();
+        string strGenes = pDoc->GetCar().getGenes();
 
         if (pDoc->m_IsSimulating) OnSimulaPlay();
 
-        pDoc->GetCar().m_ga_car.CreateCarFromGenes(strGenes.c_str());
+        pDoc->GetCar().CreateCarFromGenes(strGenes.c_str());
 
         OnSimulaPlay();
     }
@@ -406,7 +406,7 @@ namespace GUI
 
     void CGaBox2dView::OnEditCopy() const
     {
-        ImGui::SetClipboardText(GetDocument()->GetCar().m_ga_car.getGenes().c_str());
+        ImGui::SetClipboardText(GetDocument()->GetCar().getGenes().c_str());
     }
 
     void CGaBox2dView::OnEditPaste()
@@ -459,7 +459,7 @@ namespace GUI
         //     OnSimulaPlay();
 
         pDoc->GetCar().endSimulate();
-        pDoc->GetCar().m_ga_car.CreateCarFromGenes(buffer);
+        pDoc->GetCar().CreateCarFromGenes(buffer);
         pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
 
         // if (m_nSimTimer == 0)

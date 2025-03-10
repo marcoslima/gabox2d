@@ -9,7 +9,7 @@
 
 TEST_CASE( "CCar instance", "[CCar]" ) {
     CCar car;
-    REQUIRE(car.m_ga_car.getGenes().size() == GENES);
+    REQUIRE(car.getGenes().size() == GENES);
 }
 
 TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )

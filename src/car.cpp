@@ -149,3 +149,33 @@ string CCar::getGenesString() const
 {
     return m_ga_car.getGenes();
 }
+
+double CCar::getPontuacao() const
+{
+    return m_ga_car.getPontuacao();
+}
+
+string CCar::getGenes() const
+{
+    return m_ga_car.getGenes();
+}
+
+string CCar::deadReason() const
+{
+    return m_phys_car.m_dead_reason;
+}
+
+double CCar::getT() const
+{
+    return m_phys_car.getT();
+}
+
+void CCar::Draw(sf::RenderWindow &window) const
+{
+    m_gr_car.Draw(window);
+}
+
+void CCar::CreateCarFromGenes(const char *genes)
+{
+    m_ga_car.CreateCarFromGenes(genes);
+}

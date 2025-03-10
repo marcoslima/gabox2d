@@ -33,11 +33,13 @@ namespace GA
         explicit CGaCar(const char *szGenes);
         ~CGaCar();
 
-        [[nodiscard]] string getGenes() const;
-        [[nodiscard]] double getPontuacao() const;
-        void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
         void setGenes(const char *genes);
+        [[nodiscard]] string getGenes() const;
+
         void setPontos(const double pontos);
+        [[nodiscard]] double getPontuacao() const;
+
+        void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
         void CreateCarFromGenes(const char *genes = nullptr);
         void CreateCar();
     };
