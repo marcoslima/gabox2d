@@ -1,16 +1,80 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <gmock/gmock.h>
 
 #include <cstdint>
+#include <iostream>
 #include "car.h"
 #include "GaCar.h"
 
 #include <global_random.h>
 
+bool operator==(const b2WorldId &lhs, const b2WorldId &rhs)
+{
+    return lhs.index1 == rhs.index1 && lhs.generation == rhs.generation;
+}
+
+
 TEST_CASE( "CCar instance", "[CCar]" ) 
 {
-//     CCar car;
-//     REQUIRE(car.getGenes().size() == GENES);
+    class MockCGaCar : public GA::CGaCar
+    {
+    public:
+        MOCK_METHOD(void, decode, (), (override));
+    };
+
+    class MockCPhysCar : public PHYS::CPhysCar
+    {
+    public:
+        MOCK_METHOD(void, destroy, (), (override));
+        MOCK_METHOD(void, create, (b2WorldId WorldId, const CCarDef& carro), (override));
+        MOCK_METHOD(void, init_simulation_vars, (), (override));
+        MOCK_METHOD(void, phys_end_simulate, (), (override));
+    };
+
+    class MockCGrCar : public GUI::CGrCar
+    {
+    public:
+    };
+
+    MockCGaCar ga_car;
+    MockCPhysCar phys_car;
+    MockCGrCar gr_car;
+
+    CCar sut;
+
+    SECTION("CCar beginSimulate") 
+    {
+        testing::InSequence seq;
+        b2WorldId testWorldId = {42, 17};
+
+        {
+            EXPECT_CALL(phys_car, destroy()).Times(1);
+            EXPECT_CALL(ga_car, decode()).Times(1);
+            EXPECT_CALL(phys_car, create(testWorldId, testing::_)).Times(1);
+            EXPECT_CALL(phys_car, init_simulation_vars()).Times(1);
+        }
+
+        sut.beginSimulate(testWorldId);
+
+        // Verify all expectations were met
+        REQUIRE(testing::Mock::VerifyAndClearExpectations(&phys_car));
+        REQUIRE(testing::Mock::VerifyAndClearExpectations(&ga_car));        
+    }
+
+    SECTION("CCar endSimulate") 
+    {
+        testing::InSequence seq;
+
+        {
+            EXPECT_CALL(phys_car, phys_end_simulate()).Times(1);
+        }
+
+        sut.endSimulate();
+
+        // Verify all expectations were met
+        REQUIRE(testing::Mock::VerifyAndClearExpectations(&phys_car));
+    }
 }
 
 TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )

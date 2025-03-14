@@ -1,4 +1,5 @@
 #pragma once
+
 #include "car.h"
 #include "ga.h"
 #include "env.h"
@@ -30,7 +31,6 @@ public:
 	vec_vecs_t	m_vecGround;
 
 // Operations
-public:
 	void	BeginSimulation();
 	void	EndSimulation();
 
@@ -40,13 +40,10 @@ public:
 
 	CCar&	GetCar(){return m_car;}
 
-//	char *RandomCar(car_t& car);
 	bool OnNewDocument(const CEnv& env);
 
 // Implementation
 	~CGaBox2dDoc();
-
-	void OnEditCopy() const;
 
 	void _start_world();
 

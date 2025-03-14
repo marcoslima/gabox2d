@@ -48,6 +48,11 @@ namespace PHYS
 
     CPhysCar::~CPhysCar() = default;
 
+    bool CPhysCar::operator==(const CPhysCar &other) const
+    {
+        return uuid_compare(m_id, other.m_id) == 0;
+    }
+
     b2BodyId CreateRoda(const b2WorldId WorldId,
                         const b2_roda_ou_peso_def &car_def,
                         const CCarDef::CRodaParams &roda,

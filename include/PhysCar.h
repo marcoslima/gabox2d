@@ -1,5 +1,7 @@
 #pragma once
 #include <box2d/box2d.h>
+#include <uuid/uuid.h>
+
 #include "CarDef.h"
 #include "env.h"
 #include "World.h"
@@ -40,6 +42,9 @@ namespace PHYS
     {
     // public data
     public:
+        // ID deste carro:
+        uuid_t m_id;
+
         // Instanciamento do carro no box2d
         b2BodyId m_Roda1Id;
         b2BodyId m_Roda2Id;
@@ -61,14 +66,16 @@ namespace PHYS
         CPhysCar();
         ~CPhysCar();
 
-        // Usa as definições decodificadas para criar o objeto em si no box2d
-        void create(b2WorldId WorldId, const CCarDef& carro);
+        bool operator==(const CPhysCar &) const;
 
-        void destroy();
+        // Usa as definições decodificadas para criar o objeto em si no box2d
+        virtual void create(const b2WorldId WorldId, const CCarDef& carro);
+
+        virtual void destroy();
         void reset();
 
-        void init_simulation_vars();
-        static void phys_end_simulate();
+        virtual void init_simulation_vars();
+        virtual void phys_end_simulate();
         bool simulation_step();
 
         void init();
@@ -168,7 +175,7 @@ namespace PHYS
             return m_Peso2Id;
         }
 
-        [[nodiscard]] double getT() const
+        [[nodiscard]] float getT() const
         {
             return _t;
         }
@@ -179,12 +186,12 @@ namespace PHYS
         }
 
         bool m_bDead;
-        double m_distancia;
-        double m_contatoR1;
-        double m_contatoR2;
-        double m_acum_contatoR1;
-        double m_acum_contatoR2;
-        double m_vm;
-        double m_t;
+        float m_distancia;
+        float m_contatoR1;
+        float m_contatoR2;
+        float m_acum_contatoR1;
+        float m_acum_contatoR2;
+        float m_vm;
+        float m_t;
     };
 }

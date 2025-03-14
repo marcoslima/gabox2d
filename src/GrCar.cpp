@@ -91,6 +91,8 @@ namespace GUI
         const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
         const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
         DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
+
+        // TODO: Adicionar opção para desenhar ou não o texto
         text.setPosition(_roda1.circle.center.x, _roda1.circle.center.y);
         text.setString("R1");
         window.draw(text);
@@ -100,6 +102,8 @@ namespace GUI
         pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
         pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
         DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
+
+        // TODO: Adicionar opção para desenhar ou não o texto
         text.setPosition(_roda2.circle.center.x, _roda2.circle.center.y);
         text.setString("R2");
         window.draw(text);

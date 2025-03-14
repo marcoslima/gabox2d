@@ -62,7 +62,7 @@ add_library(GaBox2dLib
 )
 
 target_include_directories("GaBox2dLib" PUBLIC ${SFML_INCLUDE_DIRS})
-target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd)
+target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd ${UUID_LIBRARIES})
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 

@@ -61,7 +61,7 @@ void CGa::setParams(	size_t	nPopulacao	,
 	_max_t	   = dMaxT		;
 }
 
-void CGa::BeginEvolve(void)
+void CGa::BeginEvolve()
 {
 	// Cria a população:
 	_cria_populacao();
@@ -134,8 +134,6 @@ void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 		}
 	}
 #endif
-
-	return;
 }
 
 void CGa::_do_elitism()
@@ -167,7 +165,7 @@ void CGa::_do_manual_include()
 	}
 }
 
-void CGa::_1Select(void)
+void CGa::_1Select()
 {
 	// A população já está ordenada.
 	_do_elitism();
@@ -176,7 +174,7 @@ void CGa::_1Select(void)
 	return;
 }
 
-void CGa::_2Crossover(void)
+void CGa::_2Crossover()
 {
 	size_t i, nId1, nId2, nSize = m_populacao.size();
 	double nStdev = nSize / 1.0;
@@ -229,7 +227,7 @@ bool _do_mutate(float _mutacao)
 	return random.random(0.0, 100.0) < _mutacao;
 }
 
-void CGa::_3Mutate(void)
+void CGa::_3Mutate()
 {
 	size_t nMut;
 	char g;
@@ -257,7 +255,7 @@ void CGa::_3Mutate(void)
 	}
 }
 
-void CGa::_4AdvanceGeneration(void)
+void CGa::_4AdvanceGeneration()
 {
 	// Nova geração:
 	m_populacao.clear();
@@ -271,8 +269,8 @@ void CGa::_4AdvanceGeneration(void)
 	}
 	else
 	{
-		size_t i,nSize = m_nova.size();
-		for(i = 0; i < nSize && i < _populacao; i++)
+		const size_t nSize = m_nova.size();
+		for(size_t i = 0; i < nSize && i < _populacao; i++)
 		{
 			m_populacao.push_back(createCarFromGenes(m_nova[i]));
 		}
@@ -280,15 +278,14 @@ void CGa::_4AdvanceGeneration(void)
 	}
 
 	m_nova.clear();
-	return;
 }
 
-void CGa::MassExtinctionEvent(void)
+void CGa::MassExtinctionEvent()
 {
 	_bMassExtintion = true;	
 }
 
-void CGa::IncludeId(string strGenes)
+void CGa::IncludeId(const string& strGenes)
 {
 	_strId2Include = strGenes;
 }
@@ -299,12 +296,6 @@ void CGa::Step()
 	_2Crossover();
 	_3Mutate();
 	_4AdvanceGeneration();
-}
-
-void CGa::CopyPopulacao(lst_car_t *pTarget)
-{
-	*pTarget = m_populacao;
-
 }
 
 

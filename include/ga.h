@@ -3,8 +3,6 @@
 #include <atomic>
 #include <string>
 #include "lmfisica.h"
-#include "global_random.h"
-
 
 using namespace std;
 using namespace LmFisica;
@@ -106,10 +104,7 @@ namespace GA
         void MassExtinctionEvent();
 
         // Inclui um indivíduo na próxima geração
-        void IncludeId(string strGenes);
-
-        // Copia a população para um vector
-        void CopyPopulacao(lst_car_t *pTarget);
+        void IncludeId(const string &strGenes);
 
         // Queries
         // CCar getWinner()

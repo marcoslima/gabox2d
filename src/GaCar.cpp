@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <global_random.h>
 #include <iostream>
+#include <sstream>
 #include <ga_car_helpers.h>
 
 
@@ -35,7 +36,7 @@ namespace GA
         return _genes;
     }
 
-    double CGaCar::getPontuacao() const
+    float CGaCar::getPontuacao() const
     {
         return _pontos;
     }
@@ -44,14 +45,15 @@ namespace GA
     {
         if (strlen(genes) != GENES)
         {
-            cout << "Invalid genes size: " << strlen(genes) << endl;
-            return;
+            stringstream ss;
+            ss << "Invalid genes size: " << strlen(genes);
+            throw(length_error(ss.str().c_str()));
         }
 
         _genes = genes;
     }
 
-    void CGaCar::setPontos(const double pontos)
+    void CGaCar::setPontos(const float pontos)
     {
         _pontos = pontos;
     }
@@ -88,5 +90,48 @@ namespace GA
             _carro._freq[i] = DecodeGen(nLen, _genes.c_str(), dMinFreq, dMaxFreq, nPos);
             _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
         }
+    }
+
+    void CGaCar::calc_fitness(const float contact1,
+                              const float contact2,
+                              const float velocity,
+                              const float distance,
+                              const float time,
+                              const float max_t,
+                              const bool is_dead)
+    {
+        /*
+            A pontuação é meio difícil porque, para ser absoluta, não pode
+            depender da população.
+            Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t).
+            Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
+            será mais importante que os outros parâmetros de avaliação.
+
+            Para resolver isso, vamos fazer o fitness como sendo a distância
+            euclidiana de um vetor composto pelos parâmetros de avaliação a um
+            vetor constante ideal.
+
+            O vetor será (c1, c2, v, d, t).
+            O vetor objetivo ideal será: (t_max, t_max, 1000, 1000, 0).
+            Ou seja,
+                . o tempo de contato das rodas é o máximo possível
+                . A velocidade é a máxima possível
+                . A distância percorrida é a máxima possível
+                . O tempo gasto é o mínimo. No caso, nem é possível, pois é zero.
+
+            Para não gastar um sqrt à toa, faremos o quadrado da distância.
+        */
+        const float p1 = max_t - contact1;
+        const float p2 = max_t - contact2;
+        const float p3 = 1000 - velocity;
+        const float p4 = 1000 - distance;
+        const float p5 = time; // 0 - t = -t, mas como será ao quadrado, deixa t mesmo.
+
+        float pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
+
+        // Se quebrou, vale um d�cimo de um que n�o quebrou:
+        if(is_dead) pts *= 10;
+
+        _pontos = pts;
     }
 }

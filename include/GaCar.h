@@ -22,7 +22,7 @@ namespace GA
         CCarDef _carro;
 
         // Suporte ao algoritmo genético:
-        double _pontos;
+        float _pontos;
 
         // Internas
     protected:
@@ -36,10 +36,12 @@ namespace GA
         void setGenes(const char *genes);
         [[nodiscard]] string getGenes() const;
 
-        void setPontos(const double pontos);
-        [[nodiscard]] double getPontuacao() const;
+        void setPontos(float pontos);
+        [[nodiscard]] float getPontuacao() const;
 
-        void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
+        virtual void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
+        void calc_fitness(float contact1, float contact2, float velocity, float distance, float time, float max_t, bool is_dead);
+
         void CreateCarFromGenes(const char *genes = nullptr);
         void CreateRandomCar();
     };
