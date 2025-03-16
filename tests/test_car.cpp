@@ -17,13 +17,18 @@ bool operator==(const b2WorldId &lhs, const b2WorldId &rhs)
 
 TEST_CASE( "CCar instance", "[CCar]" ) 
 {
-    class MockCGaCar : public GA::CGaCar
+    class MockCGaCar : public GA::IGaCar
     {
     public:
+        MOCK_METHOD(string, getGenes, (), ( const override ));
+        MOCK_METHOD(float, getPontuacao, (), (const override));
         MOCK_METHOD(void, decode, (), (override));
+        MOCK_METHOD(void, calc_fitness, (float contact1, float contact2, float velocity, float distance, float time, float max_t, bool is_dead), (override));
+        MOCK_METHOD(void, CreateCarFromGenes, (const char *genes), (override));
+        MOCK_METHOD(void, CreateRandomCar, (), (override));
     };
 
-    class MockCPhysCar : public PHYS::CPhysCar
+    class MockCPhysCar : public PHYS::IPhysCar
     {
     public:
         MOCK_METHOD(void, destroy, (), (override));
