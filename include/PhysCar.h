@@ -5,6 +5,7 @@
 #include "CarDef.h"
 #include "env.h"
 #include "World.h"
+#include <IPhysCar.h>
 using namespace MODEL;
 
 namespace PHYS
@@ -38,10 +39,8 @@ namespace PHYS
         float damp[6]{};
     };
 
-    class CPhysCar
+    class CPhysCar final : IPhysCar
     {
-    // public data
-    public:
         // ID deste carro:
         uuid_t m_id;
 
@@ -61,27 +60,17 @@ namespace PHYS
         CWorld m_World;
         string m_dead_reason;
 
-    // Public Methods
-    public:
-        CPhysCar();
-        ~CPhysCar();
-
-        bool operator==(const CPhysCar &) const;
-
-        // Usa as definições decodificadas para criar o objeto em si no box2d
-        virtual void create(const b2WorldId WorldId, const CCarDef& carro);
-
-        virtual void destroy();
-        void reset();
-
-        virtual void init_simulation_vars();
-        virtual void phys_end_simulate();
-        bool simulation_step();
-
-        void init();
+        bool _bInStep;
+        bool m_bDead;
+        float m_distancia;
+        float m_contatoR1;
+        float m_contatoR2;
+        float m_acum_contatoR1;
+        float m_acum_contatoR2;
+        float m_vm;
+        float m_t;
 
         // semi-constantes
-    public:
         float _timeStep;
         int32_t _iterations;
 
@@ -98,100 +87,59 @@ namespace PHYS
         b2Vec2 _cPos;
 
         // Dados efêmeros. Só existem durante a medição/simulação do carro.
-    public:
         float _trqA;
         float _trqB;
         float _trqC;
         float _trqD;
 
+
+    // Public Methods
+    public:
+        CPhysCar();
+        ~CPhysCar() override;
+
+        bool operator==(const CPhysCar &) const;
+
+        // Usa as definições decodificadas para criar o objeto em si no box2d
+        void create(b2WorldId WorldId, const CCarDef& carro) override;
+
+        void destroy() override;
+        void reset() override;
+
+        void init_simulation_vars() override;
+        void phys_end_simulate() override;
+        bool simulation_step() override;
+        void init() override;
+
     private:
         void _simulation_pre_tick() const;
-
         void _register_contact_times();
-
         void _process_no_contact_time();
-
         void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
-
         void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
-
         void _process_contacts(const b2ContactEvents &contacts);
-
         void _test_peso(b2BodyId pesoId, const string &name);
-
         void _test_contacts();
-
         void _process_contacts();
-
         void _remove_joints_if_dead();
-
         void _register_distance_travelled();
-
         void _calc_average_velocity();
-
         void _register_time_step();
-
         void _register_contacts();
-
         void _simulation_pos_tick();
-
-        // CContactListener _cl;
-        bool _bInStep;
-
         static void _verificar_step();
-
-    protected:
         void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
-
         void _set_torques(const car_t &car_def);
-
         [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
-
         void _create_joints(const car_t &car_def);
 
-
-        // Suporte à simulação no Box2d
     public:
-        [[nodiscard]] b2Vec2 getCenter() const;
-
-        // Queries
-        [[nodiscard]] b2BodyId getR1() const
-        {
-            return m_Roda1Id;
-        }
-
-        [[nodiscard]] b2BodyId getR2() const
-        {
-            return m_Roda2Id;
-        }
-
-        [[nodiscard]] b2BodyId getP1() const
-        {
-            return m_Peso1Id;
-        }
-
-        [[nodiscard]] b2BodyId getP2() const
-        {
-            return m_Peso2Id;
-        }
-
-        [[nodiscard]] float getT() const
-        {
-            return _t;
-        }
-
-        void Destroy()
-        {
-            destroy();
-        }
-
-        bool m_bDead;
-        float m_distancia;
-        float m_contatoR1;
-        float m_contatoR2;
-        float m_acum_contatoR1;
-        float m_acum_contatoR2;
-        float m_vm;
-        float m_t;
+        [[nodiscard]] b2Vec2 getCenter() const override;
+        [[nodiscard]] b2BodyId getR1() const override;
+        [[nodiscard]] b2BodyId getR2() const override;
+        [[nodiscard]] b2BodyId getP1() const override;
+        [[nodiscard]] b2BodyId getP2() const override;
+        [[nodiscard]] float getT() const override;
+        void Destroy() override;
     };
 }

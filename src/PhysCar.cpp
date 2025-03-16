@@ -383,6 +383,30 @@ namespace PHYS
         return cm;
     }
 
+    b2BodyId CPhysCar::getR1() const {
+        return m_Roda1Id;
+    }
+
+    b2BodyId CPhysCar::getR2() const {
+        return m_Roda2Id;
+    }
+
+    b2BodyId CPhysCar::getP1() const {
+        return m_Peso1Id;
+    }
+
+    b2BodyId CPhysCar::getP2() const {
+        return m_Peso2Id;
+    }
+
+    float CPhysCar::getT() const {
+        return _t;
+    }
+
+    void CPhysCar::Destroy() {
+        destroy();
+    }
+
     void CPhysCar::init()
     {
         m_Roda1Id = b2_nullBodyId;
