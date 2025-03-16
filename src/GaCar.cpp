@@ -19,8 +19,6 @@ namespace GA
         : _genes(szGenes)
         , _pontos(0) {}
 
-    CGaCar::~CGaCar() = default;
-
     void CGaCar::_generate_random_genes()
     {
         _genes.clear();
@@ -41,7 +39,7 @@ namespace GA
         return _pontos;
     }
 
-    void CGaCar::setGenes(const char *genes)
+    void CGaCar::CreateCarFromGenes(const char *genes)
     {
         if (strlen(genes) != GENES)
         {
@@ -51,16 +49,6 @@ namespace GA
         }
 
         _genes = genes;
-    }
-
-    void CGaCar::setPontos(const float pontos)
-    {
-        _pontos = pontos;
-    }
-
-    void CGaCar::CreateCarFromGenes(const char *genes)
-    {
-        setGenes(genes);
     }
 
     void CGaCar::CreateRandomCar()

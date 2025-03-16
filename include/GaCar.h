@@ -2,7 +2,7 @@
 
 #include <string>
 #include <CarDef.h>
-#include <global_random.h>
+#include <IGaCar.h>
 
 using namespace std;
 using namespace MODEL;
@@ -12,7 +12,7 @@ using namespace MODEL;
 
 namespace GA
 {
-    class CGaCar
+    class CGaCar final : public IGaCar
     {
     public:
         // Codificado
@@ -31,18 +31,15 @@ namespace GA
     public:
         CGaCar();
         explicit CGaCar(const char *szGenes);
-        ~CGaCar();
 
-        void setGenes(const char *genes);
-        [[nodiscard]] string getGenes() const;
+        [[nodiscard]] string getGenes() const override;
 
-        void setPontos(float pontos);
-        [[nodiscard]] float getPontuacao() const;
+        [[nodiscard]] float getPontuacao() const override;
 
-        virtual void decode(); // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
-        void calc_fitness(float contact1, float contact2, float velocity, float distance, float time, float max_t, bool is_dead);
+        void decode() override; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
+        void calc_fitness(float contact1, float contact2, float velocity, float distance, float time, float max_t, bool is_dead) override;
 
-        void CreateCarFromGenes(const char *genes = nullptr);
-        void CreateRandomCar();
+        void CreateCarFromGenes(const char *genes) override;
+        void CreateRandomCar() override;
     };
 }
