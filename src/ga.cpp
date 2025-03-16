@@ -9,7 +9,7 @@ using namespace std;
 
 namespace GA
 {
-	CRandom random(unsigned(time(nullptr)));
+	CRandom random(static_cast<unsigned>(time(nullptr)));
 
 CGa::CGa()
 	: _max_t(0),
@@ -27,14 +27,7 @@ CGa::CGa()
 	_bLogOpenned = false;
 }
 
-CGa::~CGa()
-{
-	// DeleteCriticalSection(&m_cs);
-
-	// if(_bLogOpenned)
-	// 	_fileLog1.Close();
-}
-
+CGa::~CGa() = default;
 
 void CGa::_cria_populacao()
 {
@@ -44,13 +37,13 @@ void CGa::_cria_populacao()
 		m_populacao.push_back(createRandomCar());
 }
 
-void CGa::setParams(	size_t	nPopulacao	, 
-						size_t	nElitismo	, 
-						float	crossover	, 
-						float	mutacao		,
-						size_t	nAlienismo	,
-						size_t	nMutInt		,
-						float	dMaxT		)
+void CGa::setParams(const size_t nPopulacao,
+                    const size_t nElitismo,
+                    const float crossover,
+                    const float mutacao,
+                    const size_t nAlienismo,
+                    const size_t nMutInt,
+                    const float dMax_t)
 {
 	_populacao = nPopulacao	;
 	_elitismo  = nElitismo	;
@@ -58,7 +51,7 @@ void CGa::setParams(	size_t	nPopulacao	,
 	_mutacao   = mutacao	;
 	_alienismo = nAlienismo	;
 	_mut_int   = nMutInt	;
-	_max_t	   = dMaxT		;
+	_max_t	   = dMax_t		;
 }
 
 void CGa::BeginEvolve()
@@ -81,7 +74,7 @@ bool pred(const CCar& left, const CCar& right)
    return left.getPontuacao() < right.getPontuacao();
 }
 
-void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::_do_measures(const b2WorldId worldId, atomic<bool>& stop_ga)
 {
 	for (auto& car : m_populacao) 
 	{
@@ -100,7 +93,7 @@ void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
 
 void CGa::_do_calc_points()
 {
-	for(auto it = m_populacao.begin(); it!= m_populacao.end(); it++) it->calc_fitness(_max_t);
+	for(auto & it : m_populacao) it.calc_fitness(_max_t);
 }
 
 void CGa::_do_sort()
@@ -109,7 +102,7 @@ void CGa::_do_sort()
 	m_populacao.sort(pred);
 }
 
-void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::Ordena(const b2WorldId worldId, atomic<bool>& stop_ga)
 {
 	cout << "measuring..." << endl;
 	_do_measures(worldId, stop_ga);
@@ -171,7 +164,6 @@ void CGa::_1Select()
 	_do_elitism();
 	_do_alienism();
 	_do_manual_include();
-	return;
 }
 
 void CGa::_2Crossover()
@@ -218,8 +210,6 @@ void CGa::_2Crossover()
 		m_nova.push_back(str1);
 		m_nova.push_back(str2);
 	}
-
-	return;
 }
 
 bool _do_mutate(float _mutacao)
