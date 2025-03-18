@@ -15,6 +15,62 @@ namespace GUI
 
     CGrCar::~CGrCar() = default;
 
+    void CGrCar::draw(void *pParams) const
+    {
+        Draw(*static_cast<sf::RenderWindow*>(pParams));
+    }
+
+    void fill_circle(CGrCar::gr_circle_t& circle, const float center_x, const float center_y, const float radius)
+    {
+        circle.center.x = center_x;
+        circle.center.y = center_y;
+        circle.radius = radius;
+    }
+
+    void fill_roda(CGrCar::gr_roda_t& roda, float center_x, float center_y, float radius, float angle, bool touch)
+    {
+        fill_circle(roda.circle, center_x, center_y, radius);
+        roda.angle = angle;
+        roda.touch = touch;
+    }
+
+    void fill_peso(CGrCar::gr_peso_t& peso, const float center_x, const float center_y, const float radius, const bool broke)
+    {
+        fill_circle(peso.circle, center_x, center_y, radius);
+        peso.broke = broke;
+    }
+
+    void CGrCar::setRoda1(const float center_x, const float center_y, const float radius, const float angle, const bool touch)
+    {
+        fill_roda(_roda1, center_x, center_y, radius, angle, touch);
+    }
+
+    void CGrCar::setRoda2(const float center_x, const float center_y, const float radius, const float angle, const bool touch)
+    {
+        fill_roda(_roda2, center_x, center_y, radius, angle, touch);
+    }
+
+    void CGrCar::setPeso1(const float center_x, const float center_y, const float radius, const bool broke)
+    {
+        fill_peso(_peso1, center_x, center_y, radius, broke);
+    }
+
+    void CGrCar::setPeso2(const float center_x, const float center_y, const float radius, const bool broke)
+    {
+        fill_peso(_peso2, center_x, center_y, radius, broke);
+    }
+
+    void CGrCar::setCenter(const float center_x, const float center_y)
+    {
+        _cm.x = center_x;
+        _cm.y = center_y;
+    }
+
+    void CGrCar::setBroke(const bool broke)
+    {
+        _broke = broke;
+    }
+
     void DrawTickLine(sf::RenderWindow &window,
                       const sf::Vector2f p1,
                       const sf::Vector2f p2,
@@ -91,15 +147,18 @@ namespace GUI
         const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
         const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
         DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
+
+        // TODO: Adicionar opção para desenhar ou não o texto
         text.setPosition(_roda1.circle.center.x, _roda1.circle.center.y);
         text.setString("R1");
         window.draw(text);
-
 
         // Roda 2
         pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
         pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
         DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
+
+        // TODO: Adicionar opção para desenhar ou não o texto
         text.setPosition(_roda2.circle.center.x, _roda2.circle.center.y);
         text.setString("R2");
         window.draw(text);

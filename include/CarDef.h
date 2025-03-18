@@ -31,17 +31,18 @@ public:
 		CRodaParams(float x, float y, float r, float dens, float fric, float elas);
 	};
 
-	CRodaParams	_roda1		;
-	CRodaParams	_roda2		;
-	CRodaParams	_peso1		;
-	CRodaParams	_peso2		;
-	float	_torque[4]	;
-	float	_freq  [6]	;
-	float	_damp  [6]	;
+	CRodaParams	_roda1;
+	CRodaParams	_roda2;
+	CRodaParams	_peso1;
+	CRodaParams	_peso2;
+	float	_torque[4];
+	float	_freq  [6];
+	float	_damp  [6];
 
-public:
 	CCarDef();
 	~CCarDef();
+
+	bool operator==(const CCarDef &other) const;
 };
 
 }

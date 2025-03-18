@@ -1,21 +1,90 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <gmock/gmock.h>
 
 #include <cstdint>
+#include <iostream>
 #include "car.h"
 #include "GaCar.h"
 
 #include <global_random.h>
 
-#define DUMMY_GENES "JUYETUPPELECBLWIPDSQABZSVYFAEZEQHPNALAHNPKDBHZJGLCUQFJNZPMBWPRELBAYYZOVKHACGRGLRDPMVAEXKGERTILNFOOEAZVULYKXYPSXICOFNBYIVKTHOVPJZHPOHDHUEBAZLUKFHAAVFSSSUUPBYJQDXWWQLICBJIRIRSPQHXOMJDZSWTSOGUGMBNSLCALCFAXQMIONSXDGPKOTFFYCPHSEWYQVHQCWLUFEKXWOIUDXJIXCHFQLAVJWHAENNKMFSDHIGYEIFNOSKJBZGZGGSMSHDHZAGPZNKBAHI"
-#define DUMMY_ALTGENES "ASDFGUPPELECBLWIPDSQABZSVYFAEZEQHPNALAHNPKDBHZJGLCUQFJNZPMBWPRELBAYYZOVKHACGRGLRDPMVAEXKGERTILNFOOEAZVULYKXYPSXICOFNBYIVKTHOVPJZHPOHDHUEBAZLUKFHAAVFSSSUUPBYJQDXWWQLICBJIRIRSPQHXOMJDZSWTSOGUGMBNSLCALCFAXQMIONSXDGPKOTFFYCPHSEWYQVHQCWLUFEKXWOIUDXJIXCHFQLAVJWHAENNKMFSDHIGYEIFNOSKJBZGZGGSMSHDHZAGPZNKBAHI"
+bool operator==(const b2WorldId &lhs, const b2WorldId &rhs)
+{
+    return lhs.index1 == rhs.index1 && lhs.generation == rhs.generation;
+}
 
-TEST_CASE( "CCar instance", "[CCar]" ) {
-    GA::random.set_seed(42);
 
-    CCar car;
+TEST_CASE( "CCar instance", "[CCar]" ) 
+{
+    class MockCGaCar : public GA::IGaCar
+    {
+    public:
+        MOCK_METHOD(string, getGenes, (), (const override));
+        MOCK_METHOD(float, getPontuacao, (), (const override));
+        MOCK_METHOD(void, decode, (), (override));
+        MOCK_METHOD(void, calc_fitness, (GA::fitness_params_t fitness_params, float max_t), (override));
+        MOCK_METHOD(void, CreateCarFromGenes, (const char *genes), (override));
+        MOCK_METHOD(void, CreateRandomCar, (), (override));
+        MOCK_METHOD(MODEL::CCarDef, getCarro, (), (const override));
+    };
 
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
+    class MockCPhysCar : public PHYS::IPhysCar
+    {
+    public:
+        MOCK_METHOD(void, reset, (), (override));
+        MOCK_METHOD(bool, simulation_step, (), (override));
+        MOCK_METHOD(void, measure, (b2WorldId worldId, const MODEL::CCarDef &carro, float max_t), (override));
+        MOCK_METHOD(void, init, (), (override));
+        MOCK_METHOD(void, fill_gr_car, (GUI::IGrCar &car), (override));
+        MOCK_METHOD(GA::fitness_params_t, get_ga_fitness_params, (), (override));
+        MOCK_METHOD(b2Vec2, getMassCenter, (), (const override));
+        MOCK_METHOD(float, getCurrentX, (), (const override));
+        MOCK_METHOD(b2BodyId, getR1, (), (const override));
+        MOCK_METHOD(b2BodyId, getR2, (), (const override));
+        MOCK_METHOD(b2BodyId, getP1, (), (const override));
+        MOCK_METHOD(b2BodyId, getP2, (), (const override));
+        MOCK_METHOD(float, getT, (), (const override));
+        MOCK_METHOD(bool, isDead, (), (const override));
+        MOCK_METHOD(string, deadReason, (), (const override));
+        MOCK_METHOD(void, create, (b2WorldId WorldId, const MODEL::CCarDef &carro), (override));
+        MOCK_METHOD(void, destroy, (), (override));
+        MOCK_METHOD(void, init_simulation_vars, (), (override));
+    };
+
+    class MockCGrCar : public GUI::IGrCar
+    {
+    public:
+        MOCK_METHOD(void, draw, (void *pParams), (const override));
+        MOCK_METHOD(void, setRoda1, (float center_x, float center_y, float radius, float angle, bool touch), (override));
+        MOCK_METHOD(void, setRoda2, (float center_x, float center_y, float radius, float angle, bool touch), (override));
+        MOCK_METHOD(void, setPeso1, (float center_x, float center_y, float radius, bool broke), (override));
+        MOCK_METHOD(void, setPeso2, (float center_x, float center_y, float radius, bool broke), (override));
+        MOCK_METHOD(void, setCenter, (float center_x, float center_y), (override));
+    };
+
+    auto ga_car = make_shared<MockCGaCar>();
+    auto phys_car = make_shared<MockCPhysCar>();
+    const auto gr_car = make_shared<MockCGrCar>();
+
+    CCar sut(ga_car, phys_car, gr_car);
+
+    SECTION("CCar beginSimulate") 
+    {
+        testing::InSequence seq;
+        constexpr b2WorldId testWorldId = {42, 17};
+
+        {
+            EXPECT_CALL(*ga_car, decode()).Times(1);
+            EXPECT_CALL(*phys_car, create(testWorldId, testing::_)).Times(1);
+        }
+
+        sut.beginSimulate(testWorldId);
+
+        // Verify all expectations were met
+        REQUIRE(testing::Mock::VerifyAndClearExpectations(&phys_car));
+        REQUIRE(testing::Mock::VerifyAndClearExpectations(&ga_car));
+    }
 }
 
 TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )
@@ -26,57 +95,6 @@ TEST_CASE( "CGaCar ctor with genes", "[CGaCar]" )
     GA::CGaCar car(genes);
 
     REQUIRE( car.getGenes() == string("JUYET") );
-}
-
-TEST_CASE( "CGaCar getGenesString", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-
-    REQUIRE( car.getGenesString() == string(DUMMY_GENES) );
-}
-
-TEST_CASE( "CGaCar getGenes", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-    string genes;
-    car.getGenes(genes);
-
-    REQUIRE( genes == string(DUMMY_GENES) );
-}
-
-TEST_CASE( "CGaCar setGenes", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_GENES);
-    car.setGenes(DUMMY_ALTGENES);
-
-    REQUIRE( car.getGenes() == string(DUMMY_ALTGENES) );
-}
-
-TEST_CASE( "CGaCar setGenes too short", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_ALTGENES);
-    car.setGenes("ASDF");
-
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
-}
-
-
-TEST_CASE( "CGaCar CreateCar", "[CGaCar]" )
-{
-    GA::random.set_seed(42);
-
-    GA::CGaCar car(DUMMY_ALTGENES);
-    car.CreateCar(DUMMY_GENES);
-
-    REQUIRE( car.getGenes() == string(DUMMY_GENES) );
 }
 
 namespace GA

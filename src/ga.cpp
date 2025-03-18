@@ -9,7 +9,7 @@ using namespace std;
 
 namespace GA
 {
-	CRandom random(unsigned(time(nullptr)));
+	CRandom random(static_cast<unsigned>(time(nullptr)));
 
 CGa::CGa()
 	: _max_t(0),
@@ -27,30 +27,23 @@ CGa::CGa()
 	_bLogOpenned = false;
 }
 
-CGa::~CGa()
-{
-	// DeleteCriticalSection(&m_cs);
-
-	// if(_bLogOpenned)
-	// 	_fileLog1.Close();
-}
-
+CGa::~CGa() = default;
 
 void CGa::_cria_populacao()
 {
 	m_populacao.clear();
 
 	for(size_t i = 0; i < _populacao; i++)
-		m_populacao.push_back(CCar());
+		m_populacao.push_back(createRandomCar());
 }
 
-void CGa::setParams(	size_t	nPopulacao	, 
-						size_t	nElitismo	, 
-						float	crossover	, 
-						float	mutacao		,
-						size_t	nAlienismo	,
-						size_t	nMutInt		,
-						float	dMaxT		)
+void CGa::setParams(const size_t nPopulacao,
+                    const size_t nElitismo,
+                    const float crossover,
+                    const float mutacao,
+                    const size_t nAlienismo,
+                    const size_t nMutInt,
+                    const float dMax_t)
 {
 	_populacao = nPopulacao	;
 	_elitismo  = nElitismo	;
@@ -58,10 +51,10 @@ void CGa::setParams(	size_t	nPopulacao	,
 	_mutacao   = mutacao	;
 	_alienismo = nAlienismo	;
 	_mut_int   = nMutInt	;
-	_max_t	   = dMaxT		;
+	_max_t	   = dMax_t		;
 }
 
-void CGa::BeginEvolve(void)
+void CGa::BeginEvolve()
 {
 	// Cria a população:
 	_cria_populacao();
@@ -81,7 +74,7 @@ bool pred(const CCar& left, const CCar& right)
    return left.getPontuacao() < right.getPontuacao();
 }
 
-void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::_do_measures(const b2WorldId worldId, atomic<bool>& stop_ga)
 {
 	for (auto& car : m_populacao) 
 	{
@@ -100,54 +93,7 @@ void CGa::_do_measures(b2WorldId worldId, atomic<bool>& stop_ga)
 
 void CGa::_do_calc_points()
 {
-	float pts;
-	float c1,c2,v,d,t;
-	float p1,p2,p3,p4,p5;
-	lst_car_t::iterator it;
-	for(it = m_populacao.begin();
-		it!= m_populacao.end();
-		it++)
-	{
-		c1 = it->m_contatoR1	;
-		c2 = it->m_contatoR2	;
-		v  = it->m_vm			;
-		d  = it->m_distancia	;
-		t  = it->getT()			; 
-
-		/*
-			A pontuação é meio difícil porque, para ser absoluta, não pode
-			depender da população.
-			Mas se não depender, é muito difícil normalizar as partes (c1, c2, v, d e t).
-			Sem normalizar, a distância, por exemplo, que pode ter valores grandes,
-			será mais importante que os outros parâmetros de avaliação.
-			
-			Para resolver isso, vamos fazer o fitness como sendo a distância
-			euclidiana de um vetor composto pelos parâmetros de avaliação a um 
-			vetor constante ideal.
-			
-			O vetor será (c1, c2, v, d, t).
-			O vetor objetivo ideal será: (t_max, t_max, 1000, 1000, 0).
-			Ou seja, 
-				. o tempo de contato das rodas é o máximo possível
-				. A velocidade é a máxima possível
-				. A distância percorrida é a máxima possível
-				. O tempo gasto é o mínimo. No caso, nem é possível, pois é zero.
-			
-			Para não gastar um sqrt à toa, faremos o quadrado da distância.		*/
-
-		p1 = _max_t - c1;
-		p2 = _max_t - c2;
-		p3 = 1000 - v;
-		p4 = 1000 - d;
-		p5 = t; // 0 - t = -t, mas como ser� ao quadrado, deixa t mesmo.
-
-		pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
-		
-		// Se quebrou, vale um d�cimo de um que n�o quebrou:
-		if(it->m_bDead) pts *= 10;
-
-		it->setPontos(pts);
-	}
+	for(auto & it : m_populacao) it.calc_fitness(_max_t);
 }
 
 void CGa::_do_sort()
@@ -156,7 +102,7 @@ void CGa::_do_sort()
 	m_populacao.sort(pred);
 }
 
-void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::Ordena(const b2WorldId worldId, atomic<bool>& stop_ga)
 {
 	cout << "measuring..." << endl;
 	_do_measures(worldId, stop_ga);
@@ -181,8 +127,6 @@ void CGa::Ordena(b2WorldId worldId, atomic<bool>& stop_ga)
 		}
 	}
 #endif
-
-	return;
 }
 
 void CGa::_do_elitism()
@@ -193,7 +137,7 @@ void CGa::_do_elitism()
 		it!= m_populacao.end() && i < _elitismo;
 		it++,i++)
 	{
-		m_nova.push_back(string("__")+it->getGenesString());
+		m_nova.push_back(it->getGenes());
 	}
 }
 
@@ -201,7 +145,7 @@ void CGa::_do_alienism()
 {
 	for(size_t i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back(string("__")+(CCar()).getGenesString());
+		m_nova.push_back(createRandomCar().getGenes());
 	}
 }
 
@@ -214,16 +158,15 @@ void CGa::_do_manual_include()
 	}
 }
 
-void CGa::_1Select(void)
+void CGa::_1Select()
 {
 	// A população já está ordenada.
 	_do_elitism();
 	_do_alienism();
 	_do_manual_include();
-	return;
 }
 
-void CGa::_2Crossover(void)
+void CGa::_2Crossover()
 {
 	size_t i, nId1, nId2, nSize = m_populacao.size();
 	double nStdev = nSize / 1.0;
@@ -249,10 +192,10 @@ void CGa::_2Crossover(void)
 		
 		// Faz crossover?
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str1 = it->getGenesString();
+		str1 = it->getGenes();
 
 		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str2 = it->getGenesString();
+		str2 = it->getGenes();
 
 		if(random.rand_int(0, 100) < _crossover)
 		{
@@ -267,8 +210,6 @@ void CGa::_2Crossover(void)
 		m_nova.push_back(str1);
 		m_nova.push_back(str2);
 	}
-
-	return;
 }
 
 bool _do_mutate(float _mutacao)
@@ -276,7 +217,7 @@ bool _do_mutate(float _mutacao)
 	return random.random(0.0, 100.0) < _mutacao;
 }
 
-void CGa::_3Mutate(void)
+void CGa::_3Mutate()
 {
 	size_t nMut;
 	char g;
@@ -292,9 +233,6 @@ void CGa::_3Mutate(void)
 		// Ponto da mutação:
 		nMut = random.rand_int(zero, max_gene);
 
-		VERIFY(m_nova[i].substr(0, 2) != "__", "Mutate: m_nova[i].Left(2) != \"__\"" );
-		VERIFY(m_nova[i].size() == GENES, "Mutate: m_nova[i].size() == GENES, found: " << m_nova[i].size() );
-
 		// Intensidade e direção da mutação:
 		char intensidade = random.discrete_random<char>(1, _mut_int);
 		char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
@@ -307,7 +245,7 @@ void CGa::_3Mutate(void)
 	}
 }
 
-void CGa::_4AdvanceGeneration(void)
+void CGa::_4AdvanceGeneration()
 {
 	// Nova geração:
 	m_populacao.clear();
@@ -321,27 +259,23 @@ void CGa::_4AdvanceGeneration(void)
 	}
 	else
 	{
-		size_t i,nSize = m_nova.size();
-		for(i = 0; i < nSize && i < _populacao; i++)
+		const size_t nSize = m_nova.size();
+		for(size_t i = 0; i < nSize && i < _populacao; i++)
 		{
-			if(m_nova[i].substr(0, 2) == "__")
-				m_populacao.push_back(CCar(m_nova[i].substr(m_nova[i].size()-2).c_str()));
-			else
-				m_populacao.push_back(CCar(m_nova[i].c_str()));
+			m_populacao.push_back(createCarFromGenes(m_nova[i]));
 		}
 		_geracao++;
 	}
 
 	m_nova.clear();
-	return;
 }
 
-void CGa::MassExtinctionEvent(void)
+void CGa::MassExtinctionEvent()
 {
 	_bMassExtintion = true;	
 }
 
-void CGa::IncludeId(string strGenes)
+void CGa::IncludeId(const string& strGenes)
 {
 	_strId2Include = strGenes;
 }
@@ -352,12 +286,6 @@ void CGa::Step()
 	_2Crossover();
 	_3Mutate();
 	_4AdvanceGeneration();
-}
-
-void CGa::CopyPopulacao(lst_car_t *pTarget)
-{
-	*pTarget = m_populacao;
-
 }
 
 

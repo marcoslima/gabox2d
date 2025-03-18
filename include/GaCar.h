@@ -1,7 +1,8 @@
 #pragma once
+
 #include <string>
-#include "CarDef.h"
-#include <global_random.h>
+#include <CarDef.h>
+#include <IGaCar.h>
 
 using namespace std;
 using namespace MODEL;
@@ -11,7 +12,7 @@ using namespace MODEL;
 
 namespace GA
 {
-    class CGaCar
+    class CGaCar final : public IGaCar
     {
     public:
         // Codificado
@@ -20,58 +21,28 @@ namespace GA
         // Decodificado
         CCarDef _carro;
 
-        // Suporte ao algoritmo gen�tico:
-        double _pontos;
+        // Suporte ao algoritmo genético:
+        float _pontos;
 
         // Internas
     protected:
         void _generate_random_genes();
 
-        // Decodifica o carro dos genes criando-o nas definições
-        void _decode();
-
     public:
         CGaCar();
-
         explicit CGaCar(const char *szGenes);
 
-        ~CGaCar();
+        [[nodiscard]] string getGenes() const override;
 
-        void getGenes(string &genes) const;
+        [[nodiscard]] float getPontuacao() const override;
 
-        [[nodiscard]] const char *getGenes() const
-        {
-            return _genes.c_str();
-        }
+        [[nodiscard]] CCarDef getCarro() const override;
 
-        [[nodiscard]] char getGene(const size_t nIndex) const
-        {
-            return _genes[nIndex];
-        }
+        void decode() override; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
 
-        void setGene(const size_t nIndex, const char gen)
-        {
-            _genes[nIndex] = gen;
-        }
+        void CreateCarFromGenes(const char *genes) override;
+        void CreateRandomCar() override;
 
-        [[nodiscard]] string getGenesString() const;
-
-        [[nodiscard]] double getPontuacao() const
-        {
-            return _pontos;
-        }
-
-        void setGenes(const char *genes);
-
-        void setPontos(const double pontos)
-        {
-            _pontos = pontos;
-        }
-
-        void CreateCar(const char *genes = nullptr);
-
-
-        // Processo evolutivo:
-        void Crossover(CGaCar &other);
+        void calc_fitness(fitness_params_t fitness_params, float max_t) override;
     };
 }

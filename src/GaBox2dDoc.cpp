@@ -11,8 +11,7 @@ namespace GUI
     // CGaBox2dDoc
     // CGaBox2dDoc construction/destruction
     CGaBox2dDoc::CGaBox2dDoc()
-        : m_env() 
-        , m_car() {}
+        : m_car(createRandomCar()) {}
 
     CGaBox2dDoc::~CGaBox2dDoc()
     {
@@ -42,16 +41,6 @@ namespace GUI
         _start_world();
 
         return true;
-    }
-
-    void CGaBox2dDoc::OnEditCopy() const
-    {
-        string strGenes;
-        m_car.getGenes(strGenes);
-
-        // Código para copiar para a área de transferência
-        // TODO: Implementar para Linux ou genérico
-        // ...
     }
 
     void CGaBox2dDoc::_start_world()
@@ -88,7 +77,6 @@ namespace GUI
     void CGaBox2dDoc::EndSimulation()
     {
         m_IsSimulating = false;
-        m_car.endSimulate();
     }
 
     PointF CGaBox2dDoc::GetCenter() const

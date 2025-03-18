@@ -1,5 +1,6 @@
 add_library(GaBox2dLib
     src/car.cpp 
+    src/car_helpers.cpp
     src/CarDef.cpp 
     src/CCronometro.cpp 
     src/devutils.cpp 
@@ -12,6 +13,7 @@ add_library(GaBox2dLib
     src/GaBox2dDoc.cpp 
     src/GaBox2dView.cpp 
     src/GaCar.cpp 
+    src/ga_car_helpers.cpp
     src/GaInfoDlg.cpp 
     src/GaParamsDlg.cpp 
     src/GrCar.cpp 
@@ -26,6 +28,7 @@ add_library(GaBox2dLib
 
     include/assets.h
     include/car.h
+    include/car_helpers.h
     include/CarDef.h
     include/CCronometro.h
     include/CRandom.h
@@ -41,6 +44,7 @@ add_library(GaBox2dLib
     include/GaBox2dDoc.h
     include/GaBox2dView.h
     include/GaCar.h
+    include/ga_car_helpers.h
     include/GaInfoDlg.h
     include/GaParamsDlg.h
     include/GrCar.h
@@ -58,7 +62,7 @@ add_library(GaBox2dLib
 )
 
 target_include_directories("GaBox2dLib" PUBLIC ${SFML_INCLUDE_DIRS})
-target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd)
+target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2dd ${UUID_LIBRARIES})
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 

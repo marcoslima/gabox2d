@@ -146,6 +146,15 @@ ELSE ()
     )
 ENDIF ()
 
+###########################################################
+## UUID Library
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(UUID REQUIRED uuid)
+
+include_directories(${UUID_INCLUDE_DIRS})
+link_directories(${UUID_LIBRARY_DIRS})
+###########################################################
+
 # MONKEY PATCH para resolver o problema do "redefinition etc":
 # Add #pragma once to CDT.hpp
 execute_process(

@@ -25,6 +25,11 @@ namespace GUI
           , m_bWaitingEvolucao(false)
           , _pDocument(nullptr) {}
 
+    unsigned CGaBox2dView::getVelocidade() const
+    {
+        return m_nVelocidade;
+    }
+
     sf::Vector2f WorldToLogical(b2Vec2 worldPoint)
     {
         return {worldPoint.x, worldPoint.y};
@@ -219,7 +224,7 @@ namespace GUI
         if (!pDoc)
             return;
 
-        pDoc->GetCar().CreateCar();
+        pDoc->GetCar().CreateRandomCar();
         pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
     }
 
@@ -237,12 +242,11 @@ namespace GUI
     {
         CGaBox2dDoc *pDoc = GetDocument();
 
-        string strGenes;
-        pDoc->GetCar().getGenes(strGenes);
+        const string strGenes = pDoc->GetCar().getGenes();
 
         if (pDoc->m_IsSimulating) OnSimulaPlay();
 
-        pDoc->GetCar().CreateCar(strGenes.c_str());
+        pDoc->GetCar().CreateCarFromGenes(strGenes.c_str());
 
         OnSimulaPlay();
     }
@@ -407,10 +411,10 @@ namespace GUI
 
     void CGaBox2dView::OnEditCopy() const
     {
-        ImGui::SetClipboardText(GetDocument()->GetCar().getGenes());
+        ImGui::SetClipboardText(GetDocument()->GetCar().getGenes().c_str());
     }
 
-    void CGaBox2dView::OnEditPaste()
+    void CGaBox2dView::OnEditPaste() const
     {
 #ifdef WIN32
         CString buffer;
@@ -459,8 +463,7 @@ namespace GUI
         // if (m_nSimTimer != 0)
         //     OnSimulaPlay();
 
-        pDoc->GetCar().endSimulate();
-        pDoc->GetCar().CreateCar(buffer);
+        pDoc->GetCar().CreateCarFromGenes(buffer);
         pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
 
         // if (m_nSimTimer == 0)
@@ -781,5 +784,9 @@ namespace GUI
             default:
                 break;
         }
+    }
+
+    string CGaBox2dView::getDeadReason() const {
+        return GetDocument()->GetCar().deadReason();
     }
 }

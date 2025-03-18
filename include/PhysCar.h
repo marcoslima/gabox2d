@@ -1,8 +1,10 @@
 #pragma once
 #include <box2d/box2d.h>
+
 #include "CarDef.h"
 #include "env.h"
 #include "World.h"
+#include <IPhysCar.h>
 using namespace MODEL;
 
 namespace PHYS
@@ -36,12 +38,8 @@ namespace PHYS
         float damp[6]{};
     };
 
-    class CPhysCar
+    class CPhysCar final : public IPhysCar
     {
-    public:
-        CPhysCar();
-        ~CPhysCar();
-
         // Instanciamento do carro no box2d
         b2BodyId m_Roda1Id;
         b2BodyId m_Roda2Id;
@@ -58,8 +56,16 @@ namespace PHYS
         CWorld m_World;
         string m_dead_reason;
 
+        bool _bInStep;
+        bool m_bDead;
+        float m_distancia;
+        float m_contatoR1;
+        float m_contatoR2;
+        float m_acum_contatoR1;
+        float m_acum_contatoR2;
+        float m_vm;
+
         // semi-constantes
-    protected:
         float _timeStep;
         int32_t _iterations;
 
@@ -76,113 +82,62 @@ namespace PHYS
         b2Vec2 _cPos;
 
         // Dados efêmeros. Só existem durante a medição/simulação do carro.
-    public:
         float _trqA;
         float _trqB;
         float _trqC;
         float _trqD;
 
-    private:
-        void _simulation_pre_tick() const;
 
-        void _register_contact_times();
+    // Public Methods
+    public:
+        CPhysCar();
+        ~CPhysCar() override;
 
-        void _process_no_contact_time();
-
-        void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
-
-        void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
-
-        void _process_contacts(const b2ContactEvents &contacts);
-
-        void _test_peso(b2BodyId pesoId, const string &name);
-
-        void _test_contacts();
-
-        void _process_contacts();
-
-        void _remove_joints_if_dead();
-
-        void _register_distance_travelled();
-
-        void _calc_average_velocity();
-
-        void _register_time_step();
-
-        void _register_contacts();
-
-        void _simulation_pos_tick();
-
-        // CContactListener _cl;
-        bool _bInStep;
-
-        static void _verificar_step();
-
-    protected:
-        void _init();
-
-        void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
-
-        void _set_torques(const car_t &car_def);
-
-        [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
-
-        void _create_joints(const car_t &car_def);
+        // CPhysCar &operator=(const CPhysCar &other);
 
         // Usa as definições decodificadas para criar o objeto em si no box2d
-        void _create(b2WorldId WorldId, const CCarDef& carro);
+        void create(b2WorldId WorldId, const CCarDef& carro) override;
 
-        void _destroy();
+        void destroy() override;
+        void reset() override;
 
-        void _init_simulation_vars();
+        void init_simulation_vars() override;
+        bool simulation_step() override;
+        void measure(b2WorldId worldId, const CCarDef &carro, float max_t) override;
+        void init() override;
 
-        static void _phys_end_simulate();
+    private:
+        void _simulation_pre_tick() const;
+        void _register_contact_times();
+        void _process_no_contact_time();
+        void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
+        void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
+        void _test_peso(b2BodyId pesoId, const string &name);
+        void _test_contacts();
+        void _process_contacts();
+        void _remove_joints_if_dead();
+        void _register_distance_travelled();
+        void _calc_average_velocity();
+        void _register_time_step();
+        void _register_contacts();
+        void _simulation_pos_tick();
+        void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
+        void _set_torques(const car_t &car_def);
+        [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
+        void _create_joints(const car_t &car_def);
 
-        bool _simulation_step();
-
-
-        // Suporte à simulação no Box2d
     public:
-        [[nodiscard]] b2Vec2 getCenter() const;
+        [[nodiscard]] b2Vec2 getMassCenter() const override;
+        [[nodiscard]] float getCurrentX() const override;
+        [[nodiscard]] b2BodyId getR1() const override;
+        [[nodiscard]] b2BodyId getR2() const override;
+        [[nodiscard]] b2BodyId getP1() const override;
+        [[nodiscard]] b2BodyId getP2() const override;
+        [[nodiscard]] float getT() const override;
+        [[nodiscard]] bool isDead() const override;
+        [[nodiscard]] string deadReason() const override;
 
-        // Queries
-        [[nodiscard]] b2BodyId getR1() const
-        {
-            return m_Roda1Id;
-        }
-
-        [[nodiscard]] b2BodyId getR2() const
-        {
-            return m_Roda2Id;
-        }
-
-        [[nodiscard]] b2BodyId getP1() const
-        {
-            return m_Peso1Id;
-        }
-
-        [[nodiscard]] b2BodyId getP2() const
-        {
-            return m_Peso2Id;
-        }
-
-        [[nodiscard]] double getT() const
-        {
-            return _t;
-        }
-
-        void Destroy()
-        {
-            _destroy();
-        }
-
-        bool m_bDead;
-        double m_distancia;
-        double m_contatoR1;
-        double m_contatoR2;
-        double m_acum_contatoR1;
-        double m_acum_contatoR2;
-        double m_vm;
-        double m_t;
+        void fill_gr_car(GUI::IGrCar &car) override;
+        GA::fitness_params_t get_ga_fitness_params() override;
     };
 }

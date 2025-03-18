@@ -1,111 +1,143 @@
 #include "car.h"
-
+#include <car_helpers.h>
 #include <iostream>
+#include <utility>
 
 
 CCar::CCar()
-    : CGaCar() {}
-
-CCar::CCar(const char *szGenes)
-    : CGaCar(szGenes) {}
-
-void CCar::beginSimulate(const b2WorldId WorldId)
 {
-    // Desinstanciamento
-    _destroy();
-
-    // Decodificamos os genes (genes -> carro | string -> CCarDef)
-    _decode();
-
-    // Instanciamento
-    _create(WorldId, _carro);
-
-    // Inicializamos a simulação física:
-    _init_simulation_vars();
+    m_ga_car_ptr = make_shared<GA::CGaCar>();
+    m_phys_car_ptr = make_shared<PHYS::CPhysCar>();
+    m_gr_car_ptr = make_shared<GUI::CGrCar>();
 }
 
-void CCar::endSimulate()
+CCar::CCar(ga_car_ptr_t ga_car_ptr, phys_car_ptr_t phys_car_ptr, gr_car_ptr_t gr_car_ptr)
+    : m_ga_car_ptr(std::move(ga_car_ptr))
+    , m_phys_car_ptr(std::move(phys_car_ptr))
+    , m_gr_car_ptr(std::move(gr_car_ptr))
+    {}
+
+void CCar::CreateFromGenes(const char *szGenes)
 {
-    // Liberamos os recursos da phys:
-    _phys_end_simulate();
+    m_phys_car_ptr->reset();
+    m_ga_car_ptr->CreateCarFromGenes(szGenes);
 }
 
-void CCar::CreateCar(const char *szGenes)
+void CCar::CreateRandomCar()
 {
-    if (b2World_IsValid(m_World.m_WorldId) && b2Body_IsValid(m_Roda1Id))
-        _destroy();
-
-    _init();
-    CGaCar::CreateCar(szGenes);
+    m_phys_car_ptr->reset();
+    m_ga_car_ptr->CreateRandomCar();
 }
 
 void CCar::DestroyCar()
 {
-    _destroy();
+    m_phys_car_ptr->destroy();
 }
 
 bool CCar::doStep()
 {
-    const bool bRet = _simulation_step();
+    const bool bRet = m_phys_car_ptr->simulation_step();
 
     UpdateGraphicsData();
 
     return bRet;
 }
 
-void TranslateCircle(const b2BodyId RodaId, GUI::CGrCar::gr_circle_t &grCircle)
-{
-    // b2CircleShape *circle = (b2CircleShape*)pRoda->GetShapeList();
-    b2ShapeId shapes[1];
-    b2Body_GetShapes(RodaId, shapes, 1);
-
-    // b2Vec2	pos  = pRoda->GetPosition() + circle->GetLocalPosition();
-    const auto posRoda = b2Body_GetPosition(RodaId);
-    auto [posCircle, radius] = b2Shape_GetCircle(shapes[0]);
-    // cout << "Translating circle: " << posCircle.x << " " << posCircle.y << " " << radius << endl;
-    const auto [x, y] = posRoda + posCircle;
-    grCircle.center = PointF(x, y);
-    grCircle.radius = radius;
-}
-
-void TranslateRoda(const b2BodyId RodaId, GUI::CGrCar::gr_roda_t &grRoda, const bool bContact)
-{
-    TranslateCircle(RodaId, grRoda.circle);
-
-    const auto rotation = b2Body_GetRotation(RodaId);
-    grRoda.angle = b2Rot_GetAngle(rotation);
-    grRoda.touch = bContact;
-}
-
-void TranslatePeso(const b2BodyId PesoId, GUI::CGrCar::gr_peso_t &grPeso, const bool bBroke)
-{
-    TranslateCircle(PesoId, grPeso.circle);
-    grPeso.broke = bBroke;
-}
-
 void CCar::UpdateGraphicsData()
 {
-    TranslateRoda(m_Roda1Id, _roda1, m_bContactR1);
-    TranslateRoda(m_Roda2Id, _roda2, m_bContactR2);
-    TranslatePeso(m_Peso1Id, _peso1, m_bDead);
-    TranslatePeso(m_Peso2Id, _peso2, m_bDead);
-    const auto [x, y] = getCenter();
-    _cm = PointF(x, y);
-    _broke = m_bDead;
+    m_phys_car_ptr->fill_gr_car(*m_gr_car_ptr);
+    // m_gr_car_ptr->_roda1 = TranslateRoda(m_phys_car_ptr->m_Roda1Id, m_phys_car_ptr->m_bContactR1);
+    // m_gr_car_ptr->_roda2 = TranslateRoda(m_phys_car_ptr->m_Roda2Id, m_phys_car_ptr->m_bContactR2);
+    // m_gr_car_ptr->_peso1 = TranslatePeso(m_phys_car_ptr->m_Peso1Id, m_phys_car_ptr->isDead());
+    // m_gr_car_ptr->_peso2 = TranslatePeso(m_phys_car_ptr->m_Peso2Id, m_phys_car_ptr->isDead());
+    // const auto [x, y] = m_phys_car_ptr->getMassCenter();
+    // m_gr_car_ptr->_cm = PointF(x, y);
+    // m_gr_car_ptr->_broke = m_phys_car_ptr->m_bDead;
 }
 
-void CCar::Medir(const b2WorldId WorldId, const double max_t)
+void CCar::Medir(const b2WorldId WorldId, const float max_t) const
 {
-    beginSimulate(WorldId);
-    const float x0 = getCenter().x;
-    for (int k = 0; _t < max_t; k++)
-    {
-        if (!doStep())
-            break;
-    }
-    const float x = getCenter().x;
-    m_t = _t;
-    Destroy();
+    m_ga_car_ptr->decode();
+    m_phys_car_ptr->measure(WorldId, m_ga_car_ptr->getCarro(), max_t);
+}
 
-    m_distancia = x - x0;
+// OLD IMPLEMENTATION using doStep (that update graphics!!! so wrong!)
+// void CCar::Medir(const b2WorldId WorldId, const double max_t)
+// {
+//     beginSimulate(WorldId);
+//     const float x0 = m_phys_car_ptr->getCurrentX();
+//
+//     while(m_phys_car_ptr->_t < max_t && doStep()){};
+//
+//     const float x = m_phys_car_ptr->getCurrentX();
+//     m_phys_car_ptr->m_t = m_phys_car_ptr->_t;
+//     m_phys_car_ptr->Destroy();
+//
+//     m_phys_car_ptr->m_distancia = x - x0;
+// }
+
+string CCar::getGenes()
+{
+    return m_ga_car_ptr->getGenes();
+}
+
+b2Vec2 CCar::getCenter() const
+{
+    return m_phys_car_ptr->getMassCenter();
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void CCar::calc_fitness(const float max_t)
+{
+    m_ga_car_ptr->calc_fitness(m_phys_car_ptr->get_ga_fitness_params(), max_t);
+}
+
+double CCar::getPontuacao() const
+{
+    return m_ga_car_ptr->getPontuacao();
+}
+
+string CCar::getGenes() const
+{
+    return m_ga_car_ptr->getGenes();
+}
+
+string CCar::deadReason() const
+{
+    return m_phys_car_ptr->deadReason();
+}
+
+double CCar::getT() const
+{
+    return m_phys_car_ptr->getT();
+}
+
+void CCar::Draw(sf::RenderWindow &window) const
+{
+    m_gr_car_ptr->draw(&window);
+}
+
+void CCar::CreateCarFromGenes(const char *genes)
+{
+    m_ga_car_ptr->CreateCarFromGenes(genes);
+}
+
+void CCar::beginSimulate(b2WorldId b2_world_id)
+{
+    m_ga_car_ptr->decode();
+    m_phys_car_ptr->create(b2_world_id, m_ga_car_ptr->getCarro());
+}
+
+CCar createCarFromGenes(const string& genes)
+{
+    CCar car;
+    car.CreateFromGenes(genes.c_str());
+    return car;
+}
+
+CCar createRandomCar()
+{
+    CCar car;
+    car.CreateRandomCar();
+    return car;
 }
