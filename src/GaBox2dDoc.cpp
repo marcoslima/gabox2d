@@ -77,7 +77,6 @@ namespace GUI
     void CGaBox2dDoc::EndSimulation()
     {
         m_IsSimulating = false;
-        m_car.endSimulate();
     }
 
     PointF CGaBox2dDoc::GetCenter() const

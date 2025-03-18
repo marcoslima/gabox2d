@@ -41,18 +41,6 @@ namespace PHYS
         return car_def;
     }
 
-    CPhysCar::CPhysCar() // NOLINT(*-pro-type-member-init)
-    {
-        init();
-    }
-
-    CPhysCar::~CPhysCar() = default;
-
-    bool CPhysCar::operator==(const CPhysCar &other) const
-    {
-        return uuid_compare(m_id, other.m_id) == 0;
-    }
-
     b2BodyId CreateRoda(const b2WorldId WorldId,
                         const b2_roda_ou_peso_def &car_def,
                         const CCarDef::CRodaParams &roda,
@@ -70,6 +58,135 @@ namespace PHYS
         return RodaId;
     }
 
+    void showTouch(const string &name, const bool bContact, const float touch_strength)
+    {
+        cout << name << " Touch(" << bContact << "): " << touch_strength << endl;
+    }
+
+    void applyTouchIfBody(const b2BodyId bodyId,
+                          const b2BodyId targetBody,
+                          bool &targetFlag,
+                          const string &targetName,
+                          const bool bContact,
+                          const float touch_strength)
+    {
+        if (B2_ID_EQUALS(bodyId, targetBody))
+        {
+            showTouch(targetName, bContact, touch_strength);
+            targetFlag = bContact;
+        }
+    }
+
+    bool is_body_contacting(const b2BodyId bodyId)
+    {
+        const int count = b2Body_GetShapeCount(bodyId);
+        vector<b2ShapeId> shapes(count);
+        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
+        if (shape_count == 0) return false;
+
+        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
+        vector<b2ContactData> contactData(contact_capacity);
+        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
+
+        return contact_count > 0;
+    }
+
+    void destroyJoint(b2JointId &targetJoint)
+    {
+        b2DestroyJoint(targetJoint);
+        targetJoint = b2_nullJointId;
+    }
+
+
+    void _read_circle_data(const b2BodyId body_id,
+                           float &center_x, float &center_y,
+                           float &radius)
+    {
+        b2ShapeId shapes[1];
+        b2Body_GetShapes(body_id, shapes, 1);
+
+        const auto posRoda = b2Body_GetPosition(body_id);
+        auto [posCircle, _radius] = b2Shape_GetCircle(shapes[0]);
+        const auto [x, y] = posRoda + posCircle;
+
+        center_x = x;
+        center_y = y;
+        radius = _radius;
+    }
+
+    void _read_roda_data(const b2BodyId roda_id,
+                         float &center_x, float &center_y,
+                         float &radius, float &angle)
+    {
+        _read_circle_data(roda_id, center_x, center_y, radius);
+
+        const auto rotation = b2Body_GetRotation(roda_id);
+
+        angle = b2Rot_GetAngle(rotation);
+    }
+
+    void _read_peso_data(const b2BodyId peso_id, float &center_x, float &center_y, float &radius)
+    {
+        _read_circle_data(peso_id, center_x, center_y, radius);
+    }
+
+    CPhysCar::CPhysCar()
+    {
+        init();
+    }
+
+    CPhysCar::~CPhysCar() = default;
+    //
+    // CPhysCar& CPhysCar::operator=(const CPhysCar& other)
+    // {
+    //     if (this == &other)
+    //         return *this;
+    //
+    //     m_Roda1Id = other.m_Roda1Id;
+    //     m_Roda2Id = other.m_Roda2Id;
+    //     m_Peso1Id = other.m_Peso1Id;
+    //     m_Peso2Id = other.m_Peso2Id;
+    //
+    //     m_Jc1c2Id = other.m_Jc1c2Id;
+    //     m_Jc1p1Id = other.m_Jc1p1Id;
+    //     m_Jc1p2Id = other.m_Jc1p2Id;
+    //     m_Jc2p1Id = other.m_Jc2p1Id;
+    //     m_Jc2p2Id = other.m_Jc2p2Id;
+    //     m_Jp1p2Id = other.m_Jp1p2Id;
+    //
+    //     m_World = other.m_World;
+    //     m_dead_reason = other.m_dead_reason;
+    //
+    //     _bInStep = other._bInStep;
+    //     m_bDead = other.m_bDead;
+    //     m_distancia = other.m_distancia;
+    //     m_contatoR1 = other.m_contatoR1;
+    //     m_contatoR2 = other.m_contatoR2;
+    //     m_acum_contatoR1 = other.m_acum_contatoR1;
+    //     m_acum_contatoR2 = other.m_acum_contatoR2;
+    //     m_vm = other.m_vm;
+    //
+    //     _timeStep = other._timeStep;
+    //     _iterations = other._iterations;
+    //
+    //     _x0 = other._x0;
+    //     _t = other._t;
+    //     m_bContactR1 = other.m_bContactR1;
+    //     m_bContactR2 = other.m_bContactR2;
+    //     _last_contact_r1 = other._last_contact_r1;
+    //     _last_contact_r2 = other._last_contact_r2;
+    //     _no_contact_time_r1 = other._no_contact_time_r1;
+    //     _no_contact_time_r2 = other._no_contact_time_r2;
+    //     _cVel = other._cVel;
+    //     _cPos = other._cPos;
+    //
+    //     _trqA = other._trqA;
+    //     _trqB = other._trqB;
+    //     _trqC = other._trqC;
+    //     _trqD = other._trqD;
+    //
+    //     return *this;
+    // }
 
     void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def)
     {
@@ -129,33 +246,29 @@ namespace PHYS
 
     void CPhysCar::create(const b2WorldId WorldId, const CCarDef &carro)
     {
-        _verificar_step();
         if (b2World_IsValid(WorldId))
             destroy();
-
         m_World.m_WorldId = WorldId;
         const car_t car_def = _translate_rodas_e_pesos(carro);
         _create_rodas_e_pesos(carro, car_def);
         _create_joints(car_def);
         _set_torques(car_def);
+        init_simulation_vars();
     }
 
-    // Executa um passo da simulação e retorna false se o carro morreu.
-    bool CPhysCar::simulation_step()
+    void CPhysCar::measure(const b2WorldId worldId, const CCarDef &carro, const float max_t)
     {
-        _bInStep = true;
-
-        _simulation_pre_tick();
-        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
-        _simulation_pos_tick();
-
-        _bInStep = false;
-        return !m_bDead;
+        create(worldId, carro);
+        init_simulation_vars();
+        const float x0 = getCurrentX();
+        while (_t < max_t && simulation_step()) {};
+        m_distancia = getCurrentX() - x0;
+        destroy();
     }
 
     void CPhysCar::init_simulation_vars()
     {
-        _x0 = getCenter();
+        _x0 = getMassCenter();
         _t = 0;
 
         m_bContactR1 = false;
@@ -171,13 +284,22 @@ namespace PHYS
 
         _last_contact_r1 = 0;
         _last_contact_r2 = 0;
+
+        m_bDead = false;
     }
 
-    void CPhysCar::phys_end_simulate()
+    // Executa um passo da simulação e retorna false se o carro morreu.
+    bool CPhysCar::simulation_step()
     {
-        // Nothing to do.
-    }
+        _bInStep = true;
 
+        _simulation_pre_tick();
+        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
+        _simulation_pos_tick();
+
+        _bInStep = false;
+        return !m_bDead;
+    }
 
     void CPhysCar::_simulation_pre_tick() const
     {
@@ -228,25 +350,6 @@ namespace PHYS
         }
     }
 
-    void showTouch(const string &name, const bool bContact, const float touch_strength)
-    {
-        cout << name << " Touch(" << bContact << "): " << touch_strength << endl;
-    }
-
-    void applyTouchIfBody(const b2BodyId bodyId,
-                          const b2BodyId targetBody,
-                          bool &targetFlag,
-                          const string &targetName,
-                          const bool bContact,
-                          const float touch_strength)
-    {
-        if (B2_ID_EQUALS(bodyId, targetBody))
-        {
-            showTouch(targetName, bContact, touch_strength);
-            targetFlag = bContact;
-        }
-    }
-
     void CPhysCar::_process_touch_on_body(const b2BodyId bodyId, const bool bContact, const float touch_strength)
     {
         applyTouchIfBody(bodyId, m_Roda1Id, m_bContactR1, "R1", bContact, touch_strength);
@@ -260,20 +363,6 @@ namespace PHYS
         const float touch_strength = b2AbsFloat(b2Length(normal));
         const bool isContact = touch_strength > 0.9f;
         _process_touch_on_body(bodyId, isContact, touch_strength);
-    }
-
-    bool is_body_contacting(const b2BodyId bodyId)
-    {
-        const int count = b2Body_GetShapeCount(bodyId);
-        vector<b2ShapeId> shapes(count);
-        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
-        if (shape_count == 0) return false;
-
-        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
-        vector<b2ContactData> contactData(contact_capacity);
-        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
-
-        return contact_count > 0;
     }
 
     void CPhysCar::_test_peso(const b2BodyId pesoId, const string &name)
@@ -302,12 +391,6 @@ namespace PHYS
         _process_no_contact_time();
     }
 
-    void destroyJoint(b2JointId &targetJoint)
-    {
-        b2DestroyJoint(targetJoint);
-        targetJoint = b2_nullJointId;
-    }
-
     void CPhysCar::_remove_joints_if_dead()
     {
         if (!m_bDead || !b2Joint_IsValid(m_Jp1p2Id)) return;
@@ -322,7 +405,7 @@ namespace PHYS
 
     void CPhysCar::_register_distance_travelled()
     {
-        m_distancia = std::max(getCenter().x - _x0.x, 0.0f);
+        m_distancia = std::max(getCurrentX() - _x0.x, 0.0f);
     }
 
     void CPhysCar::_calc_average_velocity()
@@ -351,8 +434,12 @@ namespace PHYS
         _register_time_step();
     }
 
+    float CPhysCar::getCurrentX() const
+    {
+        return getMassCenter().x;
+    }
 
-    b2Vec2 CPhysCar::getCenter() const
+    b2Vec2 CPhysCar::getMassCenter() const
     {
         const vector pos = {
             b2Body_GetPosition(m_Roda1Id),
@@ -383,28 +470,71 @@ namespace PHYS
         return cm;
     }
 
-    b2BodyId CPhysCar::getR1() const {
+    b2BodyId CPhysCar::getR1() const
+    {
         return m_Roda1Id;
     }
 
-    b2BodyId CPhysCar::getR2() const {
+    b2BodyId CPhysCar::getR2() const
+    {
         return m_Roda2Id;
     }
 
-    b2BodyId CPhysCar::getP1() const {
+    b2BodyId CPhysCar::getP1() const
+    {
         return m_Peso1Id;
     }
 
-    b2BodyId CPhysCar::getP2() const {
+    b2BodyId CPhysCar::getP2() const
+    {
         return m_Peso2Id;
     }
 
-    float CPhysCar::getT() const {
+    float CPhysCar::getT() const
+    {
         return _t;
     }
 
-    void CPhysCar::Destroy() {
-        destroy();
+    bool CPhysCar::isDead() const
+    {
+        return m_bDead;
+    }
+
+    string CPhysCar::deadReason() const
+    {
+        return m_dead_reason;
+    }
+
+    void CPhysCar::fill_gr_car(GUI::IGrCar &car)
+    {
+        float center_x, center_y, radius, angle;
+        _read_roda_data(m_Roda1Id, center_x, center_y, radius, angle);
+        car.setRoda1(center_x, center_y, radius, angle, m_bContactR1);
+
+        _read_roda_data(m_Roda2Id, center_x, center_y, radius, angle);
+        car.setRoda2(center_x, center_y, radius, angle, m_bContactR2);
+
+        _read_peso_data(m_Peso1Id, center_x, center_y, radius);
+        car.setPeso1(center_x, center_y, radius, m_bDead);
+
+        _read_peso_data(m_Peso2Id, center_x, center_y, radius);
+        car.setPeso2(center_x, center_y, radius, m_bDead);
+
+        auto [x, y] = getMassCenter();
+        car.setCenter(x, y);
+        car.setBroke(m_bDead);
+    }
+
+    GA::fitness_params_t CPhysCar::get_ga_fitness_params()
+    {
+        return {
+            m_contatoR1,
+            m_contatoR2,
+            m_vm,
+            m_distancia,
+            _t,
+            m_bDead
+        };
     }
 
     void CPhysCar::init()
@@ -439,33 +569,9 @@ namespace PHYS
         if (!b2World_IsValid(m_World.m_WorldId))
             return;
 
-        _verificar_step();
-
-        if (!b2Body_IsValid(m_Roda1Id))
-            return;
-
-        // Consideraremos que todos os corpos existem se um deles existir
-        b2DestroyBody(m_Roda1Id);
-        b2DestroyBody(m_Roda2Id);
-        b2DestroyBody(m_Peso1Id);
-        b2DestroyBody(m_Peso2Id);
-        // _pWorld->SetContactListener(NULL);
-
-        // NULLamos tudo:
-        init();
-    }
-
-    void CPhysCar::_verificar_step()
-    {
-#if 0 // TODO: Verificar se é necessário após conversão.
-          if (_bInStep)
-        {
-            // Aguardamos at� 5 segundos antes de prosseguir:
-            for (int i = 0; i < 500 || !_bInStep; i++)
-            {
-                Sleep(10);
-            }
-        }
-#endif
+        if (b2Body_IsValid(m_Roda1Id)) b2DestroyBody(m_Roda1Id);
+        if (b2Body_IsValid(m_Roda2Id)) b2DestroyBody(m_Roda2Id);
+        if (b2Body_IsValid(m_Peso1Id)) b2DestroyBody(m_Peso1Id);
+        if (b2Body_IsValid(m_Peso2Id)) b2DestroyBody(m_Peso2Id);
     }
 }

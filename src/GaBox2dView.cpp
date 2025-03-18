@@ -463,7 +463,6 @@ namespace GUI
         // if (m_nSimTimer != 0)
         //     OnSimulaPlay();
 
-        pDoc->GetCar().endSimulate();
         pDoc->GetCar().CreateCarFromGenes(buffer);
         pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
 

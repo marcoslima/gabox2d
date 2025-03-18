@@ -36,10 +36,13 @@ namespace GA
 
         [[nodiscard]] float getPontuacao() const override;
 
+        [[nodiscard]] CCarDef getCarro() const override;
+
         void decode() override; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
-        void calc_fitness(float contact1, float contact2, float velocity, float distance, float time, float max_t, bool is_dead) override;
 
         void CreateCarFromGenes(const char *genes) override;
         void CreateRandomCar() override;
+
+        void calc_fitness(fitness_params_t fitness_params, float max_t) override;
     };
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include <box2d/box2d.h>
-#include <uuid/uuid.h>
 
 #include "CarDef.h"
 #include "env.h"
@@ -39,11 +38,8 @@ namespace PHYS
         float damp[6]{};
     };
 
-    class CPhysCar final : IPhysCar
+    class CPhysCar final : public IPhysCar
     {
-        // ID deste carro:
-        uuid_t m_id;
-
         // Instanciamento do carro no box2d
         b2BodyId m_Roda1Id;
         b2BodyId m_Roda2Id;
@@ -68,7 +64,6 @@ namespace PHYS
         float m_acum_contatoR1;
         float m_acum_contatoR2;
         float m_vm;
-        float m_t;
 
         // semi-constantes
         float _timeStep;
@@ -98,7 +93,7 @@ namespace PHYS
         CPhysCar();
         ~CPhysCar() override;
 
-        bool operator==(const CPhysCar &) const;
+        // CPhysCar &operator=(const CPhysCar &other);
 
         // Usa as definições decodificadas para criar o objeto em si no box2d
         void create(b2WorldId WorldId, const CCarDef& carro) override;
@@ -107,8 +102,8 @@ namespace PHYS
         void reset() override;
 
         void init_simulation_vars() override;
-        void phys_end_simulate() override;
         bool simulation_step() override;
+        void measure(b2WorldId worldId, const CCarDef &carro, float max_t) override;
         void init() override;
 
     private:
@@ -117,7 +112,6 @@ namespace PHYS
         void _process_no_contact_time();
         void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
         void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
-        void _process_contacts(const b2ContactEvents &contacts);
         void _test_peso(b2BodyId pesoId, const string &name);
         void _test_contacts();
         void _process_contacts();
@@ -127,19 +121,23 @@ namespace PHYS
         void _register_time_step();
         void _register_contacts();
         void _simulation_pos_tick();
-        static void _verificar_step();
         void _create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def);
         void _set_torques(const car_t &car_def);
         [[nodiscard]] b2JointId _create_joint(b2BodyId bodyA, b2BodyId bodyB, const car_t &car_def, int param_index) const;
         void _create_joints(const car_t &car_def);
 
     public:
-        [[nodiscard]] b2Vec2 getCenter() const override;
+        [[nodiscard]] b2Vec2 getMassCenter() const override;
+        [[nodiscard]] float getCurrentX() const override;
         [[nodiscard]] b2BodyId getR1() const override;
         [[nodiscard]] b2BodyId getR2() const override;
         [[nodiscard]] b2BodyId getP1() const override;
         [[nodiscard]] b2BodyId getP2() const override;
         [[nodiscard]] float getT() const override;
-        void Destroy() override;
+        [[nodiscard]] bool isDead() const override;
+        [[nodiscard]] string deadReason() const override;
+
+        void fill_gr_car(GUI::IGrCar &car) override;
+        GA::fitness_params_t get_ga_fitness_params() override;
     };
 }

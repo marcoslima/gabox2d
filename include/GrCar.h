@@ -1,7 +1,6 @@
-#ifndef __GRCAR_H__
-#define __GRCAR_H__
+#pragma once
 
-#include "CarDef.h"
+#include <IGrCar.h>
 
 #define CImage int
 #define Graphics int
@@ -17,14 +16,23 @@ static CImage	g_imgCracked;
 static bool		g_bImgLoaded = false;
 static bool		g_bImgFailed = false;
 
-class CGrCar
+class CGrCar final : public IGrCar
 {
+	void Draw(sf::RenderWindow& window) const;
+
 public:
 	CGrCar();
-	~CGrCar();
+	~CGrCar() override;
 
-	// Draw
-	void Draw(sf::RenderWindow& window) const;
+	void draw(void *pParams) const override;
+
+	void setRoda1(float center_x, float center_y, float radius, float angle, bool touch) override;
+	void setRoda2(float center_x, float center_y, float radius, float angle, bool touch) override;
+	void setPeso1(float center_x, float center_y, float radius, bool broke) override;
+	void setPeso2(float center_x, float center_y, float radius, bool broke) override;
+	void setCenter(float center_x, float center_y) override;
+	void setBroke(bool broke) override;
+
 
 	using gr_circle_t = struct tagCircle
 	{
@@ -55,5 +63,3 @@ public:
 };
 
 }
-
-#endif //__GRCAR_H__
