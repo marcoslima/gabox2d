@@ -109,8 +109,8 @@ namespace MODEL
     	float y;
         while (x < _brx)
         {
-            const float dx = random.rand_norm(_dxm, _dxs) + _dxo;
-            const float m = random.rand_norm(_dym, _dys) + _dyo;
+            const float dx = random.normal_random(_dxm, _dxs) + _dxo;
+            const float m = random.normal_random(_dym, _dys) + _dyo;
             const float dy = ldy + (dx * (lm + m));
             y = dy + _a * sin(_omega * x + _phi);
 
