@@ -214,7 +214,7 @@ void CGa::_2Crossover()
 
 bool _do_mutate(float _mutacao)
 {
-	return random.random(0.0, 100.0) < _mutacao;
+	return random.real_random(0.0, 100.0) < _mutacao;
 }
 
 void CGa::_3Mutate()
@@ -289,7 +289,7 @@ void CGa::Step()
 }
 
 
-// TODO: Mover esta fun��o para um lugar mais apropriado
+// TODO: Mover esta função para um lugar mais apropriado
 /*
 bool CGa::OpenLogFile(void)
 {

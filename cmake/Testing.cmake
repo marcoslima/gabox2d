@@ -92,7 +92,11 @@ if(GABOX2D_BUILD_TESTS)
         # Also output text summary to console
         COMMAND gcovr --root ${CMAKE_SOURCE_DIR}
                       --object-directory=${CMAKE_BINARY_DIR}
-        
+                      --exclude=".*imgui\.*"
+                      --exclude=".*cdt\.*"
+                      --exclude=".*box2d\.*"
+                      --exclude=".*_deps\.*"
+
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating code coverage report..."
     )    
