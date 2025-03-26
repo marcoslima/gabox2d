@@ -168,8 +168,8 @@ namespace GUI
     void CGaBox2dView::Draw(sf::RenderWindow &window)
     {
         CGaBox2dDoc *pDoc = GetDocument();
-        const auto car = pDoc->GetCar();
-        const auto center_mass = car.getCenter();
+        const auto &car = pDoc->GetCar();
+        const auto center_mass = car->getCenter();
         const CEnv env = pDoc->m_env;
         constexpr float move_step = 1.0f;
         constexpr float zoom_step = 1.01f;
@@ -192,7 +192,7 @@ namespace GUI
         _draw_sky(window, env);
         _draw_ground(window);
         _draw_border(window, env);
-        pDoc->GetCar().Draw(window);
+        pDoc->GetCar()->draw(&window);
     }
 
     CGaBox2dDoc *CGaBox2dView::GetDocument() const
@@ -224,8 +224,8 @@ namespace GUI
         if (!pDoc)
             return;
 
-        pDoc->GetCar().CreateRandomCar();
-        pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
+        pDoc->GetCar()->createGaRandomCar();
+        pDoc->GetCar()->beginSimulate(pDoc->m_World);
     }
 
     void CGaBox2dView::OnVelocidadeMais()
@@ -242,11 +242,11 @@ namespace GUI
     {
         CGaBox2dDoc *pDoc = GetDocument();
 
-        const string strGenes = pDoc->GetCar().getGenes();
+        const string strGenes = pDoc->GetCar()->getGenes();
 
         if (pDoc->m_IsSimulating) OnSimulaPlay();
 
-        pDoc->GetCar().CreateCarFromGenes(strGenes.c_str());
+        pDoc->GetCar()->createGaFromGenes(strGenes);
 
         OnSimulaPlay();
     }
@@ -293,9 +293,9 @@ namespace GUI
         ga_params_t gaParams = tp->m_Params;
         // CGaInfo *pGaInfo = tp->m_pGaInfo;
         PHYS::CWorld world;
-        PHYS::buildWorld(tp->m_env, world);
+        world.create(tp->m_env);
 
-        CGa ga;
+        CGa ga(make_unique<CCarFactory>());
         const float cross = gaParams.m_fCrossover;
         const float mut = gaParams.m_fMutacao;
 
@@ -320,7 +320,7 @@ namespace GUI
 
         while (!tp->m_bStopGa.load())
         {
-            ga.Ordena(world.m_WorldId, tp->m_bStopGa);
+            ga.Ordena(world, tp->m_bStopGa);
             if (crInfo.Get() > 250)
             {
 #if 0
@@ -411,7 +411,7 @@ namespace GUI
 
     void CGaBox2dView::OnEditCopy() const
     {
-        ImGui::SetClipboardText(GetDocument()->GetCar().getGenes().c_str());
+        ImGui::SetClipboardText(GetDocument()->GetCar()->getGenes().c_str());
     }
 
     void CGaBox2dView::OnEditPaste() const
@@ -463,8 +463,8 @@ namespace GUI
         // if (m_nSimTimer != 0)
         //     OnSimulaPlay();
 
-        pDoc->GetCar().CreateCarFromGenes(buffer);
-        pDoc->GetCar().beginSimulate(pDoc->m_World.m_WorldId);
+        pDoc->GetCar()->createGaFromGenes(buffer);
+        pDoc->GetCar()->beginSimulate(pDoc->m_World);
 
         // if (m_nSimTimer == 0)
         //     OnSimulaPlay();
@@ -787,6 +787,6 @@ namespace GUI
     }
 
     string CGaBox2dView::getDeadReason() const {
-        return GetDocument()->GetCar().deadReason();
+        return GetDocument()->GetCar()->deadReason();
     }
 }

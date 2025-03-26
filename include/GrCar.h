@@ -32,7 +32,7 @@ public:
 	void setPeso2(float center_x, float center_y, float radius, bool broke) override;
 	void setCenter(float center_x, float center_y) override;
 	void setBroke(bool broke) override;
-
+	[[nodiscard]] gr_car_ptr_t clone() override;
 
 	using gr_circle_t = struct tagCircle
 	{

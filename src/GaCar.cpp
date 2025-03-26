@@ -44,12 +44,26 @@ namespace GA
         return _carro;
     }
 
-    void CGaCar::CreateCarFromGenes(const char *genes)
+    string CGaCar::crossover(const string &genes, const size_t crosspoint) const
     {
-        if (strlen(genes) != GENES)
+        return _genes.substr(0, crosspoint) + genes.substr(crosspoint);
+    }
+
+    ga_car_ptr_t CGaCar::clone()
+    {
+        auto car = make_shared<CGaCar>();
+        car->_genes = _genes;
+        car->_pontos = _pontos;
+        car->_carro = _carro;
+        return car;
+    }
+
+    void CGaCar::CreateCarFromGenes(const string &genes)
+    {
+        if (genes.size() != GENES)
         {
             stringstream ss;
-            ss << "Invalid genes size: " << strlen(genes);
+            ss << "Invalid genes size: " << genes.size();
             throw(length_error(ss.str().c_str()));
         }
 
@@ -96,6 +110,16 @@ namespace GA
         if(fitness_params.is_dead) pts *= 10;
 
         _pontos = pts;
+    }
+
+    void CGaCar::mutate()
+    {
+        const auto point_of_mutation = random.rand_int(0, GENES-1);
+        const char intensidade = random.discrete_random<char>(1, 10);
+        const char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
+        const char mutacao = intensidade * direcao;
+        const auto g = std::clamp<char>(_genes[point_of_mutation] + mutacao, 'A', 'Z');
+        _genes[point_of_mutation] = g;
     }
 
     void CGaCar::decode()

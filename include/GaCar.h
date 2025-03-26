@@ -33,16 +33,15 @@ namespace GA
         explicit CGaCar(const char *szGenes);
 
         [[nodiscard]] string getGenes() const override;
-
         [[nodiscard]] float getPontuacao() const override;
-
         [[nodiscard]] CCarDef getCarro() const override;
+        [[nodiscard]] string crossover(const string &genes, size_t crosspoint) const override;
+        [[nodiscard]] ga_car_ptr_t clone() override;
 
         void decode() override; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
-
-        void CreateCarFromGenes(const char *genes) override;
+        void CreateCarFromGenes(const string &genes) override;
         void CreateRandomCar() override;
-
         void calc_fitness(fitness_params_t fitness_params, float max_t) override;
+        void mutate() override;
     };
 }

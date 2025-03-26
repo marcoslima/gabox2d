@@ -71,6 +71,18 @@ namespace GUI
         _broke = broke;
     }
 
+    gr_car_ptr_t CGrCar::clone()
+    {
+        auto car = std::make_shared<CGrCar>();
+        car->_roda1 = _roda1;
+        car->_roda2 = _roda2;
+        car->_peso1 = _peso1;
+        car->_peso2 = _peso2;
+        car->_cm = _cm;
+        car->_broke = _broke;
+        return car;
+    }
+
     void DrawTickLine(sf::RenderWindow &window,
                       const sf::Vector2f p1,
                       const sf::Vector2f p2,

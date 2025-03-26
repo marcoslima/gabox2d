@@ -53,7 +53,8 @@ namespace PHYS
         b2JointId m_Jc2p2Id;
         b2JointId m_Jp1p2Id;
 
-        CWorld m_World;
+        CWorld& m_World;
+        b2WorldId m_WorldId;
         string m_dead_reason;
 
         bool _bInStep;
@@ -96,14 +97,14 @@ namespace PHYS
         // CPhysCar &operator=(const CPhysCar &other);
 
         // Usa as definições decodificadas para criar o objeto em si no box2d
-        void create(b2WorldId WorldId, const CCarDef& carro) override;
+        void create(IWorld &world, const CCarDef& carro) override;
 
         void destroy() override;
         void reset() override;
 
         void init_simulation_vars() override;
         bool simulation_step() override;
-        void measure(b2WorldId worldId, const CCarDef &carro, float max_t) override;
+        void measure(IWorld& world, const CCarDef &carro, float max_t) override;
         void init() override;
 
     private:
@@ -127,15 +128,12 @@ namespace PHYS
         void _create_joints(const car_t &car_def);
 
     public:
-        [[nodiscard]] b2Vec2 getMassCenter() const override;
+        [[nodiscard]] IVec2f getMassCenter() const override;
         [[nodiscard]] float getCurrentX() const override;
-        [[nodiscard]] b2BodyId getR1() const override;
-        [[nodiscard]] b2BodyId getR2() const override;
-        [[nodiscard]] b2BodyId getP1() const override;
-        [[nodiscard]] b2BodyId getP2() const override;
         [[nodiscard]] float getT() const override;
         [[nodiscard]] bool isDead() const override;
         [[nodiscard]] string deadReason() const override;
+        [[nodiscard]] phys_car_ptr_t clone() const override;
 
         void fill_gr_car(GUI::IGrCar &car) override;
         GA::fitness_params_t get_ga_fitness_params() override;

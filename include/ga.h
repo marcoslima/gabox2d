@@ -4,22 +4,25 @@
 #include <string>
 #include "lmfisica.h"
 
+
 using namespace std;
 using namespace LmFisica;
 
-#include "car.h"
+#include <icar.h>
+#include <IWorld.h>
 
 typedef vector<double> vec_double_t;
 
 namespace GA
 {
-    typedef vector<string> vec_cstr_t;
-    typedef pair<size_t, CCar> melhor_t;
-    typedef vector<melhor_t> vec_melhores_t;
-
+    using vec_cstr_t = vector<string>;
+    using melhor_t = pair<size_t, icar_ptr_t>;
+    using vec_melhores_t = vector<melhor_t>;
 
     class CGa
     {
+        car_factory_ptr_t _carFactory;
+
         // Parâmetros para o algoritmo genético
         float  _max_t; // Tempo máximo de simulação
         size_t _populacao; // Número de indivíduos por geração
@@ -47,7 +50,7 @@ namespace GA
         lst_car_t m_populacao;
 
         // Nova população (sequências de genes)
-        vec_cstr_t m_nova;
+        vec_car_t m_nova;
 
         vec_double_t _vec_select,
                      _vec_crossover,
@@ -66,7 +69,7 @@ namespace GA
         void _do_elitism();
         void _do_alienism();
         void _do_manual_include();
-        void _do_measures(b2WorldId worldId, atomic<bool> &stop_ga);
+        void _do_measures(PHYS::IWorld &world, atomic<bool> &stop_ga) const;
         void _do_calc_points();
         void _do_sort();
         void _cria_populacao();
@@ -78,7 +81,7 @@ namespace GA
         // Interface
     public:
         // Construtor/destrutor
-        CGa();
+        explicit CGa(car_factory_ptr_t car_factory);
 
         ~CGa();
 
@@ -95,7 +98,7 @@ namespace GA
         void BeginEvolve();
 
         // Testa e ordena os indivíduos
-        void Ordena(b2WorldId worldId, atomic<bool>& stop_ga);
+        void Ordena(PHYS::IWorld &world, atomic<bool>& stop_ga);
 
         // Seleciona, cruza, muta e passa para geração seguinte
         void Step();
