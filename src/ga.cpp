@@ -95,12 +95,11 @@ void CGa::_do_measures(PHYS::IWorld &world, atomic<bool>& stop_ga) const
 
 void CGa::_do_calc_points()
 {
-	for(auto & it : m_populacao) it->calc_fitness(_max_t);
+	for(const auto & it : m_populacao) it->calc_fitness(_max_t);
 }
 
 void CGa::_do_sort()
 {
-	cout << "n: " << m_populacao.size() << endl;
 	m_populacao.sort();
 }
 

@@ -137,7 +137,8 @@ namespace GUI
 
         if (ImGui::BeginMenu("GA"))
         {
-            if (ImGui::MenuItem("Iniciar GA..."))
+            const string sIniciarGa = view.isGaRunning() ? "Parar GA" : "Iniciar GA...";
+            if (ImGui::MenuItem(sIniciarGa.c_str()))
             {
                 bShowGaParams = true;
             }

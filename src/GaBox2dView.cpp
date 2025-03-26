@@ -30,6 +30,11 @@ namespace GUI
         return m_nVelocidade;
     }
 
+    bool CGaBox2dView::isGaRunning() const
+    {
+        return m_bGaRunning;
+    }
+
     sf::Vector2f WorldToLogical(b2Vec2 worldPoint)
     {
         return {worldPoint.x, worldPoint.y};
@@ -318,6 +323,7 @@ namespace GUI
         int nCount = 0;
         crGa.Start();
 
+        cout << "Evolving..." << endl;
         while (!tp->m_bStopGa.load())
         {
             ga.Ordena(world, tp->m_bStopGa);
@@ -357,7 +363,7 @@ namespace GUI
 
             //		if(gaParams.m_b
         }
-
+        cout << "fnGa exiting..." << endl;
         // delete pWorld;
         // SetEvent(hGaStopped);
     }
@@ -374,8 +380,10 @@ namespace GUI
             dlgMsg.EndMessage();
 #endif
 
+        cout << "Commanding GA to stop..." << endl;
         _thread_params.m_bStopGa.store(true);
         _ga_thread.join();
+        cout << "GA stopped." << endl;
     }
 
     void CGaBox2dView::_start_ga(const CGaParamsDlg &dlgParams)
