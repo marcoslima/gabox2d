@@ -137,7 +137,8 @@ namespace GUI
 
         if (ImGui::BeginMenu("GA"))
         {
-            if (ImGui::MenuItem("Iniciar GA..."))
+            const string sIniciarGa = view.isGaRunning() ? "Parar GA" : "Iniciar GA...";
+            if (ImGui::MenuItem(sIniciarGa.c_str()))
             {
                 bShowGaParams = true;
             }
@@ -188,8 +189,8 @@ namespace GUI
     {
         ImGui::Begin("Info");
         ImGui::Text("Dead reason: %s", view.getDeadReason().c_str());
-        ImGui::Text("Time: %f", view.GetDocument()->GetCar().getT());
-        ImGui::Text("Genes: %s", view.GetDocument()->GetCar().getGenes().c_str());
+        ImGui::Text("Time: %f", view.GetDocument()->GetCar()->getT());
+        ImGui::Text("Genes: %s", view.GetDocument()->GetCar()->getGenes().c_str());
         ImGui::End();
     }
 
@@ -262,7 +263,7 @@ namespace GUI
                 window.close();
             }
             for (int i = 0; i < view.getVelocidade(); i++)
-                doc.GetCar().doStep();
+                doc.GetCar()->doStep();
 
             ImGui::SFML::Update(window, deltaClock.restart());
             ImGui::ShowDemoWindow();

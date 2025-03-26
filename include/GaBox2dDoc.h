@@ -17,7 +17,7 @@ public:
 
 // Attributes
 private:
-	CCar m_car;
+	icar_ptr_t m_car;
 
 public:
 	bool m_bQuit = false;
@@ -38,7 +38,7 @@ public:
 
 	void Quit();
 
-	CCar&	GetCar(){return m_car;}
+	const icar_ptr_t& GetCar();
 
 	bool OnNewDocument(const CEnv& env);
 

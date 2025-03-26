@@ -2,50 +2,64 @@
 #include "GaCar.h"
 #include "PhysCar.h"
 #include "GrCar.h"
-#include <vector>
-#include <list>
 #include <memory>
+#include <icar.h>
 
 using namespace std;
 
-using ga_car_ptr_t = shared_ptr<GA::IGaCar>;
-using phys_car_ptr_t = shared_ptr<PHYS::IPhysCar>;
-using gr_car_ptr_t = shared_ptr<GUI::IGrCar>;
 
-class CCar 
+class CCar final : public ICar
 {
-	ga_car_ptr_t m_ga_car_ptr;
-	phys_car_ptr_t m_phys_car_ptr;
-	gr_car_ptr_t m_gr_car_ptr;
+	GA::ga_car_ptr_t m_ga_car_ptr;
+	PHYS::phys_car_ptr_t m_phys_car_ptr;
+	GUI::gr_car_ptr_t m_gr_car_ptr;
 
 public:
 	CCar();
-	CCar(ga_car_ptr_t ga_car_ptr, phys_car_ptr_t phys_car_ptr, gr_car_ptr_t gr_car_ptr);
-	~CCar() = default;
+	CCar(GA::ga_car_ptr_t ga_car_ptr, PHYS::phys_car_ptr_t phys_car_ptr, GUI::gr_car_ptr_t gr_car_ptr);
 
+	// Overriden methods
+	void calc_fitness(float max_t) override;
+	void Medir(PHYS::IWorld &world, float max_t) override;
+	void resetPhysCar() override;
+	void createGaFromGenes(const string &genes) override;
+	void beginSimulate(PHYS::IWorld &world) override;
+	void draw(void *pParams) const override;
+	void mutate() override;
+	[[nodiscard]] float getFitness() const override;
+	[[nodiscard]] float getT() const override;
+	[[nodiscard]] bool operator<(const ICar &rhs) const override;
+	[[nodiscard]] bool doStep() override;
+	[[nodiscard]] string deadReason() const override;
+	[[nodiscard]] icar_ptr_t crossover(const icar_ptr_t &rhs, size_t crosspoint) const override;
+	[[nodiscard]] icar_ptr_t clone() override;
+
+	// Rest: verify after all done
 	void CreateFromGenes(const char* szGenes = nullptr);
 	void CreateRandomCar();
 	void DestroyCar();
-	bool doStep();
 	void UpdateGraphicsData();
-	void Medir(b2WorldId WorldId, float max_t) const;
 	string getGenes();
-	[[nodiscard]] b2Vec2 getCenter() const;
-	void calc_fitness(float max_t);
+	[[nodiscard]] IVec2f getCenter() const override;
 
 	///////////////////////////////////
 	// Down Interfaces
-	[[nodiscard]] double getPontuacao() const;
 	[[nodiscard]] string getGenes() const;
-	[[nodiscard]] string deadReason() const;
-	[[nodiscard]] double getT() const;
-	void Draw(sf::RenderWindow &window) const;	
-	void CreateCarFromGenes(const char *genes);
 
-	void beginSimulate(b2WorldId b2_world_id);
+	void Draw(sf::RenderWindow &window) const;
+	void createGaRandomCar() override;
+
+	~CCar() override;
 };
 
-typedef vector<CCar> vec_car_t;
-typedef list<CCar> lst_car_t;
-CCar createCarFromGenes(const string& genes);
-CCar createRandomCar();
+inline void CCar::mutate()
+{
+	m_ga_car_ptr->mutate();
+}
+
+class CCarFactory final : public ICarFactory
+{
+public:
+	icar_ptr_t createCarFromGenes(const std::string &genes) override;
+	icar_ptr_t createRandomCar() override;
+};

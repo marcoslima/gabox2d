@@ -15,7 +15,7 @@ public:
 	virtual ~CEvolucaoDlg();
 
 // Dialog Data
-	enum { IDD = IDD_EVOLUCAO };
+	enum tag_idd_evolucao{ IDD = IDD_EVOLUCAO };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

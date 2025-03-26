@@ -59,6 +59,7 @@ add_library(GaBox2dLib
     include/WndPreviewChao.h
     include/WndShowCarro.h
     include/World.h
+        ../src/World.cpp
 )
 
 target_include_directories("GaBox2dLib" PUBLIC ${SFML_INCLUDE_DIRS})

@@ -1,4 +1,6 @@
 #include <algorithm>
+
+#include "car.h"
 using namespace std;
 #include "CCronometro.h"
 #include "CRandom.h"
@@ -11,17 +13,23 @@ namespace GA
 {
 	CRandom random(static_cast<unsigned>(time(nullptr)));
 
-CGa::CGa()
-	: _max_t(0),
-	_populacao(0),
-	_elitismo(0),
-	_alienismo(0),
-	_mut_int(0),
-	_crossover(0),
-	_mutacao(0),
-	_geracao(0),
-	_bMassExtintion(false),
-	_nCount(0)
+	bool _do_mutate(float _mutacao)
+	{
+		return random.real_random(0.0, 100.0) < _mutacao;
+	}
+
+CGa::CGa(car_factory_ptr_t car_factory)
+	: _carFactory(std::move(car_factory))
+	, _max_t(0)
+	, _populacao(0)
+	, _elitismo(0)
+	, _alienismo(0)
+	, _mut_int(0)
+	, _crossover(0)
+	, _mutacao(0)
+	, _geracao(0)
+	, _bMassExtintion(false)
+	, _nCount(0)
 {
 	// InitializeCriticalSection(&m_cs);
 	_bLogOpenned = false;
@@ -34,7 +42,7 @@ void CGa::_cria_populacao()
 	m_populacao.clear();
 
 	for(size_t i = 0; i < _populacao; i++)
-		m_populacao.push_back(createRandomCar());
+		m_populacao.push_back(_carFactory->createRandomCar());
 }
 
 void CGa::setParams(const size_t nPopulacao,
@@ -68,19 +76,13 @@ void CGa::BeginEvolve()
 	_bLogOpenned = true;
 }
 
-
-bool pred(const CCar& left, const CCar& right)
-{
-   return left.getPontuacao() < right.getPontuacao();
-}
-
-void CGa::_do_measures(const b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::_do_measures(PHYS::IWorld &world, atomic<bool>& stop_ga) const
 {
 	for (auto& car : m_populacao) 
 	{
 		try 
 		{
-			car.Medir(worldId, _max_t);
+			car->Medir(world, _max_t);
 		} 
 		catch (const std::exception& e) 
 		{
@@ -93,24 +95,18 @@ void CGa::_do_measures(const b2WorldId worldId, atomic<bool>& stop_ga)
 
 void CGa::_do_calc_points()
 {
-	for(auto & it : m_populacao) it.calc_fitness(_max_t);
+	for(const auto & it : m_populacao) it->calc_fitness(_max_t);
 }
 
 void CGa::_do_sort()
 {
-	cout << "n: " << m_populacao.size() << endl;
-	m_populacao.sort(pred);
+	m_populacao.sort();
 }
 
-void CGa::Ordena(const b2WorldId worldId, atomic<bool>& stop_ga)
+void CGa::Ordena(PHYS::IWorld &world, atomic<bool>& stop_ga)
 {
-	cout << "measuring..." << endl;
-	_do_measures(worldId, stop_ga);
-
-	cout << "calculating points..." << endl;
+	_do_measures(world, stop_ga);
 	_do_calc_points();
-
-	cout << "sorting..." << endl;
 	_do_sort();
 
 #if 0
@@ -135,9 +131,9 @@ void CGa::_do_elitism()
 	size_t i;
 	for(it = m_populacao.begin(),i = 0;
 		it!= m_populacao.end() && i < _elitismo;
-		it++,i++)
+		++it,i++)
 	{
-		m_nova.push_back(it->getGenes());
+		m_nova.push_back((*it)->clone());
 	}
 }
 
@@ -145,7 +141,7 @@ void CGa::_do_alienism()
 {
 	for(size_t i = 0; i < _alienismo; i++)
 	{
-		m_nova.push_back(createRandomCar().getGenes());
+		m_nova.push_back(CCarFactory().createRandomCar());
 	}
 }
 
@@ -153,7 +149,7 @@ void CGa::_do_manual_include()
 {
 	if(!_strId2Include.empty())
 	{
-		m_nova.push_back(_strId2Include);
+		m_nova.push_back(_carFactory->createCarFromGenes(_strId2Include));
 		_strId2Include.clear();
 	}
 }
@@ -168,81 +164,39 @@ void CGa::_1Select()
 
 void CGa::_2Crossover()
 {
-	size_t i, nId1, nId2, nSize = m_populacao.size();
-	double nStdev = nSize / 1.0;
-	size_t nMaxIndex = nSize - 1;
-	string str1, str2, strt;
-	size_t nCross;
-	size_t zero = 0;
-	lst_car_t::iterator it;
+	size_t i;
+	const size_t nSize = m_populacao.size();
+	const size_t nMaxIndex = nSize - 1;
 
 	while(m_nova.size() < _populacao)
 	{
+		constexpr size_t zero = 0;
 		// Escolha dos pais:
-		nId1 = random.rand_int(zero, nSize);
-		nId2 = random.rand_int(zero, nSize);
+		size_t nId1 = random.rand_int(zero, nSize);
+		size_t nId2 = random.rand_int(zero, nSize);
 
 		// Clamp no range permitido
 		nId1 = std::min(nMaxIndex, nId1);
 		nId2 = std::min(nMaxIndex, nId2);
 
-
 		if(nId1 == nId2)
 			continue;
 		
 		// Faz crossover?
-		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str1 = it->getGenes();
-
-		it = m_populacao.begin();for(i = 0; i < nId1; i++,it++);
-		str2 = it->getGenes();
-
-		if(random.rand_int(0, 100) < _crossover)
-		{
-			nCross = 1 + random.rand_int(zero, static_cast<size_t>(GENES-2));
-			strt = str1.substr(0, nCross);
-			str1 = str2.substr(0, nCross) + str1.substr(GENES-nCross);
-			str2 = strt + str2.substr(GENES-nCross);
-		}
-
-		VERIFY(str1.size() == GENES, "Crossover: str1.size() == GENES, found: " << str1.size() );
-		VERIFY(str2.size() == GENES, "Crossover: str2.size() == GENES, found: " << str2.size() );
-		m_nova.push_back(str1);
-		m_nova.push_back(str2);
+		auto itCar1 = m_populacao.begin();for(i = 0; i < nId1; i++,++itCar1) {}
+		auto itCar2 = m_populacao.begin();for(i = 0; i < nId1; i++,++itCar2) {}
+		const auto cross_point = random.rand_int(1, GENES-2);
+		m_nova.push_back((*itCar1)->crossover(*itCar2, cross_point));
+		m_nova.push_back((*itCar2)->crossover(*itCar1, cross_point));
 	}
-}
-
-bool _do_mutate(float _mutacao)
-{
-	return random.real_random(0.0, 100.0) < _mutacao;
 }
 
 void CGa::_3Mutate()
 {
-	size_t nMut;
-	char g;
-	size_t i,nSize = m_nova.size();
-	size_t zero = 0;
-	size_t max_gene = static_cast<size_t>(GENES-1);
-	for(i = (_elitismo + _alienismo) ; i < nSize; i++)
-	{
-		if(! _do_mutate(_mutacao))
-			continue;
-
-		// Mutação:
-		// Ponto da mutação:
-		nMut = random.rand_int(zero, max_gene);
-
-		// Intensidade e direção da mutação:
-		char intensidade = random.discrete_random<char>(1, _mut_int);
-		char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
-		char mutacao = intensidade * direcao;
-		g = m_nova[i][nMut] + mutacao;
-
-		g = std::clamp(g, 'A', 'Z');
-
-		m_nova[i][nMut] = g;
-	}
+	const size_t first_new = _elitismo + _alienismo;
+	const size_t nova_len = m_nova.size();
+	for(auto i = first_new; i < nova_len; i++)
+		m_nova[i]->mutate();
 }
 
 void CGa::_4AdvanceGeneration()
@@ -259,11 +213,7 @@ void CGa::_4AdvanceGeneration()
 	}
 	else
 	{
-		const size_t nSize = m_nova.size();
-		for(size_t i = 0; i < nSize && i < _populacao; i++)
-		{
-			m_populacao.push_back(createCarFromGenes(m_nova[i]));
-		}
+		ranges::move(m_nova, std::back_inserter(m_populacao));
 		_geracao++;
 	}
 

@@ -11,6 +11,11 @@ namespace PHYS
 {
     constexpr int MAX_NO_CONTACT_TIME_SECONDS = 4;
 
+    b2Vec2 ivec2box2d(const IVec2f v)
+    {
+        return b2Vec2(v.x, v.y);
+    }
+
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
         copy(begin(carro._torque), end(carro._torque), begin(car_def.torque));
@@ -131,71 +136,21 @@ namespace PHYS
     }
 
     CPhysCar::CPhysCar()
+        : m_World(nullWorld)
     {
         init();
     }
 
     CPhysCar::~CPhysCar() = default;
-    //
-    // CPhysCar& CPhysCar::operator=(const CPhysCar& other)
-    // {
-    //     if (this == &other)
-    //         return *this;
-    //
-    //     m_Roda1Id = other.m_Roda1Id;
-    //     m_Roda2Id = other.m_Roda2Id;
-    //     m_Peso1Id = other.m_Peso1Id;
-    //     m_Peso2Id = other.m_Peso2Id;
-    //
-    //     m_Jc1c2Id = other.m_Jc1c2Id;
-    //     m_Jc1p1Id = other.m_Jc1p1Id;
-    //     m_Jc1p2Id = other.m_Jc1p2Id;
-    //     m_Jc2p1Id = other.m_Jc2p1Id;
-    //     m_Jc2p2Id = other.m_Jc2p2Id;
-    //     m_Jp1p2Id = other.m_Jp1p2Id;
-    //
-    //     m_World = other.m_World;
-    //     m_dead_reason = other.m_dead_reason;
-    //
-    //     _bInStep = other._bInStep;
-    //     m_bDead = other.m_bDead;
-    //     m_distancia = other.m_distancia;
-    //     m_contatoR1 = other.m_contatoR1;
-    //     m_contatoR2 = other.m_contatoR2;
-    //     m_acum_contatoR1 = other.m_acum_contatoR1;
-    //     m_acum_contatoR2 = other.m_acum_contatoR2;
-    //     m_vm = other.m_vm;
-    //
-    //     _timeStep = other._timeStep;
-    //     _iterations = other._iterations;
-    //
-    //     _x0 = other._x0;
-    //     _t = other._t;
-    //     m_bContactR1 = other.m_bContactR1;
-    //     m_bContactR2 = other.m_bContactR2;
-    //     _last_contact_r1 = other._last_contact_r1;
-    //     _last_contact_r2 = other._last_contact_r2;
-    //     _no_contact_time_r1 = other._no_contact_time_r1;
-    //     _no_contact_time_r2 = other._no_contact_time_r2;
-    //     _cVel = other._cVel;
-    //     _cPos = other._cPos;
-    //
-    //     _trqA = other._trqA;
-    //     _trqB = other._trqB;
-    //     _trqC = other._trqC;
-    //     _trqD = other._trqD;
-    //
-    //     return *this;
-    // }
 
     void CPhysCar::_create_rodas_e_pesos(const CCarDef &carro, const car_t &car_def)
     {
         //////////////////////////////////////////////
         // Criação dos objetos:
-        m_Roda1Id = CreateRoda(m_World.m_WorldId, car_def.R1, carro._roda1, &ID_RODA1);
-        m_Roda2Id = CreateRoda(m_World.m_WorldId, car_def.R2, carro._roda2, &ID_RODA2);
-        m_Peso1Id = CreateRoda(m_World.m_WorldId, car_def.P1, carro._peso1, &ID_PESO1);
-        m_Peso2Id = CreateRoda(m_World.m_WorldId, car_def.P2, carro._peso2, &ID_PESO2);
+        m_Roda1Id = CreateRoda(m_WorldId, car_def.R1, carro._roda1, &ID_RODA1);
+        m_Roda2Id = CreateRoda(m_WorldId, car_def.R2, carro._roda2, &ID_RODA2);
+        m_Peso1Id = CreateRoda(m_WorldId, car_def.P1, carro._peso1, &ID_PESO1);
+        m_Peso2Id = CreateRoda(m_WorldId, car_def.P2, carro._peso2, &ID_PESO2);
     }
 
     void CPhysCar::_set_torques(const car_t &car_def)
@@ -231,7 +186,7 @@ namespace PHYS
         jd.enableSpring = true;
         jd.maxLength = jd.length * 1.1f;
         jd.minLength = jd.length * 0.9f;
-        return b2CreateDistanceJoint(m_World.m_WorldId, &jd);
+        return b2CreateDistanceJoint(m_WorldId, &jd);
     }
 
     void CPhysCar::_create_joints(const car_t &car_def)
@@ -244,11 +199,13 @@ namespace PHYS
         m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, car_def, 5);
     }
 
-    void CPhysCar::create(const b2WorldId WorldId, const CCarDef &carro)
+    void CPhysCar::create(IWorld &world, const CCarDef &carro)
     {
-        if (b2World_IsValid(WorldId))
+        const b2WorldId world_id = *static_cast<b2WorldId*>(world.getWorld());
+        if (b2World_IsValid(world_id))
             destroy();
-        m_World.m_WorldId = WorldId;
+        m_World = dynamic_cast<CWorld&>(world);
+        m_WorldId = world_id;
         const car_t car_def = _translate_rodas_e_pesos(carro);
         _create_rodas_e_pesos(carro, car_def);
         _create_joints(car_def);
@@ -256,9 +213,9 @@ namespace PHYS
         init_simulation_vars();
     }
 
-    void CPhysCar::measure(const b2WorldId worldId, const CCarDef &carro, const float max_t)
+    void CPhysCar::measure(IWorld& world, const CCarDef &carro, const float max_t)
     {
-        create(worldId, carro);
+        create(world, carro);
         init_simulation_vars();
         const float x0 = getCurrentX();
         while (_t < max_t && simulation_step()) {};
@@ -268,7 +225,7 @@ namespace PHYS
 
     void CPhysCar::init_simulation_vars()
     {
-        _x0 = getMassCenter();
+        _x0 = ivec2box2d(getMassCenter());
         _t = 0;
 
         m_bContactR1 = false;
@@ -294,7 +251,7 @@ namespace PHYS
         _bInStep = true;
 
         _simulation_pre_tick();
-        b2World_Step(m_World.m_WorldId, _timeStep, _iterations);
+        b2World_Step(m_WorldId, _timeStep, _iterations);
         _simulation_pos_tick();
 
         _bInStep = false;
@@ -439,7 +396,7 @@ namespace PHYS
         return getMassCenter().x;
     }
 
-    b2Vec2 CPhysCar::getMassCenter() const
+    IVec2f CPhysCar::getMassCenter() const
     {
         const vector pos = {
             b2Body_GetPosition(m_Roda1Id),
@@ -466,28 +423,10 @@ namespace PHYS
                 return m * p;
             }
         );
+
+        // ReSharper disable once CppUseStructuredBinding
         const b2Vec2 cm = numerator * invMass;
-        return cm;
-    }
-
-    b2BodyId CPhysCar::getR1() const
-    {
-        return m_Roda1Id;
-    }
-
-    b2BodyId CPhysCar::getR2() const
-    {
-        return m_Roda2Id;
-    }
-
-    b2BodyId CPhysCar::getP1() const
-    {
-        return m_Peso1Id;
-    }
-
-    b2BodyId CPhysCar::getP2() const
-    {
-        return m_Peso2Id;
+        return {cm.x, cm.y};
     }
 
     float CPhysCar::getT() const
@@ -503,6 +442,38 @@ namespace PHYS
     string CPhysCar::deadReason() const
     {
         return m_dead_reason;
+    }
+
+    phys_car_ptr_t CPhysCar::clone() const
+    {
+        auto car = make_shared<CPhysCar>();
+        car->m_World = m_World;
+        car->m_WorldId = m_WorldId;
+        car->m_dead_reason = m_dead_reason;
+        car->_timeStep = _timeStep;
+        car->_iterations = _iterations;
+        car->_bInStep = _bInStep;
+        car->m_bDead = m_bDead;
+        car->m_distancia = m_distancia;
+        car->m_contatoR1 = m_contatoR1;
+        car->m_contatoR2 = m_contatoR2;
+        car->m_acum_contatoR1 = m_acum_contatoR1;
+        car->m_acum_contatoR2 = m_acum_contatoR2;
+        car->m_vm = m_vm;
+        car->_t = _t;
+        car->m_bContactR1 = m_bContactR1;
+        car->m_bContactR2 = m_bContactR2;
+        car->_last_contact_r1 = _last_contact_r1;
+        car->_last_contact_r2 = _last_contact_r2;
+        car->_no_contact_time_r1 = _no_contact_time_r1;
+        car->_no_contact_time_r2 = _no_contact_time_r2;
+        car->_cVel = _cVel;
+        car->_cPos = _cPos;
+        car->_trqA = _trqA;
+        car->_trqB = _trqB;
+        car->_trqC = _trqC;
+        car->_trqD = _trqD;
+        return car;
     }
 
     void CPhysCar::fill_gr_car(GUI::IGrCar &car)
@@ -566,7 +537,7 @@ namespace PHYS
 
     void CPhysCar::destroy()
     {
-        if (!b2World_IsValid(m_World.m_WorldId))
+        if (!b2World_IsValid(m_WorldId))
             return;
 
         if (b2Body_IsValid(m_Roda1Id)) b2DestroyBody(m_Roda1Id);

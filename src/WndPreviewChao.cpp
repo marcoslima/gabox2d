@@ -1,6 +1,10 @@
 // WndPreviewChao.cpp : implementation file
 //
+
 #include "WndPreviewChao.h"
+
+#include <SFML/Window/Event.hpp>
+
 #include "lmmath.h"
 using namespace lmmath;
 
@@ -22,15 +26,12 @@ namespace GUI
         m_zoom = 1.0;
     }
 
-	void CWndPreviewChao::flush()
+    void CWndPreviewChao::flush()
     {
-	    sf::Event event;
-    	while (m_window.pollEvent(event))
-    	{
-
-    	}
-    	m_window.clear(sf::Color::Blue);
-    	m_window.display();
+        sf::Event event;
+        while (m_window.pollEvent(event)) {}
+        m_window.clear(sf::Color::Blue);
+        m_window.display();
     }
 
     void CWndPreviewChao::show()

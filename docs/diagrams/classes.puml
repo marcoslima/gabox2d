@@ -1,0 +1,139 @@
+@startuml
+class ga_params_t
+class CPoint
+class IVec2f
+class CCircleParams
+class CBodyParams
+class CIdInfoDlg
+class vec2_t
+class CEnv
+class CCronometro
+class TFracao
+class CBilinearAmostras
+class CLinearMap
+class CGaBox2dApp
+class ICarFactory
+class CAngulo
+class IGrCar
+class CGaInfoDlg
+class IWorld
+class doublex
+class CRandom
+class CCarDef
+class CRodaParams
+class CSolidBrush
+class CWorld
+class CEditorChaoDlg
+class CPen
+class CGaInfo
+class CCarFactory
+class CGaParamsDlg
+class CWndPreviewChao
+class ICar
+class IGaCar
+class CWndShowCarro
+class CThreadParams
+class CGa
+class CGrCar
+class CGaCar
+class IPhysCar
+class CGaBox2dDoc
+class CGaBox2dView
+class CPhysCar
+class CEvolucaoDlg
+class CCar
+CEvolucaoDlg -down-|> "CDialog"
+CEvolucaoDlg -down-> "ICar"
+CEvolucaoDlg -down-> "CString"
+CEvolucaoDlg -down-> "CWndShowCarro"
+CEvolucaoDlg ..> "BOOL"
+CEvolucaoDlg ..> "CScrollBar"
+CEvolucaoDlg ..> "UINT"
+CEvolucaoDlg ..> "afx_msg void"
+CCar -down-|> "ICar"
+CCar ..> "IGaCar"
+CCar ..> "ICar"
+CCar ..> "RenderWindow"
+CCar ..> "IPhysCar"
+CCar ..> "IWorld"
+CCar ..> "IGrCar"
+CCar ..> "IVec2f"
+CPhysCar -down-|> "IPhysCar"
+CPhysCar ..> "CCarDef"
+CPhysCar ..> "IPhysCar"
+CPhysCar ..> "IWorld"
+CPhysCar ..> "IGrCar"
+CPhysCar ..> "IVec2f"
+CPhysCar ..> "fitness_params_t"
+IPhysCar ..> "CCarDef"
+IPhysCar ..> "IPhysCar"
+IPhysCar ..> "IWorld"
+IPhysCar ..> "IGrCar"
+IPhysCar ..> "IVec2f"
+IPhysCar ..> "fitness_params_t"
+CGaBox2dDoc -down-> "ICar"
+CGaBox2dDoc -down-> "CWorld"
+CGaBox2dDoc -down-> "CEnv"
+CGaBox2dDoc ..> "ICar"
+CGaBox2dDoc ..> "PointF"
+CGaBox2dDoc ..> "CEnv"
+CGaBox2dView ..> "CGaParamsDlg"
+CGaBox2dView ..> "Key"
+CGaBox2dView ..> "RenderWindow"
+CGaBox2dView ..> "CGaBox2dDoc"
+CGaBox2dView ..> "CEnv"
+CGaBox2dView ..> "CGa"
+CGaCar -down-|> "IGaCar"
+CGaCar -down-> "CCarDef"
+CGaCar ..> "CCarDef"
+CGaCar ..> "IGaCar"
+CGaCar ..> "fitness_params_t"
+CGa -down-> "ICar"
+CGa ..> "IWorld"
+CGa ..> "ICarFactory"
+CGa ..> "atomic<bool>"
+CGrCar -down-|> "IGrCar"
+CGrCar -down-> "gr_circle_t"
+CGrCar -down-> "PointF"
+CGrCar ..> "IGrCar"
+CWndPreviewChao -down-> "CEnv"
+CWndPreviewChao -down-> "CPoint"
+CWndPreviewChao -down-> "b2Vec2"
+ICar ..> "ICar"
+ICar ..> "IVec2f"
+ICar ..> "IWorld"
+IGaCar ..> "CCarDef"
+IGaCar ..> "IGaCar"
+IGaCar ..> "fitness_params_t"
+CWndShowCarro -down-|> "CStatic"
+CWndShowCarro -down-> "CCar"
+CWndShowCarro ..> "afx_msg void"
+CThreadParams -down-> "atomic<bool>"
+CThreadParams -down-> "ga_params_t"
+CThreadParams -down-> "CEnv"
+CCarDef -down-> "CRodaParams"
+CCarDef ..> "CCarDef"
+CRodaParams -down-> "CBodyParams"
+CRodaParams -down-> "CCircleParams"
+CSolidBrush ..> "Color"
+CSolidBrush ..> "Shape"
+CWorld -down-|> "IWorld"
+CWorld ..> "CEnv"
+CEditorChaoDlg -down-> "CEnv"
+CEditorChaoDlg -down-> "CWndPreviewChao"
+CPen ..> "Color"
+CPen ..> "Shape"
+CGaInfo -down-> "ICar"
+CGaInfo -down-> "CEnv"
+CCarFactory -down-|> "ICarFactory"
+CCarFactory ..> "ICar"
+CGaParamsDlg -down-> "ga_params_t"
+CGaParamsDlg ..> "CGaBox2dView"
+ICarFactory ..> "ICar"
+CAngulo ..> "doublex"
+IGrCar ..> "IGrCar"
+CGaInfoDlg ..> "CGaInfo"
+IWorld ..> "CEnv"
+doublex ..> "doublex"
+CRandom ..> "T"
+@enduml

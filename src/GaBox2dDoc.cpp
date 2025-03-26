@@ -3,7 +3,8 @@
 #include <iostream>
 #include <mutex>
 #include "EditorChaoDlg.h"
-#include "phys.h"
+#include <phys.h>
+#include <ga.h>
 
 
 namespace GUI
@@ -11,12 +12,11 @@ namespace GUI
     // CGaBox2dDoc
     // CGaBox2dDoc construction/destruction
     CGaBox2dDoc::CGaBox2dDoc()
-        : m_car(createRandomCar()) {}
+        : m_car(CCarFactory().createRandomCar()) {}
 
     CGaBox2dDoc::~CGaBox2dDoc()
     {
-        if (!b2World_IsValid(m_World.m_WorldId))
-            b2DestroyWorld(m_World.m_WorldId);
+        if ( m_World.isValid() ) m_World.destroy();
     }
 
     b2Vec2 operator*(const b2Vec2 left, const double mul)
@@ -45,9 +45,9 @@ namespace GUI
 
     void CGaBox2dDoc::_start_world()
     {
-        buildWorld(m_env, m_World);
+        m_World.create(m_env);
         m_vecGround = m_env.get_vecs();
-        m_car.beginSimulate(m_World.m_WorldId);
+        m_car->beginSimulate(m_World);
     }
 
     void CGaBox2dDoc::OnEditEditarch()
@@ -71,7 +71,7 @@ namespace GUI
     void CGaBox2dDoc::BeginSimulation()
     {
         m_IsSimulating = true;
-        m_car.beginSimulate(m_World.m_WorldId);
+        m_car->beginSimulate(m_World);
     }
 
     void CGaBox2dDoc::EndSimulation()
@@ -81,12 +81,17 @@ namespace GUI
 
     PointF CGaBox2dDoc::GetCenter() const
     {
-        auto [x, y] = m_car.getCenter();
+        auto [x, y] = m_car->getCenter();
         return PointF(x, y);
     }
 
     void CGaBox2dDoc::Quit()
     {
         m_bQuit = true;
+    }
+
+    const icar_ptr_t& CGaBox2dDoc::GetCar()
+    {
+        return m_car;
     }
 }
