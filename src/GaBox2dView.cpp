@@ -1,16 +1,16 @@
-#include <GaBox2dDoc.h>
-#include "GaBox2dView.h"
-#include "EvolucaoDlg.h"
-#include "devutils.h"
-#include "Pen.h"
-#include "SolidBrush.h"
 #include <imgui.h>
 #include <iostream>
-#include <mutex>
 
-#include "assets.h"
-#include "CCronometro.h"
-#include "phys.h"
+#include <GaBox2dDoc.h>
+#include <GaBox2dView.h>
+#include <EvolucaoDlg.h>
+#include <devutils.h>
+#include <Pen.h>
+#include <SolidBrush.h>
+#include <assets.h>
+#include <GaParamsDlg.h>
+#include <phys.h>
+#include <fn_ga.h>
 
 using namespace DevUtils;
 
@@ -24,6 +24,11 @@ namespace GUI
           , m_bShowInfoGaGenes(false)
           , m_bWaitingEvolucao(false)
           , _pDocument(nullptr) {}
+
+    void CGaBox2dView::startGa(ga_params_t params)
+    {
+        _start_ga(params);
+    }
 
     unsigned CGaBox2dView::getVelocidade() const
     {
@@ -281,94 +286,8 @@ namespace GUI
         m_nVelocidade = 100;
     }
 
-    void fnGa(void *pParam)
+    void CGaBox2dView::_stop_ga()
     {
-        cout << "fnGa starting..." << endl;
-        auto tp = static_cast<CThreadParams *>(pParam);
-
-        // while (!tp->m_bStopGa.load())
-        // {
-        //     this_thread::sleep_for(chrono::seconds(3));
-        // }
-
-        // cout << "fnGa escaped the waiting." << endl;
-
-
-        // HWND hWndNotify = tp->m_wndNotify;
-        ga_params_t gaParams = tp->m_Params;
-        // CGaInfo *pGaInfo = tp->m_pGaInfo;
-        PHYS::CWorld world;
-        world.create(tp->m_env);
-
-        CGa ga(make_unique<CCarFactory>());
-        const float cross = gaParams.m_fCrossover;
-        const float mut = gaParams.m_fMutacao;
-
-        ga.setParams(gaParams.m_nPopulacao, // Número de indivíduos
-                     gaParams.m_nElitismo, // Tamanho do elitismo
-                     cross, // Probabilidade de crossover
-                     mut, // Probabilidade de mutação
-                     gaParams.m_nAlienismo, // Tamanho do alienismo
-                     gaParams.m_nMutInt, // Intensidade da mutação
-                     gaParams.m_fMaxT); // Tempo máximo a ser simulado
-
-        cout << "Iniciando evolução..." << endl;
-        ga.BeginEvolve();
-
-        CCronometro crInfo, crGa;
-        crInfo.Start();
-
-        // Medição da velocidade gerações por segundo:
-        double gps = -1;
-        int nCount = 0;
-        crGa.Start();
-
-        cout << "Evolving..." << endl;
-        while (!tp->m_bStopGa.load())
-        {
-            ga.Ordena(world, tp->m_bStopGa);
-            if (crInfo.Get() > 250)
-            {
-#if 0
-                pGaInfo->Lock();
-                pGaInfo->m_geracao = ga.getGeracao();
-                pGaInfo->m_gps = gps;
-                ga.CopyPopulacao(&pGaInfo->m_populacao);
-
-                if (pGaInfo->m_reqMelhores)
-                {
-                    pGaInfo->m_reqMelhores = false;
-                    pGaInfo->m_vecMelhores = ga.m_melhores;
-                }
-                if (pGaInfo->m_reqExtincao)
-                {
-                    pGaInfo->m_reqExtincao = false;
-                    ga.MassExtinctionEvent();
-                }
-
-                pGaInfo->Release();
-                crInfo.Start();
-                PostMessage(hWndNotify,IDM_GA_INFO, 0, 0);
-#endif
-            }
-            ga.Step();
-
-            nCount++;
-            if (nCount == 10)
-            {
-                // gps = 10.0 / crGa.Get();
-                nCount = 0;
-                crGa.Start();
-            }
-
-            //		if(gaParams.m_b
-        }
-        cout << "fnGa exiting..." << endl;
-        // delete pWorld;
-        // SetEvent(hGaStopped);
-    }
-
-    void CGaBox2dView::_stop_ga() {
 #if 0
             // Já está rodando, então é para parar:
             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
@@ -383,12 +302,13 @@ namespace GUI
         cout << "Commanding GA to stop..." << endl;
         _thread_params.m_bStopGa.store(true);
         _ga_thread.join();
+        m_bGaRunning = false;
         cout << "GA stopped." << endl;
     }
 
-    void CGaBox2dView::_start_ga(const CGaParamsDlg &dlgParams)
+    void CGaBox2dView::_start_ga(ga_params_t params)
     {
-        _thread_params.m_Params = dlgParams.params;
+        _thread_params.m_Params = params;
         _thread_params.m_bStopGa = false;
         // _thread_params.m_wndNotify = m_hWnd;
         // _thread_params.m_pGaInfo = &m_GaInfo;
@@ -399,7 +319,8 @@ namespace GUI
         _ga_thread = thread(fnGa, &_thread_params);
     }
 
-    void CGaBox2dView::_show_start_ga_params() {
+    void CGaBox2dView::_show_start_ga_params()
+    {
         // Obtemos os parâmetros do GA:
         CGaParamsDlg dlgParams(*this);
         dlgParams.OnInitDialog();
@@ -679,21 +600,6 @@ namespace GUI
 #endif
 
 
-#if 0
-      void CGaBox2dView::OnGaMudarpar()
-    {
-        CGaParamsDlg dlgParams;
-        if (dlgParams.DoModal() != IDOK)
-        {
-            return;
-        }
-        // TODO: Reativar
-        //	_thread_params.m_Params = dlgParams;
-        //	_thread_params.bParamsChanged = true;
-    }
-#endif
-
-
     void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key)
     {
         switch (key)
@@ -794,7 +700,8 @@ namespace GUI
         }
     }
 
-    string CGaBox2dView::getDeadReason() const {
+    string CGaBox2dView::getDeadReason() const
+    {
         return GetDocument()->GetCar()->deadReason();
     }
 }

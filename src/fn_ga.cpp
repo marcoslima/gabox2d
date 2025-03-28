@@ -1,0 +1,98 @@
+#include <iostream>
+#include <thread_params.h>
+
+#include "car.h"
+#include "CCronometro.h"
+#include "ga.h"
+#include "World.h"
+using namespace std;
+
+
+void fnGa(void *pParam)
+{
+    cout << "fnGa starting..." << endl;
+    auto tp = static_cast<CThreadParams *>(pParam);
+
+    // while (!tp->m_bStopGa.load())
+    // {
+    //     this_thread::sleep_for(chrono::seconds(3));
+    // }
+
+    // cout << "fnGa escaped the waiting." << endl;
+
+
+    // HWND hWndNotify = tp->m_wndNotify;
+    ga_params_t gaParams = tp->m_Params;
+    // CGaInfo *pGaInfo = tp->m_pGaInfo;
+    PHYS::CWorld world;
+    world.create(tp->m_env);
+
+    GA::CGa ga(make_unique<CCarFactory>());
+    const float cross = gaParams.m_fCrossover;
+    const float mut = gaParams.m_fMutacao;
+
+    ga.setParams(gaParams.m_nPopulacao, // Número de indivíduos
+                 gaParams.m_nElitismo, // Tamanho do elitismo
+                 cross, // Probabilidade de crossover
+                 mut, // Probabilidade de mutação
+                 gaParams.m_nAlienismo, // Tamanho do alienismo
+                 gaParams.m_nMutInt, // Intensidade da mutação
+                 gaParams.m_fMaxT); // Tempo máximo a ser simulado
+
+    cout << "Iniciando evolução..." << endl;
+    ga.BeginEvolve();
+
+    CCronometro crInfo, crGa;
+    crInfo.Start();
+
+    // Medição da velocidade gerações por segundo:
+    double gps = -1;
+    size_t nCount = 0;
+    constexpr size_t N = 10;
+
+    crGa.Start();
+
+    cout << "Evolving..." << endl;
+    while (!tp->m_bStopGa.load())
+    {
+        ga.Ordena(world, tp->m_bStopGa);
+        if (crInfo.Get() > .250)
+        {
+            cout << "Info: " << ga.getGeracao() << " " << gps << " " << ga.getBest()->getFitness() << endl;
+
+            // pGaInfo->Lock();
+            // pGaInfo->m_geracao = ga.getGeracao();
+            // pGaInfo->m_gps = gps;
+            // ga.CopyPopulacao(&pGaInfo->m_populacao);
+            //
+            // if (pGaInfo->m_reqMelhores)
+            // {
+            //     pGaInfo->m_reqMelhores = false;
+            //     pGaInfo->m_vecMelhores = ga.m_melhores;
+            // }
+            // if (pGaInfo->m_reqExtincao)
+            // {
+            //     pGaInfo->m_reqExtincao = false;
+            //     ga.MassExtinctionEvent();
+            // }
+            //
+            // pGaInfo->Release();
+            crInfo.Start();
+            // PostMessage(hWndNotify,IDM_GA_INFO, 0, 0);
+        }
+        ga.Step();
+
+        nCount++;
+        if (nCount == N)
+        {
+            gps = static_cast<double>(N) / crGa.Get();
+            nCount = 0;
+            crGa.Start();
+        }
+
+        //		if(gaParams.m_b
+    }
+    cout << "fnGa exiting..." << endl;
+    // delete pWorld;
+    // SetEvent(hGaStopped);
+}
