@@ -1,20 +1,19 @@
 #pragma once
 #include "ga_params.h"
-#include "GaBox2dView.h"
+#include <IGaBox2dView.h>
+
 using namespace std;
 
 namespace GUI
 {
-    // CGaParamsDlg dialog
-    class CGaBox2dView;
     class CGaParamsDlg
     {
         const char *_wndName = "Parâmetros para o GA";
-        CGaBox2dView &_view;
+        IGaBox2dView &_view;
 
     public:
-        ga_params_t params;
-        explicit CGaParamsDlg(CGaBox2dView &view); // standard constructor
+        ga_params_t m_params;
+        explicit CGaParamsDlg(IGaBox2dView &view); // standard constructor
         CGaParamsDlg() = delete;
         void OnInitDialog();
 

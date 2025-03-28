@@ -194,8 +194,15 @@ namespace GUI
         ImGui::End();
     }
 
+    void _show_ga_info(CGaInfoDlg &ga_info_dlg, const GUI::CGaBox2dView & view)
+    {
+        CGaInfo gaInfo;
+        ga_info_dlg.OnInitDialog(&gaInfo);
+    }
+
     void DrawGui(CGaParamsDlg &dlgParams,
                  CEditorChaoDlg &dlgEditorChao,
+                 CGaInfoDlg &dlgGaInfoDlg,
                  CGaBox2dView &view)
     {
         DrawMenu(dlgParams, dlgEditorChao, view);
@@ -208,6 +215,7 @@ namespace GUI
         }
 
         _show_info(view);
+        _show_ga_info(dlgGaInfoDlg, view);
     }
         
     CGaBox2dApp::CGaBox2dApp() = default;
@@ -236,10 +244,11 @@ namespace GUI
         // sf::Vector2i ptMouse, lastPtMouse;
         CGaParamsDlg dlgParams(view);
         CEditorChaoDlg dlgEditorChao;
+        CGaInfoDlg dlgGaInfo(view);
 
         while (window.isOpen())
         {
-            sf::Event event;
+            sf::Event event{};
             while (window.pollEvent(event))
             {
                 ImGui::SFML::ProcessEvent(window, event);
@@ -272,7 +281,7 @@ namespace GUI
 
             // VIEW.DRAW
             // dlgEditorChao.OnInitDialog();
-            DrawGui(dlgParams, dlgEditorChao, view);
+            DrawGui(dlgParams, dlgEditorChao, dlgGaInfo, view);
             // dlgParams.draw();
             // if(ImGui::Button("Open")) dlgParams.show();
             view.Draw(window);
