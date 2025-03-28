@@ -115,15 +115,9 @@ namespace GA
         //     return m_carWinner;
         // }
 
-        [[nodiscard]] size_t getPopulacaoLen() const
-        {
-            return _populacao;
-        }
-
-        [[nodiscard]] size_t getGeracao() const
-        {
-            return _geracao;
-        }
+        [[nodiscard]] size_t getPopulacaoLen() const;
+        [[nodiscard]] size_t getGeracao() const;
+        [[nodiscard]] icar_ptr_t getBest() const;
 
         // bool OpenLogFile();
     };
