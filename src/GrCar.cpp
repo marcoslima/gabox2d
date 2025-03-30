@@ -110,10 +110,9 @@ namespace GUI
 
     void DrawPeso(sf::RenderWindow &window,
               const CGrCar::gr_circle_t &c,
-              const CPen &pen,
-              const CSolidBrush &brush)
+              const CPen &pen)
     {
-        DrawDashedCircle(window, c.center, c.radius, pen, 0.5f, 0.5f);
+        DrawDashedCircle(window, c.center, c.radius, pen, 0.2f, 0.2f);
     }
 
     void CGrCar::Draw(sf::RenderWindow &window) const
@@ -160,8 +159,8 @@ namespace GUI
         const CPen penPeso(sf::Color(255, 0, 0), 0.2);
         // penPeso.SetDashStyle(DashStyleDot);
 
-        DrawPeso(window, _peso1.circle, penPeso, bshNull);
-        DrawPeso(window, _peso2.circle, penPeso, bshNull);
+        DrawPeso(window, _peso1.circle, penPeso);
+        DrawPeso(window, _peso2.circle, penPeso);
 
         // Joints:
         const CPen penJoint(sf::Color(150, 150, 150), 0.2f);

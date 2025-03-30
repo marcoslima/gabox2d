@@ -7,6 +7,7 @@ void DrawDashedCircle(sf::RenderWindow& window, const sf::Vector2f& center,
                      const float dashLength, const float gapLength)
 {
     constexpr float doublepi = 2.0f * static_cast<float>(M_PI);
+
     // Calculate the circumference and the number of segments
     const float circumference = doublepi * radius;
     constexpr int numSegments = 60; // Adjust for smoother circle
@@ -15,12 +16,11 @@ void DrawDashedCircle(sf::RenderWindow& window, const sf::Vector2f& center,
     float currentAngle = 0.0f;
 
     // Calculate how much angle each dash/gap covers
-    const float dashAngle = (dashLength / circumference) * 2.0f * static_cast<float>(M_PI);
-    const float gapAngle = (gapLength / circumference) * 2.0f * static_cast<float>(M_PI);
+    const float dashAngle = (dashLength / circumference) * doublepi;
+    const float gapAngle = (gapLength / circumference) * doublepi;
 
     // Draw the dashed circle
     bool isDash = true;
-    float remainingAngle = 0.0f;
 
     while (currentAngle < doublepi)
     {
