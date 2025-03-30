@@ -13,7 +13,7 @@ namespace GA
 {
     CRandom random(static_cast<unsigned>(time(nullptr)));
 
-    bool _do_mutate(float _mutacao)
+    bool _do_mutate(const float _mutacao)
     {
         return random.real_random(0.0, 100.0) < _mutacao;
     }
@@ -76,7 +76,7 @@ namespace GA
         _bLogOpenned = true;
     }
 
-    void CGa::_do_measures(PHYS::IWorld &world, atomic<bool> &stop_ga) const
+    void CGa::_do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const
     {
         for (auto &car: m_populacao)
         {
@@ -102,7 +102,7 @@ namespace GA
         m_populacao.sort();
     }
 
-    void CGa::Ordena(PHYS::IWorld &world, atomic<bool> &stop_ga)
+    void CGa::Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga)
     {
         _do_measures(world, stop_ga);
         _do_calc_points();

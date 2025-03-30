@@ -69,7 +69,7 @@ namespace GA
         void _do_elitism();
         void _do_alienism();
         void _do_manual_include();
-        void _do_measures(PHYS::IWorld &world, atomic<bool> &stop_ga) const;
+        void _do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const;
         void _do_calc_points();
         void _do_sort();
         void _cria_populacao();
@@ -98,7 +98,7 @@ namespace GA
         void BeginEvolve();
 
         // Testa e ordena os indivíduos
-        void Ordena(PHYS::IWorld &world, atomic<bool>& stop_ga);
+        void Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga);
 
         // Seleciona, cruza, muta e passa para geração seguinte
         void Step();
