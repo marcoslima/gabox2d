@@ -203,11 +203,11 @@ namespace GUI
         CSolidBrush bshCm(sf::Color::Transparent);
 
         DrawLine(window,
-                 PointF(_cm.x - 0.5f, _cm.y - 0.5f),
-                 PointF(_cm.x + 0.5f, _cm.y + 0.5f), crCm);
+                 sf::Vector2f(_cm.x - 0.5f, _cm.y - 0.5f),
+                 sf::Vector2f(_cm.x + 0.5f, _cm.y + 0.5f), crCm);
         DrawLine(window,
-                 PointF(_cm.x - 0.5f, _cm.y + 0.5f),
-                 PointF(_cm.x + 0.5f, _cm.y - 0.5f), crCm);
+                 sf::Vector2f(_cm.x - 0.5f, _cm.y + 0.5f),
+                 sf::Vector2f(_cm.x + 0.5f, _cm.y - 0.5f), crCm);
 
         sf::CircleShape shapeCm(0.5f);
         shapeCm.setPosition(_cm.x - .5f, _cm.y - .5f);
