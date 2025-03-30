@@ -29,6 +29,7 @@ add_library(GaBox2dLib
     src/World.cpp
     src/fn_ga.cpp
     src/main_menu.cpp
+    src/sfml_primitives.cpp
 
     include/assets.h
     include/car.h

@@ -119,7 +119,7 @@ namespace GUI
 
     void CGaBox2dView::_draw_ground(sf::RenderWindow &window) const
     {
-        const CPen penGround(sf::Color(0, 0, 0), 0.1);
+        const CPen penGround(sf::Color(0, 0, 0), 0.08);
         const CSolidBrush bshTransparent(sf::Color::Transparent);
         const CSolidBrush bshGround(sf::Color(32, 128, 32));
 
