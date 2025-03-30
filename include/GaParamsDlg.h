@@ -9,11 +9,11 @@ namespace GUI
     class CGaParamsDlg
     {
         const char *_wndName = "Parâmetros para o GA";
-        IGaBox2dView &_view;
+        IGaBox2dViewPtr _view;
 
     public:
         ga_params_t m_params;
-        explicit CGaParamsDlg(IGaBox2dView &view); // standard constructor
+        explicit CGaParamsDlg(const IGaBox2dViewPtr &view); // standard constructor
         CGaParamsDlg() = delete;
         void OnInitDialog();
 

@@ -7,7 +7,7 @@
 namespace GUI
 {
     // CGaParamsDlg dialog
-    CGaParamsDlg::CGaParamsDlg(IGaBox2dView &view)
+    CGaParamsDlg::CGaParamsDlg(const IGaBox2dViewPtr &view)
         : m_params{60, 75, 2, 65, 0, 10, 60}
           , _view{view} {}
 
@@ -55,7 +55,7 @@ namespace GUI
 
         if (ImGui::Button("Iniciar"))
         {
-            _view.startGa(m_params);
+            _view->startGa(m_params);
             ImGui::CloseCurrentPopup();
         }
     }

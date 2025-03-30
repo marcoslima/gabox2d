@@ -6,7 +6,7 @@
 
 namespace GUI
 {
-    CGaInfoDlg::CGaInfoDlg(IGaBox2dView &view)
+    CGaInfoDlg::CGaInfoDlg(IGaBox2dViewPtr view)
         : _view(view)
           , m_nGeracao(0)
           , m_nPopulacao(0) {}

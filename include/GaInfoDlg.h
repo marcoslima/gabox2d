@@ -8,19 +8,21 @@ using namespace GA;
 
 namespace GUI
 {
+    using genes_vector_t = vector<pair<string, string> >;
+
     class CGaInfoDlg
     {
         const char *_wndName = "GA Info";
-        IGaBox2dView &_view;
+        IGaBox2dViewPtr _view;
 
     public:
-        explicit CGaInfoDlg(IGaBox2dView &view);
+        explicit CGaInfoDlg(IGaBox2dViewPtr view);
 
         ~CGaInfoDlg();
 
         unsigned m_nGeracao;
         unsigned m_nPopulacao;
-        vector<pair<string, string> > m_lstGenes;
+        genes_vector_t m_lstGenes;
 
         void OnInitDialog(CGaInfo *pInfo);
 
