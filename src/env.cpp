@@ -1,11 +1,8 @@
-#include "env.h"
 #include <ranges>
 #include <sstream>
 #include <cmath>
-#include <iostream>
-#include <random>
-
-#include "CRandom.h"
+#include <env.h>
+#include <CRandom.h>
 
 using namespace std;
 
@@ -91,7 +88,7 @@ namespace MODEL
 
     vec_vecs_t CEnv::get_vecs() const
     {
-        CRandom random(_seed);
+        const CRandom random(_seed);
 
         vec_vecs_t cwvecs, ccwvecs;
 
@@ -132,6 +129,5 @@ namespace MODEL
 		cwvecs.insert(cwvecs.end(), ccwvecs.begin(), ccwvecs.end());
 
     	return ccwvecs;
-
     }
 }

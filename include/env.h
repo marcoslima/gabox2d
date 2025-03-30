@@ -2,26 +2,15 @@
 
 #include <vector>
 #include <string>
+#include <vec2f_t.h>
+
 using namespace std;
 
 #define ENV_HEADER "1.0"
 
 namespace MODEL
 {
-    class vec2_t
-    {
-    public:
-        float x;
-        float y;
-
-        vec2_t(const float ax, const float ay)
-        {
-            x = ax;
-            y = ay;
-        }
-    };
-
-    typedef vector<vec2_t> vec_vecs_t;
+    typedef vector<vec2f_t> vec_vecs_t;
 
     // Classe que guarda as características do ambiente
     class CEnv
@@ -45,7 +34,6 @@ namespace MODEL
         float _brx;
         float _bry;
 
-    public:
         CEnv();
 
         void set(unsigned seed,
@@ -56,9 +44,7 @@ namespace MODEL
                  float brx, float bry);
 
         [[nodiscard]] string get() const;
-
         static void set(const string &sParams);
-
         [[nodiscard]] vec_vecs_t get_vecs() const;
     };
 }; //namespace MODEL
