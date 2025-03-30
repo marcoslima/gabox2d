@@ -22,10 +22,10 @@ void fnGa(void *pParam)
 
 
     // HWND hWndNotify = tp->m_wndNotify;
-    ga_params_t gaParams = tp->m_Params;
+    const ga_params_t gaParams = tp->m_Params;
     // CGaInfo *pGaInfo = tp->m_pGaInfo;
-    PHYS::CWorld world;
-    world.create(tp->m_env);
+    const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
+    world->create(tp->m_env);
 
     GA::CGa ga(make_unique<CCarFactory>());
     const float cross = gaParams.m_fCrossover;
