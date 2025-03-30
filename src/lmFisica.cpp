@@ -1,7 +1,6 @@
 #include <lmfisica.h>
 #include <doublex.h>
 #include <math.h>
-#include <float.h>
 #include <limits>
 #include <cstdint>
 
@@ -40,7 +39,7 @@ double StdDev (VECDBL& vec)
 }
 #endif
 
-doublex CAngulo::GetDeg(void)
+doublex CAngulo::GetDeg()
 {
 	/*
 		 pi     rad             rad * 180
@@ -50,36 +49,34 @@ doublex CAngulo::GetDeg(void)
 	return m_degVal;
 }
 
-doublex CAngulo::GetRad(void)
+doublex CAngulo::GetRad()
 {
 	return m_Val;
 }
 
-void CAngulo::SetDeg(doublex aDeg)
+void CAngulo::SetDeg(const doublex &aDeg)
 {
 	m_degVal = aDeg;
 	m_Val = aDeg * M_PI / 180.0;
 }
 
-void CAngulo::SetRad(doublex aRad)
+void CAngulo::SetRad(const doublex &aRad)
 {
 	m_Val = aRad;
 	m_degVal = aRad * 180.0 / M_PI;
 }
-doublex CAngulo::GetSin(void)
+doublex CAngulo::GetSin()
 {
 	return sin(m_Val);
 }
-doublex CAngulo::GetCos(void)
+doublex CAngulo::GetCos()
 {
 	return cos(m_Val);
 }
-doublex CAngulo::GetTan(void)
+doublex CAngulo::GetTan()
 {
 	return tan(m_Val);
 }
-
-#define pow(a,b) pow((double)a,(double)b)
 
 //////////////////////////////////////
 // Arredondamento na física:
@@ -95,9 +92,9 @@ doublex CAngulo::GetTan(void)
 // São Paulo (1996).
 // (pág. 71)
 ///////////////////////////////////////////////
-double Round(double num, int nCasas)
+double Round(double num, const int nCasas)
 {
-	double dRet;
+	double dRet = 0;
 
 	// Multiplicamos para que fique com o n�mero de casas
 	// decimais desejado exatamente na v�rgula:
@@ -105,8 +102,8 @@ double Round(double num, int nCasas)
 	    num *= pow(10,nCasas);
 
 	// Isolamos o n�mero que determinar� o arredondamento:
-	double dInt, dFrac;
-	dFrac = modf(num,&dInt);
+	double dInt;
+	const double dFrac = modf(num, &dInt);
 
 	if(dFrac < 0.5)
 		dRet = dInt;
@@ -114,50 +111,49 @@ double Round(double num, int nCasas)
 		dRet = dInt+1;
 	else
 	{
-		if( (static_cast<int64_t>(dInt)) % 2 == 1 )
-		if( (static_cast<int64_t>(dInt)) % 2 == 1 )
+		if( static_cast<int64_t>(dInt) % 2 == 1 )
+		if( static_cast<int64_t>(dInt) % 2 == 1 )
 			dRet = dInt + 1;
 		else
 			dRet = dInt;
 	}
 
-	// Voltamos o n�mero � sua ordem real:
+	// Voltamos o número à sua ordem real:
 	if(nCasas != 0)
 	    return dRet / pow(10,nCasas);
-	else
-	    return dRet;
+	return dRet;
 }
 
-int Significativos(double& grandeza, double& incerteza, bool cientifico)
+int Significativos(double& grandeza, double& incerteza, const bool cientifico)
 {
-    // Expoente da pot�ncia de 10
-    double dExp10 = pow(10,floor(log10(incerteza)));
+    // Expoente da potência de 10
+    double dExp10 = pow(10, std::floor(log10(incerteza)));
 
-	// Reduzimos os n�meros � ordem zero ( 1 <= x < 10 )
+	// Reduzimos os números à ordem zero ( 1 <= x < 10 )
     double grd0 = grandeza  / dExp10;
     if(fabs(grd0) == numeric_limits<double>::infinity())
 	{
 		// Passamos a ignorar a incerteza, pois est� gerando erro
 		// Bateu nos limites.
-		dExp10 = pow(10,floor(log10(grandeza)));
+		dExp10 = pow(10, std::floor(log10(grandeza)));
 		grd0 = grandeza / dExp10;
 	}
-    double inc0 = incerteza / dExp10;
+    const double inc0 = incerteza / dExp10;
 
     // Limitamos a incerteza aos algarismos significativos:
-	incerteza = Round(inc0,(inc0 < 3.0)?(1):(0));
+	incerteza = Round(inc0, inc0 < 3.0 ? 1 : 0);
 
-    // Limitamos tamb�m a grandeza:
-	grandeza = Round(grd0,(incerteza < 3.0)?(1):(0));
+    // Limitamos também a grandeza:
+	grandeza = Round(grd0, incerteza < 3.0 ? 1 : 0);
 
     if(!cientifico)
     {
-		// Retornamos eles � ordem original:
+		// Retornamos eles à ordem original:
 		grandeza *= dExp10;
 		incerteza *= dExp10;
     }
 
-    return (int)log10(dExp10);
+    return static_cast<int>(log10(dExp10));
 }
 
 double SigniVal(const double& aV, const double& aS)
@@ -173,15 +169,13 @@ double SigniS(const double& aS)
 	return s;
 }
 
-void Inclinacao(TVecPairDouble vecValores, double& a,  double& b)
+void Inclinacao(vec_pair_dbl_t vecValores, double& a,  double& b)
 {
-	TVecPairDouble::const_iterator it;
 	double sx(0), sy(0), sxy(0), sx2(0);
-	double n = vecValores.size();
-	double xm,ym;
-	for(it = vecValores.begin();
-		it!= vecValores.end();
-		it++)
+	const double n = vecValores.size();
+	for(vec_pair_dbl_t::const_iterator it = vecValores.begin();
+	    it!= vecValores.end();
+	    ++it)
 	{
 		sx  += it->first;
 		sy  += it->second;
@@ -189,28 +183,25 @@ void Inclinacao(TVecPairDouble vecValores, double& a,  double& b)
 		sx2 += it->first*it->first;
 	}
 
-	xm = sx/n;
-	ym = sy/n;
+	const double xm = sx / n;
+	const double ym = sy / n;
 	a = (sxy - n * xm * ym)/(sx2-n*(xm*xm));
 	b = ym - a*xm;
-	return;
 }
 
 void MediaPonderada(vector<double>&vecValores, vector<double>&vecIncertezas, double& outMedia, double& outIncerteza)
 {
 	double aTot(0.0);
-	size_t i,nSize = vecValores.size();
+	const size_t nSize = vecValores.size();
 	if(vecIncertezas.size() != nSize)
 	{
 		throw invalid_argument("Vetor de pesos tem tamanho diferente do vetor de valores");
-		throw length_error("Comprimento do vetor de pesos diferente do vetor de valores");
 	}
 
 	double sumPesos = 0.0;
-	double peso;
-	for(i = 0; i < nSize; i++)
+	for(size_t i = 0; i < nSize; i++)
 	{
-		peso = 1.0/(vecIncertezas[i]*vecIncertezas[i]);
+		const double peso = 1.0 / (vecIncertezas[i] * vecIncertezas[i]);
 		sumPesos += peso;
 		aTot += vecValores[i] * peso;
 	}
@@ -219,4 +210,4 @@ void MediaPonderada(vector<double>&vecValores, vector<double>&vecIncertezas, dou
 	outIncerteza = ::sqrt(1.0/sumPesos);
 }
 
-}//namespace LmFisica
+} // namespace LmFisica
