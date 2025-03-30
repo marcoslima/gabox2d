@@ -10,215 +10,16 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <main_menu.h>
 
 namespace GUI
 {
-    void _show_help()
+    CGaBox2dApp::CGaBox2dApp()
     {
-        constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
-                                           | ImGuiTableFlags_NoBordersInBodyUntilResize
-                                           | ImGuiTableFlags_NoHostExtendX;
-
-        ImGui::Begin("Help");
-        if (ImGui::BeginTable("help table", 2, flags1))
-        {
-            ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-            ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
-            ImGui::TableHeadersRow();
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("F1");
-            ImGui::TableNextColumn();
-            ImGui::Text("Show Help");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("<-/->");
-            ImGui::TableNextColumn();
-            ImGui::Text("Horizontal Pan");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("+/-");
-            ImGui::TableNextColumn();
-            ImGui::Text("Zoom");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("N");
-            ImGui::TableNextColumn();
-            ImGui::Text("New random car");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("R");
-            ImGui::TableNextColumn();
-            ImGui::Text("Repeat current car");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("F");
-            ImGui::TableNextColumn();
-            ImGui::Text("Follow car");
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("Q");
-            ImGui::TableNextColumn();
-            ImGui::Text("Quit");
-
-            ImGui::EndTable();
-        }
-        ImGui::End();
+        _doc = std::make_shared<CGaBox2dDoc>();
+        _view = std::make_shared<CGaBox2dView>();
+        _menu = std::make_shared<CMainMenu>(_view);
     }
-
-    void DrawMenu(CGaParamsDlg &dlgParams,
-                  CEditorChaoDlg &dlgEditorChao,
-                  CGaBox2dView &view)
-    {
-        ImGui::BeginMainMenuBar();
-        dlgEditorChao.OnInitDialog();
-        dlgParams.OnInitDialog();
-
-        bool bShowEditor = false;
-        bool bShowGaParams = false;
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("New", "Ctrl+N")) {}
-            if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-            if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-            if (ImGui::MenuItem("Save As..")) {}
-            if (ImGui::MenuItem("Exit"))
-            {
-                exit(0);
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Edit"))
-        {
-            if (ImGui::MenuItem("Copy", "Ctrl+C")) {view.OnEditCopy();}
-            if (ImGui::MenuItem("Paste", "Ctrl+V")) {view.OnEditPaste();}
-            if (ImGui::MenuItem("Ambiente")){bShowEditor = true;}
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Simulação"))
-        {
-            if (ImGui::MenuItem("Play")) {}
-            if (ImGui::MenuItem("Reset"))
-            {
-                view.OnSimulaReset();
-            }
-            if (ImGui::BeginMenu("Velocidade"))
-            {
-                unsigned current_vel = view.getVelocidade();
-                if (ImGui::MenuItem("1x", nullptr, current_vel == 1))
-                {
-                    view.setVelocidade(1);
-                }
-                if (ImGui::MenuItem("2x", nullptr, current_vel == 2))
-                {
-                    view.setVelocidade(2);
-                }
-                if (ImGui::MenuItem("4x", nullptr, current_vel == 4))
-                {
-                    view.setVelocidade(4);
-                }
-                if (ImGui::MenuItem("10x", nullptr, current_vel == 10))
-                {
-                    view.setVelocidade(10);
-                }
-                if (ImGui::MenuItem("100x"))
-                {
-                    view.setVelocidade(100);
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::MenuItem("Repetir"))
-            {
-                view.OnSimulaRepetir();
-            }
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("GA"))
-        {
-            const string sIniciarGa = view.isGaRunning() ? "Parar GA" : "Iniciar GA...";
-            if (ImGui::MenuItem(sIniciarGa.c_str()))
-            {
-                bShowGaParams = true;
-            }
-            if (ImGui::BeginMenu("Mostrar atual"))
-            {
-                if (ImGui::MenuItem("Melhor")) {}
-                if (ImGui::MenuItem("Qualquer")) {}
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("View"))
-        {
-            if (ImGui::MenuItem("Follow car\tF", nullptr, view.isFollowCar()))
-            {
-                view.toggleFollowCar();
-            }
-            if (ImGui::MenuItem("Draw Ground Debug", nullptr, view.isDebugGround()))
-            {
-                view.toggleDrawDebugGround();
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Help"))
-        {
-            if (ImGui::MenuItem("Show..."))
-            {
-                view.ShowHelp();
-            }
-            if (ImGui::BeginMenu("Shortcuts..."))
-            {
-                ImGui::MenuItem("Zoom in/out\t+/-");
-                ImGui::MenuItem("Pan\t<-/->");
-                ImGui::MenuItem("Show help\tF1");
-                ImGui::MenuItem("New random car\tN");
-                ImGui::MenuItem("Repeat current car\tR");
-                ImGui::MenuItem("Follow car\tF");
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-        if (bShowEditor) dlgEditorChao.show();
-        if (bShowGaParams) view.OnGaIniciarga();
-        ImGui::EndMainMenuBar();
-    }
-
-    void _show_info(const CGaBox2dView &view)
-    {
-        ImGui::Begin("Info");
-        ImGui::Text("Dead reason: %s", view.getDeadReason().c_str());
-        ImGui::Text("Time: %f", view.GetDocument()->GetCar()->getT());
-        ImGui::Text("Genes: %s", view.GetDocument()->GetCar()->getGenes().c_str());
-        ImGui::End();
-    }
-
-    void _show_ga_info(CGaInfoDlg &ga_info_dlg, const GUI::CGaBox2dView & view)
-    {
-        CGaInfo gaInfo;
-        ga_info_dlg.OnInitDialog(&gaInfo);
-    }
-
-    void DrawGui(CGaParamsDlg &dlgParams,
-                 CEditorChaoDlg &dlgEditorChao,
-                 CGaInfoDlg &dlgGaInfoDlg,
-                 CGaBox2dView &view)
-    {
-        DrawMenu(dlgParams, dlgEditorChao, view);
-
-        ////////////////////////////////////
-        /// Show Help
-        if (view.isShowHelp())
-        {
-            _show_help();
-        }
-
-        _show_info(view);
-        _show_ga_info(dlgGaInfoDlg, view);
-    }
-        
-    CGaBox2dApp::CGaBox2dApp() = default;
 
     int CGaBox2dApp::run()
     {
@@ -233,18 +34,16 @@ namespace GUI
         }
         // ImGuiIO& io = ImGui::GetIO();
 
-        auto doc = CGaBox2dDoc();
         auto env = CEnv();
-        doc.OnNewDocument(env);
-        auto view = CGaBox2dView();
-        view.SetDocument(&doc);
+        _doc->OnNewDocument(env);
+        _view->SetDocument(_doc);
 
         sf::Clock deltaClock;
         // bool bMouseDown = false;
         // sf::Vector2i ptMouse, lastPtMouse;
-        CGaParamsDlg dlgParams(view);
+        CGaParamsDlg dlgParams(_view);
         CEditorChaoDlg dlgEditorChao;
-        CGaInfoDlg dlgGaInfo(view);
+        CGaInfoDlg dlgGaInfo(_view);
 
         while (window.isOpen())
         {
@@ -259,20 +58,21 @@ namespace GUI
                 }
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    view.OnKeyPressed(event.key.code);
+                    _view->OnKeyPressed(&event.key.code);
                 }
                 if (event.type == sf::Event::KeyReleased)
                 {
-                    view.OnKeyReleased(event.key.code);
+                    _view->OnKeyReleased(&event.key.code);
                 }
             }
 
-            if (doc.m_bQuit)
+            if (_doc->isQuit())
             {
                 window.close();
             }
-            for (int i = 0; i < view.getVelocidade(); i++)
-                doc.GetCar()->doStep();
+
+            for (int i = 0; i < _view->getVelocidade(); i++)
+                _doc->GetCar()->doStep();
 
             ImGui::SFML::Update(window, deltaClock.restart());
             ImGui::ShowDemoWindow();
@@ -281,10 +81,10 @@ namespace GUI
 
             // VIEW.DRAW
             // dlgEditorChao.OnInitDialog();
-            DrawGui(dlgParams, dlgEditorChao, dlgGaInfo, view);
+            _menu->draw(dlgParams, dlgEditorChao, dlgGaInfo);
             // dlgParams.draw();
             // if(ImGui::Button("Open")) dlgParams.show();
-            view.Draw(window);
+            _view->draw(&window);
             ImGui::SFML::Render(window);
 
             window.display();

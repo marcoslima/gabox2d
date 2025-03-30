@@ -28,6 +28,7 @@ add_library(GaBox2dLib
     src/GaInfo.cpp
     src/World.cpp
     src/fn_ga.cpp
+    src/main_menu.cpp
 
     include/assets.h
     include/car.h
