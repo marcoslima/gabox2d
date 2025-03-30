@@ -10,7 +10,7 @@ GUI::CGrCar::gr_circle_t TranslateCircle(const b2BodyId RodaId)
     const auto posRoda = b2Body_GetPosition(RodaId);
     auto [posCircle, radius] = b2Shape_GetCircle(shapes[0]);
     const auto [x, y] = posRoda + posCircle;
-    grCircle.center = PointF(x, y);
+    grCircle.center = sf::Vector2f(x, y);
     grCircle.radius = radius;
 
     return grCircle;
