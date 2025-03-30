@@ -5,13 +5,16 @@
 #include "CCronometro.h"
 #include "ga.h"
 #include "World.h"
+#include <ga_ipc.h>
+#include <ga_server.h>
+
 using namespace std;
 
 
 void fnGa(void *pParam)
 {
     cout << "fnGa starting..." << endl;
-    auto tp = static_cast<CThreadParams *>(pParam);
+    const auto tp = static_cast<CThreadParams *>(pParam);
 
     // while (!tp->m_bStopGa.load())
     // {
@@ -26,6 +29,9 @@ void fnGa(void *pParam)
     // CGaInfo *pGaInfo = tp->m_pGaInfo;
     const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
     world->create(tp->m_env);
+
+    GaServer gaServer;
+    // gaServer.startAccept();
 
     GA::CGa ga(make_unique<CCarFactory>());
     const float cross = gaParams.m_fCrossover;
@@ -58,7 +64,15 @@ void fnGa(void *pParam)
         ga.Ordena(world, tp->m_bStopGa);
         if (crInfo.Get() > .250)
         {
-            cout << "Info: " << ga.getGeracao() << " " << gps << " " << ga.getBest()->getFitness() << endl;
+            // Create status update and broadcast to GUI
+            ipc::GaStatus status;
+            status.generation = ga.getGeracao();
+            status.gps = gps;
+            status.bestFitness = ga.getBest()->getFitness();
+            status.bestGenes = ga.getBest()->getGenes();
+            gaServer.broadcastStatus(status);
+
+            // cout << "Info: " << ga.getGeracao() << " " << gps << " " << ga.getBest()->getFitness() << endl;
 
             // pGaInfo->Lock();
             // pGaInfo->m_geracao = ga.getGeracao();
@@ -80,6 +94,7 @@ void fnGa(void *pParam)
             crInfo.Start();
             // PostMessage(hWndNotify,IDM_GA_INFO, 0, 0);
         }
+
         ga.Step();
 
         nCount++;
@@ -89,8 +104,6 @@ void fnGa(void *pParam)
             nCount = 0;
             crGa.Start();
         }
-
-        //		if(gaParams.m_b
     }
     cout << "fnGa exiting..." << endl;
     // delete pWorld;

@@ -236,8 +236,7 @@ namespace GUI
         if (pDoc->isSimulating())
         {
             pDoc->EndSimulation();
-        }
-        else
+        } else
         {
             pDoc->BeginSimulation();
         }
@@ -337,6 +336,7 @@ namespace GUI
         m_bGaRunning = true;
         cout << "Iniciando thread do GA..." << endl;
         _ga_thread = thread(fnGa, &_thread_params);
+        startClient();
     }
 
     void CGaBox2dView::_show_start_ga_params()
@@ -622,7 +622,7 @@ namespace GUI
 
     void CGaBox2dView::OnKeyPressed(void *pParam)
     {
-        const auto key = *(static_cast<sf::Keyboard::Key*>(pParam));
+        const auto key = *(static_cast<sf::Keyboard::Key *>(pParam));
         switch (key)
         {
             case sf::Keyboard::Add:
@@ -655,7 +655,7 @@ namespace GUI
 
     void CGaBox2dView::OnKeyReleased(void *pParam)
     {
-        const auto key = *(static_cast<sf::Keyboard::Key*>(pParam));
+        const auto key = *(static_cast<sf::Keyboard::Key *>(pParam));
         const auto pDoc = GetDocument();
         switch (key)
         {
@@ -724,7 +724,7 @@ namespace GUI
 
     void CGaBox2dView::draw(void *pParam)
     {
-        const auto pWindow = static_cast<sf::RenderWindow*>(pParam);
+        const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);
     }
 
@@ -736,5 +736,86 @@ namespace GUI
     IGaBox2dViewPtr CGaBox2dView::getPtr()
     {
         return shared_from_this();
+    }
+
+    void CGaBox2dView::startClient()
+    {
+        io_context_ = std::make_unique<boost::asio::io_context>();
+        socket_ = std::make_unique<boost::asio::ip::tcp::socket>(*io_context_);
+        connected_ = false;
+        // Start a reconnection timer
+        auto timer = std::make_shared<boost::asio::steady_timer>(*io_context_, boost::asio::chrono::seconds(1));
+        attemptConnect(timer);
+
+        // Run IO context in separate thread
+        client_thread_ = std::thread([this]()
+        {
+            try
+            {
+                io_context_->run();
+            } catch (const std::exception &e)
+            {
+                std::cerr << "Client error: " << e.what() << std::endl;
+            }
+        });
+    }
+
+    void CGaBox2dView::attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer)
+    {
+        try
+        {
+            socket_->connect(boost::asio::ip::tcp::endpoint(
+                boost::asio::ip::address::from_string("127.0.0.1"), 9876));
+            connected_ = true;
+
+            std::cout << "Connected to GA server" << std::endl;
+
+            // Start async read
+            receive_buffer_.resize(1024);
+            socket_->async_read_some(
+                boost::asio::buffer(receive_buffer_),
+                std::bind(&CGaBox2dView::handleRead, this,
+                          std::placeholders::_1, std::placeholders::_2));
+        } catch (const std::exception &e)
+        {
+            std::cerr << "Connection attempt failed, retrying in 1 second..." << std::endl;
+
+            // Schedule reconnection attempt
+            timer->expires_after(boost::asio::chrono::seconds(1));
+            timer->async_wait([this, timer](const boost::system::error_code &error)
+            {
+                if (!error)
+                {
+                    attemptConnect(timer);
+                }
+            });
+        }
+    }
+
+    void CGaBox2dView::handleRead(const boost::system::error_code &error, const size_t bytes_transferred)
+    {
+        if (!error)
+        {
+            const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + bytes_transferred);
+            current_status_ = ipc::deserializeGaStatus(data);
+            std::cout << "Received status: "
+                    << "Generation: " << current_status_.generation
+                    << ", GPS: " << current_status_.gps
+                    << ", Best Fitness: " << current_status_.bestFitness
+                    << ", Best Genes: " << current_status_.bestGenes
+                    << std::endl;
+
+            // Schedule redraw or update your UI
+            // In SFML you might want to set a flag that's checked in the main loop
+
+            // Continue reading
+            const auto buffers = boost::asio::buffer(receive_buffer_);
+            auto handler = std::bind(
+                &CGaBox2dView::handleRead,
+                this,
+                std::placeholders::_1,
+                std::placeholders::_2);
+            socket_->async_read_some(buffers, handler);
+        }
     }
 }

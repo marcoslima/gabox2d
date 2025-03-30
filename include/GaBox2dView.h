@@ -10,6 +10,7 @@
 
 #include <GaInfoDlg.h>
 #include <GaInfo.h>
+#include <ga_ipc.h>
 #include <thread_params.h>
 
 using namespace GA;
@@ -18,6 +19,17 @@ namespace GUI
 {
     class CGaBox2dView final : public IGaBox2dView, public enable_shared_from_this<CGaBox2dView>
     {
+        std::unique_ptr<boost::asio::io_context> io_context_;
+        std::unique_ptr<boost::asio::ip::tcp::socket> socket_;
+        std::vector<char> receive_buffer_;
+        bool connected_ = false;
+        ipc::GaStatus current_status_{};
+        std::thread client_thread_;
+
+        void startClient();
+        void attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer);
+        void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
+
     public:
         CGaBox2dView();
 
