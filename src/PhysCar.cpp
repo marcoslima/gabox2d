@@ -11,7 +11,7 @@ namespace PHYS
 {
     constexpr int MAX_NO_CONTACT_TIME_SECONDS = 4;
 
-    b2Vec2 ivec2box2d(const IVec2f v)
+    b2Vec2 ivec2box2d(const vec2f_t v)
     {
         return b2Vec2(v.x, v.y);
     }
@@ -136,7 +136,6 @@ namespace PHYS
     }
 
     CPhysCar::CPhysCar()
-        : m_World(nullWorld)
     {
         init();
     }
@@ -199,12 +198,12 @@ namespace PHYS
         m_Jp1p2Id = _create_joint(m_Peso1Id, m_Peso2Id, car_def, 5);
     }
 
-    void CPhysCar::create(IWorld &world, const CCarDef &carro)
+    void CPhysCar::create(const IWorldPtr world, const CCarDef &carro)
     {
-        const b2WorldId world_id = *static_cast<b2WorldId*>(world.getWorld());
+        const b2WorldId world_id = *static_cast<b2WorldId*>(world->getWorld());
         if (b2World_IsValid(world_id))
             destroy();
-        m_World = dynamic_cast<CWorld&>(world);
+        m_World = world;
         m_WorldId = world_id;
         const car_t car_def = _translate_rodas_e_pesos(carro);
         _create_rodas_e_pesos(carro, car_def);
@@ -213,12 +212,12 @@ namespace PHYS
         init_simulation_vars();
     }
 
-    void CPhysCar::measure(IWorld& world, const CCarDef &carro, const float max_t)
+    void CPhysCar::measure(const IWorldPtr world, const CCarDef &carro, const float max_t)
     {
         create(world, carro);
         init_simulation_vars();
         const float x0 = getCurrentX();
-        while (_t < max_t && simulation_step()) {};
+        while (_t < max_t && simulation_step_get_dead()) {}
         m_distancia = getCurrentX() - x0;
         destroy();
     }
@@ -246,7 +245,14 @@ namespace PHYS
     }
 
     // Executa um passo da simulação e retorna false se o carro morreu.
-    bool CPhysCar::simulation_step()
+    bool CPhysCar::simulation_step_get_dead()
+    {
+        simulation_step();
+        return !m_bDead;
+    }
+
+    // Executa um passo da simulação.
+    void CPhysCar::simulation_step()
     {
         _bInStep = true;
 
@@ -255,7 +261,6 @@ namespace PHYS
         _simulation_pos_tick();
 
         _bInStep = false;
-        return !m_bDead;
     }
 
     void CPhysCar::_simulation_pre_tick() const
@@ -305,21 +310,6 @@ namespace PHYS
             m_bDead = true;
             m_dead_reason = "No contact R2";
         }
-    }
-
-    void CPhysCar::_process_touch_on_body(const b2BodyId bodyId, const bool bContact, const float touch_strength)
-    {
-        applyTouchIfBody(bodyId, m_Roda1Id, m_bContactR1, "R1", bContact, touch_strength);
-        applyTouchIfBody(bodyId, m_Roda2Id, m_bContactR2, "R2", bContact, touch_strength);
-    }
-
-    void CPhysCar::_process_contact_data(const b2ContactData &contactData, const b2BodyId bodyId)
-    {
-        const b2Manifold manifold = contactData.manifold;
-        const b2Vec2 normal = manifold.normal;
-        const float touch_strength = b2AbsFloat(b2Length(normal));
-        const bool isContact = touch_strength > 0.9f;
-        _process_touch_on_body(bodyId, isContact, touch_strength);
     }
 
     void CPhysCar::_test_peso(const b2BodyId pesoId, const string &name)
@@ -396,7 +386,7 @@ namespace PHYS
         return getMassCenter().x;
     }
 
-    IVec2f CPhysCar::getMassCenter() const
+    vec2f_t CPhysCar::getMassCenter() const
     {
         const vector pos = {
             b2Body_GetPosition(m_Roda1Id),

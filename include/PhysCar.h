@@ -41,52 +41,52 @@ namespace PHYS
     class CPhysCar final : public IPhysCar
     {
         // Instanciamento do carro no box2d
-        b2BodyId m_Roda1Id;
-        b2BodyId m_Roda2Id;
-        b2BodyId m_Peso1Id;
-        b2BodyId m_Peso2Id;
+        b2BodyId m_Roda1Id{};
+        b2BodyId m_Roda2Id{};
+        b2BodyId m_Peso1Id{};
+        b2BodyId m_Peso2Id{};
 
-        b2JointId m_Jc1c2Id;
-        b2JointId m_Jc1p1Id;
-        b2JointId m_Jc1p2Id;
-        b2JointId m_Jc2p1Id;
-        b2JointId m_Jc2p2Id;
-        b2JointId m_Jp1p2Id;
+        b2JointId m_Jc1c2Id{};
+        b2JointId m_Jc1p1Id{};
+        b2JointId m_Jc1p2Id{};
+        b2JointId m_Jc2p1Id{};
+        b2JointId m_Jc2p2Id{};
+        b2JointId m_Jp1p2Id{};
 
-        CWorld& m_World;
-        b2WorldId m_WorldId;
+        IWorldPtr m_World;
+        b2WorldId m_WorldId{};
         string m_dead_reason;
 
-        bool _bInStep;
-        bool m_bDead;
-        float m_distancia;
-        float m_contatoR1;
-        float m_contatoR2;
-        float m_acum_contatoR1;
-        float m_acum_contatoR2;
-        float m_vm;
+        bool _bInStep{};
+        bool m_bDead{};
+        float m_distancia{};
+        float m_contatoR1{};
+        float m_contatoR2{};
+        float m_acum_contatoR1{};
+        float m_acum_contatoR2{};
+        float m_vm{};
 
         // semi-constantes
-        float _timeStep;
-        int32_t _iterations;
+        float _timeStep{};
+        int32_t _iterations{};
 
         // Temporárias durante simulação:
-        b2Vec2 _x0;
-        float _t;
-        bool m_bContactR1;
-        bool m_bContactR2;
-        float _last_contact_r1;
-        float _last_contact_r2;
-        float _no_contact_time_r1;
-        float _no_contact_time_r2;
-        b2Vec2 _cVel;
-        b2Vec2 _cPos;
+        b2Vec2 _x0{};
+        float _t{};
+        bool m_bContactR1{};
+        bool m_bContactR2{};
+        float _last_contact_r1{};
+        float _last_contact_r2{};
+        float _no_contact_time_r1{};
+        float _no_contact_time_r2{};
+        b2Vec2 _cVel{};
+        b2Vec2 _cPos{};
 
         // Dados efêmeros. Só existem durante a medição/simulação do carro.
-        float _trqA;
-        float _trqB;
-        float _trqC;
-        float _trqD;
+        float _trqA{};
+        float _trqB{};
+        float _trqC{};
+        float _trqD{};
 
 
     // Public Methods
@@ -97,22 +97,21 @@ namespace PHYS
         // CPhysCar &operator=(const CPhysCar &other);
 
         // Usa as definições decodificadas para criar o objeto em si no box2d
-        void create(IWorld &world, const CCarDef& carro) override;
+        void create(IWorldPtr world, const CCarDef& carro) override;
 
         void destroy() override;
         void reset() override;
 
         void init_simulation_vars() override;
-        bool simulation_step() override;
-        void measure(IWorld& world, const CCarDef &carro, float max_t) override;
+        bool simulation_step_get_dead() override;
+        void simulation_step() override;
+        void measure(IWorldPtr world, const CCarDef &carro, float max_t) override;
         void init() override;
 
     private:
         void _simulation_pre_tick() const;
         void _register_contact_times();
         void _process_no_contact_time();
-        void _process_touch_on_body(b2BodyId bodyId, bool bContact, float touch_strength);
-        void _process_contact_data(const b2ContactData &contactData, b2BodyId bodyId);
         void _test_peso(b2BodyId pesoId, const string &name);
         void _test_contacts();
         void _process_contacts();
@@ -128,7 +127,7 @@ namespace PHYS
         void _create_joints(const car_t &car_def);
 
     public:
-        [[nodiscard]] IVec2f getMassCenter() const override;
+        [[nodiscard]] vec2f_t getMassCenter() const override;
         [[nodiscard]] float getCurrentX() const override;
         [[nodiscard]] float getT() const override;
         [[nodiscard]] bool isDead() const override;
