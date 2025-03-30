@@ -6,8 +6,8 @@ namespace MODEL
 
     CCarDef::~CCarDef(void) = default;
 
-    bool operator==(const CCarDef::CCircleParams& left, const CCarDef::CCircleParams& right);
-    bool operator==(const CCarDef::CBodyParams& left, const CCarDef::CBodyParams& right);
+    bool operator==(const CCarDef::circle_params_t& left, const CCarDef::circle_params_t& right);
+    bool operator==(const CCarDef::body_params_t& left, const CCarDef::body_params_t& right);
     bool operator==(const CCarDef::CRodaParams& left, const CCarDef::CRodaParams& right);
 
     bool CCarDef::operator==(const CCarDef &other) const
@@ -39,14 +39,14 @@ namespace MODEL
         : circle{x, y, r}
         , body{dens, fric, elas} {}
 
-    bool operator==(const CCarDef::CCircleParams& left, const CCarDef::CCircleParams& right)
+    bool operator==(const CCarDef::circle_params_t& left, const CCarDef::circle_params_t& right)
     {
         return left.x == right.x
                 && left.y == right.y
                 && left.raio == right.raio;
     }
 
-    bool operator==(const CCarDef::CBodyParams& left, const CCarDef::CBodyParams& right)
+    bool operator==(const CCarDef::body_params_t& left, const CCarDef::body_params_t& right)
     {
         return left.densidade == right.densidade
                 && left.friccao == right.friccao
