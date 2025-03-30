@@ -9,28 +9,43 @@
 #include <CDT.hpp>
 
 #include <GaInfoDlg.h>
+#include <GaInfo.h>
 #include <thread_params.h>
 
 using namespace GA;
 
 namespace GUI
 {
-    class CGaBox2dView final : public IGaBox2dView
+    class CGaBox2dView final : public IGaBox2dView, public enable_shared_from_this<CGaBox2dView>
     {
     public:
         CGaBox2dView();
 
         void startGa(ga_params_t params) override;
+        void SetDocument(IGaBox2dDocPtr doc) override;
+        void OnEditCopy() const override;
+        void OnEditPaste() const override;
+        void OnSimulaPlay() const override;
+        void OnSimulaReset() const override;
+        void setVelocidade(unsigned nVelocidade) override;
+        void OnSimulaRepetir() const override;
+        void toggleDrawDebugGround() override;
+        void ShowHelp() override;
+        void toggleFollowCar() override;
+        void OnGaIniciarga() override;
+        void OnKeyPressed(void *pParam) override;
+        void OnKeyReleased(void *pParam) override;
+        void draw(void *pParam) override;
 
-        [[nodiscard]] unsigned getVelocidade() const;
+        [[nodiscard]] unsigned getVelocidade() const override;
+        [[nodiscard]] IGaBox2dDocPtr GetDocument() const override;
+        [[nodiscard]] bool isGaRunning() const override;
+        [[nodiscard]] bool isFollowCar() const override;
+        [[nodiscard]] bool isDebugGround() const override;
+        [[nodiscard]] bool isShowHelp() const override;
+        [[nodiscard]] string getDeadReason() const override;
 
-        void setVelocidade(const unsigned nVelocidade) // NOLINT(*-convert-member-functions-to-static)
-        {
-            m_nVelocidade = nVelocidade;
-        }
-
-        [[nodiscard]] bool isGaRunning() const;
-
+        IGaBox2dViewPtr getPtr();
         // Attributes
     private:
         unsigned m_nVelocidade;
@@ -43,7 +58,7 @@ namespace GUI
         CThreadParams _thread_params;
         bool m_bWaitingEvolucao;
         thread _ga_thread;
-        // CGaInfo			_ga_info;
+        CGaInfo _ga_info;
 
         // UI:
         sf::Vector2f m_view_pos = {0.0f, 0.0f};
@@ -58,34 +73,9 @@ namespace GUI
         bool m_bDrawDebugGround = false;
         bool m_bFollowCar = false;
 
-        CGaBox2dDoc *_pDocument;
+        IGaBox2dDocPtr _document;
 
     public:
-        [[nodiscard]] CGaBox2dDoc *GetDocument() const;
-
-        void SetDocument(CGaBox2dDoc *pDoc);
-
-        [[nodiscard]] bool isShowHelp() const
-        {
-            return m_bShowHelp;
-        }
-
-        [[nodiscard]] bool isDebugGround() const
-        {
-            return m_bDrawDebugGround;
-        }
-
-        void toggleDrawDebugGround()
-        {
-            m_bDrawDebugGround = !m_bDrawDebugGround;
-        }
-
-        void ShowHelp();
-
-        [[nodiscard]] bool isFollowCar() const;
-
-        void toggleFollowCar();
-
         // Implementation
         static void _draw_sky(sf::RenderWindow &window, const CEnv &env);
 
@@ -103,15 +93,9 @@ namespace GUI
 
         void _show_start_ga_params();
 
-        void OnSimulaPlay() const;
-
-        void OnSimulaReset() const;
-
         void OnVelocidadeMais();
 
         void OnVelocidadeMenos();
-
-        void OnSimulaRepetir() const;
 
         void OnVelocidade1x();
 
@@ -123,11 +107,6 @@ namespace GUI
 
         void OnVelocidade100x();
 
-        void OnGaIniciarga();
-
-        void OnEditCopy() const;
-
-        void OnEditPaste() const;
 
         void OnMostrarMelhor();
 
@@ -143,10 +122,6 @@ namespace GUI
 
         void OnInformaEvolu();
 
-        void OnKeyPressed(sf::Keyboard::Key key);
 
-        void OnKeyReleased(sf::Keyboard::Key key);
-
-        [[nodiscard]] string getDeadReason() const;
     };
 }

@@ -22,10 +22,9 @@ namespace GUI
           , m_bGaExited(false)
           , m_bShowInfoId(true)
           , m_bShowInfoGaGenes(false)
-          , m_bWaitingEvolucao(false)
-          , _pDocument(nullptr) {}
+          , m_bWaitingEvolucao(false) {}
 
-    void CGaBox2dView::startGa(ga_params_t params)
+    void CGaBox2dView::startGa(const ga_params_t params)
     {
         _start_ga(params);
     }
@@ -46,6 +45,11 @@ namespace GUI
     }
 
 
+    void CGaBox2dView::toggleDrawDebugGround()
+    {
+        m_bDrawDebugGround = !m_bDrawDebugGround;
+    }
+
     void CGaBox2dView::ShowHelp()
     {
         m_bShowHelp = true;
@@ -59,6 +63,16 @@ namespace GUI
     void CGaBox2dView::toggleFollowCar()
     {
         m_bFollowCar = !m_bFollowCar;
+    }
+
+    bool CGaBox2dView::isDebugGround() const
+    {
+        return m_bDrawDebugGround;
+    }
+
+    bool CGaBox2dView::isShowHelp() const
+    {
+        return m_bShowHelp;
     }
 
     void CGaBox2dView::_draw_sky(sf::RenderWindow &window, const CEnv &env)
@@ -109,7 +123,7 @@ namespace GUI
         const CSolidBrush bshTransparent(sf::Color::Transparent);
         const CSolidBrush bshGround(sf::Color(32, 128, 32));
 
-        const vec_vecs_t vecGround = _pDocument->m_vecGround;
+        const vec_vecs_t vecGround = _document->GetGround();
 
         const size_t nSize = vecGround.size();
         if (nSize == 0)
@@ -177,10 +191,10 @@ namespace GUI
 
     void CGaBox2dView::Draw(sf::RenderWindow &window)
     {
-        CGaBox2dDoc *pDoc = GetDocument();
-        const auto &car = pDoc->GetCar();
+        const auto doc = GetDocument();
+        const auto &car = doc->GetCar();
         const auto center_mass = car->getCenter();
-        const CEnv env = pDoc->m_env;
+        const CEnv env = doc->GetEnv();
         constexpr float move_step = 1.0f;
         constexpr float zoom_step = 1.01f;
         if (m_bZoomOut) m_ZoomFactor = min(m_ZoomFactor * zoom_step, 8.0f);
@@ -202,27 +216,28 @@ namespace GUI
         _draw_sky(window, env);
         _draw_ground(window);
         _draw_border(window, env);
-        pDoc->GetCar()->draw(&window);
+        doc->GetCar()->draw(&window);
     }
 
-    CGaBox2dDoc *CGaBox2dView::GetDocument() const
+    IGaBox2dDocPtr CGaBox2dView::GetDocument() const
     {
-        return _pDocument;
+        return _document;
     }
 
-    void CGaBox2dView::SetDocument(CGaBox2dDoc *pDoc)
+    void CGaBox2dView::SetDocument(const IGaBox2dDocPtr doc)
     {
-        _pDocument = pDoc;
+        _document = doc;
     }
 
     // CGaBox2dView message handlers
     void CGaBox2dView::OnSimulaPlay() const
     {
         const auto pDoc = GetDocument();
-        if (pDoc->m_IsSimulating)
+        if (pDoc->isSimulating())
         {
             pDoc->EndSimulation();
-        } else
+        }
+        else
         {
             pDoc->BeginSimulation();
         }
@@ -230,12 +245,17 @@ namespace GUI
 
     void CGaBox2dView::OnSimulaReset() const
     {
-        CGaBox2dDoc *pDoc = GetDocument();
-        if (!pDoc)
+        auto pDoc = GetDocument();
+        if (pDoc.get() == nullptr)
             return;
 
         pDoc->GetCar()->createGaRandomCar();
-        pDoc->GetCar()->beginSimulate(pDoc->m_World);
+        pDoc->GetCar()->beginSimulate(pDoc->GetWorld());
+    }
+
+    void CGaBox2dView::setVelocidade(const unsigned nVelocidade)
+    {
+        m_nVelocidade = nVelocidade;
     }
 
     void CGaBox2dView::OnVelocidadeMais()
@@ -250,13 +270,13 @@ namespace GUI
 
     void CGaBox2dView::OnSimulaRepetir() const
     {
-        CGaBox2dDoc *pDoc = GetDocument();
+        const auto doc = GetDocument();
 
-        const string strGenes = pDoc->GetCar()->getGenes();
+        const string strGenes = doc->GetCar()->getGenes();
 
-        if (pDoc->m_IsSimulating) OnSimulaPlay();
+        if (doc->isSimulating()) OnSimulaPlay();
 
-        pDoc->GetCar()->createGaFromGenes(strGenes);
+        doc->GetCar()->createGaFromGenes(strGenes);
 
         OnSimulaPlay();
     }
@@ -312,7 +332,7 @@ namespace GUI
         _thread_params.m_bStopGa = false;
         // _thread_params.m_wndNotify = m_hWnd;
         // _thread_params.m_pGaInfo = &m_GaInfo;
-        _thread_params.m_env = GetDocument()->m_env;
+        _thread_params.m_env = GetDocument()->GetEnv();
 
         m_bGaRunning = true;
         cout << "Iniciando thread do GA..." << endl;
@@ -322,7 +342,7 @@ namespace GUI
     void CGaBox2dView::_show_start_ga_params()
     {
         // Obtemos os parâmetros do GA:
-        CGaParamsDlg dlgParams(*this);
+        CGaParamsDlg dlgParams(getPtr());
         dlgParams.OnInitDialog();
         dlgParams.show();
     }
@@ -386,14 +406,14 @@ namespace GUI
 #endif
 
         // Ok, podemos colar:
-        CGaBox2dDoc *pDoc = GetDocument();
+        auto doc = GetDocument();
 
         // m_pdlgIdInfo->set(0, 0, 0, "nenhum");
         // if (m_nSimTimer != 0)
         //     OnSimulaPlay();
 
-        pDoc->GetCar()->createGaFromGenes(buffer);
-        pDoc->GetCar()->beginSimulate(pDoc->m_World);
+        doc->GetCar()->createGaFromGenes(buffer);
+        doc->GetCar()->beginSimulate(doc->GetWorld());
 
         // if (m_nSimTimer == 0)
         //     OnSimulaPlay();
@@ -600,8 +620,9 @@ namespace GUI
 #endif
 
 
-    void CGaBox2dView::OnKeyPressed(const sf::Keyboard::Key key)
+    void CGaBox2dView::OnKeyPressed(void *pParam)
     {
+        const auto key = *(static_cast<sf::Keyboard::Key*>(pParam));
         switch (key)
         {
             case sf::Keyboard::Add:
@@ -632,8 +653,9 @@ namespace GUI
         }
     }
 
-    void CGaBox2dView::OnKeyReleased(const sf::Keyboard::Key key)
+    void CGaBox2dView::OnKeyReleased(void *pParam)
     {
+        const auto key = *(static_cast<sf::Keyboard::Key*>(pParam));
         const auto pDoc = GetDocument();
         switch (key)
         {
@@ -700,8 +722,19 @@ namespace GUI
         }
     }
 
+    void CGaBox2dView::draw(void *pParam)
+    {
+        const auto pWindow = static_cast<sf::RenderWindow*>(pParam);
+        Draw(*pWindow);
+    }
+
     string CGaBox2dView::getDeadReason() const
     {
         return GetDocument()->GetCar()->deadReason();
+    }
+
+    IGaBox2dViewPtr CGaBox2dView::getPtr()
+    {
+        return shared_from_this();
     }
 }
