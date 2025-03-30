@@ -1,10 +1,8 @@
 #pragma once
 
 #include <math.h>
-#include <float.h>
 #include <string>
 #include <vector>
-#include <list>
 
 #define SQUAREDX(a)	(a^2.0)
 #define SQRTX(a)	(a^0.5)
@@ -14,24 +12,24 @@ namespace LmFisica
 {
 class doublex
 {
-private:
 	double dV;	// Valor
 	double dS;	// Incerteza
 public:
 	// Constructors:
 	doublex();
-	doublex(double aVal, double aS = 0.0);
+
+	explicit doublex(double aVal, double aS = 0.0);
 
 	// Copy constructor:
 	doublex(const doublex& other);
 
-// Opera��es
+// Operações
 
-	doublex operator +(doublex other) const;
-	doublex operator -(doublex other) const;
-	doublex operator *(doublex other) const;
-	doublex operator /(doublex other) const;
-	doublex operator ^(doublex other) const;
+	doublex operator +(const doublex &other) const;
+	doublex operator -(const doublex &other) const;
+	doublex operator *(const doublex &other) const;
+	doublex operator /(const doublex &other) const;
+	doublex operator ^(const doublex &other) const;
 
 	// <operator>=
 	doublex operator +=(const doublex& other);
@@ -40,52 +38,52 @@ public:
 	doublex operator /=(const doublex& other);
 	doublex operator ^=(const doublex& other);
 
-// Opera��es com double:
-	doublex operator +(const double other) const;
-	doublex operator -(const double other) const;
-	doublex operator *(const double other) const;
-	doublex operator /(const double other) const;
-	doublex operator ^(const double other) const;
+// Operações com double:
+	doublex operator +(double other) const;
+	doublex operator -(double other) const;
+	doublex operator *(double other) const;
+	doublex operator /(double other) const;
+	doublex operator ^(double other) const;
 
-	doublex operator += (const double other);
-	doublex operator -= (const double other);
-	doublex operator *= (const double other);
-	doublex operator /= (const double other);
-	doublex operator ^= (const double other);
+	doublex operator += (double other);
+	doublex operator -= (double other);
+	doublex operator *= (double other);
+	doublex operator /= (double other);
+	doublex operator ^= (double other);
 
-// Un�rio:
-	doublex operator -(void);
+// Unário:
+	doublex operator -();
 
-// Atribui��es:
-	doublex operator =(const doublex other);
-	doublex operator =(const double other);
-	doublex operator =(const long   other);
-	doublex operator =(const int    other);
+// Atribuições:
+	doublex operator =(const doublex &other);
+	doublex operator =(double other);
+	doublex operator =(long   other);
+	doublex operator =(int    other);
 
-// Compara��es:
-	bool operator < (const doublex  other);
+// Comparações:
+	bool operator < (const doublex &other);
 	bool operator > (const doublex& other);
 	bool operator <=(const doublex& other);
 	bool operator >=(const doublex& other);
 	bool operator ==(const doublex& other);
 	bool operator !=(const doublex& other);
 
-// Convers�o para double:
+// Conversão para double:
 //	operator double(){return dV;} // Melhor deixar explicito.
-// Convers�o para int:
-	operator int(){return int(dV);}
+// Conversão para int:
+	explicit operator int(){return static_cast<int>(dV);}
 
 // Perfumaria:
 	// String
-	std::string str(void);
-public:
-	double S(void) const {return dS;}
-	double V(void) const {return dV;}
+	std::string str();
+
+	double S() const {return dS;}
+	double V() const {return dV;}
 };
 
 ////////////////////////////////////////////////////////
 // Overloads fora da classe:
-doublex sqrt(doublex  aVal);
+doublex sqrt(const doublex&  aVal);
 doublex sin (const doublex&  aVal);
 doublex cos (const doublex&  aVal);
 doublex tan (const doublex&  aVal);
@@ -103,16 +101,16 @@ doublex signi(const doublex& aVal);
 doublex mod(const doublex& left, const doublex& right);
 doublex log(const doublex& numero, double base = 10.0);
 
-// Operadores com double � esquerda:
+// Operadores com double à esquerda:
 // FIXME: terminar os operadores
-doublex operator *(double left, doublex right);
+doublex operator *(double left, const doublex &right);
 bool operator <(double left, doublex right);
 bool operator >(double left, doublex right);
 
 
-// Fun��es especializadas doublex:
+// Funções especializadas doublex:
 doublex Somatorio (const std::vector<doublex> &vecValores);
 doublex Somatorio2(const std::vector<doublex> &vecValores);
 doublex Media     (const std::vector<doublex> &vec);
 doublex StdDev	  (const std::vector<doublex> &vec);
-};//namespace LmFisica
+}
