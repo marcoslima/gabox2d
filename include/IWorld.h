@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "env.h"
 using namespace MODEL;
 
@@ -17,4 +19,5 @@ namespace PHYS
 
         virtual bool isValid() = 0;
     };
+    using IWorldPtr = shared_ptr<IWorld>;
 }

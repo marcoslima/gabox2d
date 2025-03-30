@@ -60,7 +60,7 @@ namespace PHYS
         m_WorldId = b2CreateWorld(&worldDef);
     }
 
-    b2Vec2 b2Vec2_from_vec2_t(const MODEL::vec2_t &a)
+    b2Vec2 b2Vec2_from_vec2_t(const vec2f_t &a)
     {
         return b2Vec2(static_cast<float>(a.x),
                       static_cast<float>(a.y));
