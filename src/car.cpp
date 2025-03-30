@@ -24,32 +24,26 @@ icar_ptr_t CCar::clone()
     return car;
 }
 
-void CCar::CreateFromGenes(const char *szGenes)
+void _updateGraphicsData(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car_ptr_t &gr_car)
 {
-    m_phys_car_ptr->reset();
-    m_ga_car_ptr->CreateCarFromGenes(szGenes);
+    phys_car->fill_gr_car(*gr_car);
 }
 
-void CCar::DestroyCar()
+bool CCar::doStepGetContinue()
 {
-    m_phys_car_ptr->destroy();
-}
-
-bool CCar::doStep()
-{
-    const bool bRet = m_phys_car_ptr->simulation_step();
-
-    UpdateGraphicsData();
+    const bool bRet = m_phys_car_ptr->simulation_step_get_dead();
+    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
 
     return bRet;
 }
 
-void CCar::UpdateGraphicsData()
+void CCar::doStep()
 {
-    m_phys_car_ptr->fill_gr_car(*m_gr_car_ptr);
+    m_phys_car_ptr->simulation_step();
+    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
 }
 
-void CCar::Medir(PHYS::IWorld &world, const float max_t)
+void CCar::Medir(const PHYS::IWorldPtr world, const float max_t)
 {
     m_ga_car_ptr->decode();
     m_phys_car_ptr->measure(world, m_ga_car_ptr->getCarro(), max_t);
@@ -60,7 +54,7 @@ string CCar::getGenes() const
     return m_ga_car_ptr->getGenes();
 }
 
-IVec2f CCar::getCenter() const
+vec2f_t CCar::getCenter() const
 {
     return m_phys_car_ptr->getMassCenter();
 }
@@ -119,7 +113,7 @@ void CCar::draw(void *pParams) const
     m_gr_car_ptr->draw(pParams);
 }
 
-void CCar::beginSimulate(PHYS::IWorld &world)
+void CCar::beginSimulate(const PHYS::IWorldPtr world)
 {
     m_ga_car_ptr->decode();
     m_phys_car_ptr->create(world, m_ga_car_ptr->getCarro());
