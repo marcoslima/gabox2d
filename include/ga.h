@@ -11,7 +11,7 @@ using namespace LmFisica;
 #include <icar.h>
 #include <IWorld.h>
 
-typedef vector<double> vec_double_t;
+using vec_double_t = vector<double>;
 
 namespace GA
 {
