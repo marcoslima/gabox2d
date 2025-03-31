@@ -5,6 +5,8 @@
 #include <IGaBox2dView.h>
 #include "GaBox2dDoc.h"
 #undef CDT_USE_AS_COMPILED_LIBRARY
+
+// ReSharper disable once CppUnusedIncludeDirective
 #include <CDT.hpp>
 
 #include <GaInfo.h>
@@ -13,6 +15,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
+#include "GaInfoDlg.h"
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
 
@@ -33,11 +36,14 @@ namespace GUI
 
         CGaParamsDlg _dlgGaParams;
         CIdInfoDlg _panelIdInfo;
+        CGaInfoDlg _panelGaInfo;
 
         void startClient();
         void attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer);
         void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
 
+        void updateIdInfo();
+        void updateGaInfo();
     public:
         CGaBox2dView();
         ~CGaBox2dView() override;
@@ -109,7 +115,7 @@ namespace GUI
 
         void _draw_ground(sf::RenderWindow &window) const;
 
-        static void _draw_border(sf::RenderWindow &window, const MODEL::CEnv &env);
+        static void _draw_border(sf::RenderWindow &window, const CEnv &env);
 
         void Draw(sf::RenderWindow &window);
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ga.h>
-#include <GaBox2dView.h>
+#include <IPanel.h>
+#include <ga_ipc.h>
 
 
 using namespace GA;
@@ -9,24 +9,14 @@ using namespace GA;
 
 namespace GUI
 {
-    using genes_vector_t = vector<pair<string, string> >;
-
-    class CGaInfoDlg
+    class CGaInfoDlg final : public IPanel
     {
-        const char *_wndName;
-        IGaBox2dViewPtr _view;
+        ipc::GaStatus _status{};
 
     public:
-        explicit CGaInfoDlg(const IGaBox2dViewPtr &view);
+        void render() override;
+        void set(const ipc::GaStatus& status);
 
-        ~CGaInfoDlg();
-
-        unsigned m_nGeracao;
-        unsigned m_nPopulacao;
-        genes_vector_t m_lstGenes;
-
-        void OnInitDialog();
-
-        void Render();
+        ~CGaInfoDlg() override = default;
     };
-}; //namespace GUI
+}

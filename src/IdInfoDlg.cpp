@@ -30,7 +30,7 @@ namespace GUI
 
     void CIdInfoDlg::render()
     {
-        ImGui::Begin("Info");
+        ImGui::Begin("Informações do atual");
         ImGui::Text("Dead reason: %s", m_strDeathReason.c_str());
         ImGui::Text("Time: %s", m_strTempo.c_str());
         ImGui::Text("Generation: %s", m_strGeracao.c_str());

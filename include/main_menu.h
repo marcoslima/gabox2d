@@ -1,8 +1,5 @@
 #pragma once
-#include <GaParamsDlg.h>
-#include <EditorChaoDlg.h>
 #include <IGaBox2dView.h>
-#include "GaInfoDlg.h"
 
 
 namespace GUI
@@ -22,14 +19,11 @@ namespace GUI
 
         void DrawDialogs();
 
-        void _show_info();
-        void _show_ga_info(CGaInfoDlg &ga_info_dlg);
         void _show_help();
 
     public:
         explicit CMainMenu(IGaBox2dViewPtr &view);
-        void draw(
-        );
+        void draw();
     };
 
     using CMainMenuPtr = std::shared_ptr<CMainMenu>;

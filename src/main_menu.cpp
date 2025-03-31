@@ -1,3 +1,4 @@
+#include <imgui.h>
 #include <main_menu.h>
 
 #include "GaInfoDlg.h"
@@ -153,20 +154,6 @@ namespace GUI
         _render_menu_view();
         _render_menu_help();
         ImGui::EndMainMenuBar();
-    }
-
-    void CMainMenu::DrawDialogs()
-    {
-
-        // dlgEditorChao.OnInitDialog();
-        // dlgParams.OnInitDialog();
-        // if (bShowEditor) dlgEditorChao.show();
-        // if (bShowGaParams) _view->OnGaIniciarga();
-    }
-
-    void CMainMenu::_show_ga_info(CGaInfoDlg &ga_info_dlg)
-    {
-        ga_info_dlg.OnInitDialog();
     }
 
     void CMainMenu::_show_help()

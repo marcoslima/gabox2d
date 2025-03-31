@@ -5,47 +5,42 @@
 
 namespace GUI
 {
-    CGaInfoDlg::CGaInfoDlg(const IGaBox2dViewPtr &view)
-        : _wndName("GA Info")
-        , _view(view)
-        , m_nGeracao(0)
-        , m_nPopulacao(0) {}
-
-    CGaInfoDlg::~CGaInfoDlg() {}
-    
-    void CGaInfoDlg::OnInitDialog()
+    void CGaInfoDlg::render()
     {
-        ImGui::BeginPopup(_wndName, ImGuiWindowFlags_Popup);
-        Render();
-    }
-
-    void CGaInfoDlg::Render()
-    {
-        const ipc::GaStatus& status = _view->getCurrentStatus();
+        ImGui::Begin("GA Info");
         ImGui::BeginGroup();
-        ImGui::Text("Geração: %d", status.generation);
-        ImGui::Text("População: %ld", status.population.size());
-        ImGui::Text("Gens p/s: %f", status.gps);
-        ImGui::Text("Melhor fitness: %f", status.bestFitness);
-        ImGui::Text("Melhor genes: %s", status.bestGenes.c_str());
-        ImGui::Text("Histórico: %ld", status.best_history.size());
+        ImGui::Text("Geração: %d", _status.generation);
+        ImGui::Text("População: %ld", _status.population.size());
+        ImGui::Text("Gens p/s: %f", _status.gps);
+        ImGui::Text("Melhor fitness: %f", _status.bestFitness);
+        ImGui::Text("Melhor genes: %s", _status.bestGenes.c_str());
+        ImGui::Text("Histórico: %ld", _status.best_history.size());
 
-        constexpr auto flags = ImGuiTableFlags_Resizable;
-        ImGui::BeginTable("Genes", 2, flags);
-        ImGui::TableSetupColumn("Pts");
-        ImGui::TableSetupColumn("Genes", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableHeadersRow();
-        for (const auto& gene : status.population)
+        if (_status.population.size() > 0)
         {
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("%.01f", gene.first);
-            ImGui::TableNextColumn();
-            ImGui::Text("%s", gene.second.c_str());
+            constexpr auto flags = ImGuiTableFlags_Resizable;
+            ImGui::BeginTable("Genes", 2, flags);
+            ImGui::TableSetupColumn("Pts");
+            ImGui::TableSetupColumn("Genes", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+            for (const auto& gene : _status.population)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("%.01f", gene.first);
+                ImGui::TableNextColumn();
+                ImGui::Text("%s", gene.second.c_str());
+            }
+            ImGui::EndTable();
         }
-        ImGui::EndTable();
 
         ImGui::EndGroup();
+        ImGui::End();
+    }
+
+    void CGaInfoDlg::set(const ipc::GaStatus &status)
+    {
+        _status = status;
     }
 
     // void CGaInfoDlg::OnNMDblclkGenes(NMHDR *pn, LRESULT *pResult)

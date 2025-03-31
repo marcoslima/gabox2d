@@ -487,19 +487,16 @@ namespace GUI
 #ifdef IMGUI_VERSION
         const char *buffer = ImGui::GetClipboardText();
 #endif
-
-        // Ok, podemos colar:
-        const auto doc = GetDocument();
-
-        // m_pdlgIdInfo->set(0, 0, 0, "nenhum");
-        // if (m_nSimTimer != 0)
-        //     OnSimulaPlay();
-
-        doc->GetCar()->createGaFromGenes(buffer);
-        doc->GetCar()->beginSimulate(doc->GetWorld());
-
-        // if (m_nSimTimer == 0)
-        //     OnSimulaPlay();
+        try
+        {
+            const auto doc = GetDocument();
+            doc->GetCar()->createGaFromGenes(buffer);
+            doc->GetCar()->beginSimulate(doc->GetWorld());
+        }
+        catch (const std::length_error& e)
+        {
+            cerr << "Error pasting genes: " << e.what() << endl;
+        }
     }
 
     void CGaBox2dView::OnMostrarMelhor()
@@ -807,21 +804,15 @@ namespace GUI
 
     void CGaBox2dView::updateData()
     {
-        const auto doc = GetDocument();
-
-        constexpr int generation = -1;
-
-        _panelIdInfo.set(generation,
-                         doc->GetCar()->getFitness(),
-                         doc->GetCar()->getT(),
-                         doc->GetCar()->getGenes(),
-                         doc->GetCar()->deadReason());
+        updateIdInfo();
+        updateGaInfo();
     }
 
     void CGaBox2dView::draw(void *pParam)
     {
         _dlgGaParams.Render();
         _panelIdInfo.render();
+        _panelGaInfo.render();
 
         const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);
@@ -937,6 +928,25 @@ namespace GUI
             std::placeholders::_1,
             std::placeholders::_2);
         socket_->async_read_some(buffers, handler);
+    }
+
+    void CGaBox2dView::updateIdInfo()
+    {
+        const auto doc = GetDocument();
+
+        constexpr int generation = -1;
+
+        _panelIdInfo.set(generation,
+                         doc->GetCar()->getFitness(),
+                         doc->GetCar()->getT(),
+                         doc->GetCar()->getGenes(),
+                         doc->GetCar()->deadReason());
+
+    }
+
+    void CGaBox2dView::updateGaInfo()
+    {
+        _panelGaInfo.set(current_status_);
     }
 
     void CGaBox2dView::OnEditEnvironment()
