@@ -2,6 +2,8 @@
 
 #include <atomic>
 #include <string>
+#include <unordered_set>
+
 #include "lmfisica.h"
 
 
@@ -15,9 +17,10 @@ using vec_double_t = vector<double>;
 
 namespace GA
 {
-    using vec_cstr_t = vector<string>;
-    using melhor_t = pair<size_t, icar_ptr_t>;
+    using vec_string_t = vector<string>;
+    using melhor_t = pair<size_t, string>;
     using vec_melhores_t = vector<melhor_t>;
+    using vec_genes_t = vector<pair<float, string>>;
 
     class CGa
     {
@@ -31,7 +34,7 @@ namespace GA
         size_t _mut_int; // A mutação será +/- _mut_int numa letra
         float  _crossover; // Percentual de probabilidade de ocorrer crossover
         float  _mutacao; // Percentual de probabilidade de ocorrer mutação
-        // CCar   m_carWinner; // Indivíduo mais adaptado da geração atual (Objeto CCar)
+        string _carWinner; // Indivíduo mais adaptado da geração atual (genes)
 
         // Acumuladores do algoritmo
         size_t _geracao; // Geração atual
@@ -49,7 +52,7 @@ namespace GA
         // População (objetos CCar)
         lst_car_t m_populacao;
 
-        // Nova população (sequências de genes)
+        // Nova população
         vec_car_t m_nova;
 
         vec_double_t _vec_select,
@@ -60,9 +63,9 @@ namespace GA
         size_t _nCount;
         bool _bLogOpenned;
 
-    public:
         // Histórico de melhoramentos
         vec_melhores_t m_melhores;
+        unordered_set<std::string> m_melhores_set;
 
         // Funções internas
     private:
@@ -97,6 +100,8 @@ namespace GA
         // Inicia o algoritmo
         void BeginEvolve();
 
+        bool _not_in_melhores(const string &current_best);
+
         // Testa e ordena os indivíduos
         void Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga);
 
@@ -118,6 +123,8 @@ namespace GA
         [[nodiscard]] size_t getPopulacaoLen() const;
         [[nodiscard]] size_t getGeracao() const;
         [[nodiscard]] icar_ptr_t getBest() const;
+        [[nodiscard]] const lst_car_t &getPopulacao() const;
+        [[nodiscard]] const vec_melhores_t &getMelhores() const;
 
         // bool OpenLogFile();
     };

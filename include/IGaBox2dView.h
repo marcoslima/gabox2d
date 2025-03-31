@@ -3,7 +3,7 @@
 #include <ga_params.h>
 #include <memory>
 #include <IGaBox2dDoc.h>
-
+#include <ga_ipc.h>
 
 namespace GUI
 {
@@ -22,10 +22,11 @@ namespace GUI
         virtual void toggleDrawDebugGround() = 0;
         virtual void ShowHelp() = 0;
         virtual void toggleFollowCar() = 0;
-        virtual void OnGaIniciarga() = 0;
+        virtual void OnGaIniciar() = 0;
         virtual void OnKeyPressed(void *pParam) = 0;
         virtual void OnKeyReleased(void *pParam) = 0;
         virtual void draw(void *pParam) = 0;
+        virtual void OnEditEnvironment() = 0;
 
         [[nodiscard]] virtual IGaBox2dDocPtr GetDocument() const = 0;
         [[nodiscard]] virtual unsigned getVelocidade() const = 0;
@@ -34,6 +35,7 @@ namespace GUI
         [[nodiscard]] virtual bool isDebugGround() const = 0;
         [[nodiscard]] virtual bool isShowHelp() const = 0;
         [[nodiscard]] virtual string getDeadReason() const = 0;
+        [[nodiscard]] virtual const ipc::GaStatus& getCurrentStatus() const = 0;
     };
 
     using IGaBox2dViewPtr = std::shared_ptr<IGaBox2dView>;

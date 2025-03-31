@@ -1,9 +1,8 @@
 #pragma once
 
-// In a shared header file (ga_ipc.h)
-#include <boost/asio.hpp>
 #include <string>
 #include <vector>
+#include <ga.h>
 
 namespace ipc {
     struct GaStatus {
@@ -11,10 +10,24 @@ namespace ipc {
         double gps; // generations per second
         double bestFitness;
         std::string bestGenes;
-        std::vector<std::string> population;
+        GA::vec_genes_t population;
+        GA::vec_melhores_t best_history;
     };
 
-    // Serialization functions for GaStatus
-    std::string serializeGaStatus(const GaStatus& status);
-    GaStatus deserializeGaStatus(const std::string& data);
+    class GaStatusSerializer
+    {
+        static const string START;
+        static const string END;
+        std::string _data;
+        GaStatus current_status_{};
+
+        bool _try_parse();
+        bool _parse(size_t start, size_t length);
+    public:
+        // Serialization functions for GaStatus
+        static std::string serializeGaStatus(const GaStatus& status);
+        GaStatus getStatus();
+
+        bool deserializeGaStatus(const std::string &data);
+    };
 }

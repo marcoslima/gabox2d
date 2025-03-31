@@ -76,6 +76,11 @@ namespace GA
         _bLogOpenned = true;
     }
 
+    bool CGa::_not_in_melhores(const string &current_best)
+    {
+        return !m_melhores_set.contains(current_best);
+    }
+
     void CGa::_do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const
     {
         for (auto &car: m_populacao)
@@ -88,7 +93,7 @@ namespace GA
                 std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
             }
 
-            // if (stop_ga.load()) break;
+            if (stop_ga.load()) break;
         }
     }
 
@@ -99,7 +104,10 @@ namespace GA
 
     void CGa::_do_sort()
     {
-        m_populacao.sort();
+        m_populacao.sort([](const auto &lhs, const auto &rhs)
+        {
+            return lhs->getFitness() < rhs->getFitness();
+        });
     }
 
     void CGa::Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga)
@@ -108,20 +116,13 @@ namespace GA
         _do_calc_points();
         _do_sort();
 
-#if 0
-	m_carWinner = *(m_populacao.begin());
-	if(m_melhores.size() == 0)
-	{
-		m_melhores.push_back(melhor_t(_geracao,m_carWinner));
-	}
-	else
-	{
-		if(m_melhores[m_melhores.size()-1].second.getGenesString() != m_carWinner.getGenesString())
-		{
-			m_melhores.push_back(melhor_t(_geracao,m_carWinner));
-		}
-	}
-#endif
+	    _carWinner = m_populacao.front()->getGenes();
+
+        if (m_melhores.size() == 0 || _not_in_melhores(_carWinner))
+        {
+            m_melhores.push_back(melhor_t(_geracao, _carWinner));
+            m_melhores_set.insert(_carWinner);
+        }
     }
 
     void CGa::_do_elitism()
@@ -211,7 +212,8 @@ namespace GA
             _cria_populacao();
             _bMassExtintion = false;
             _geracao = 1;
-        } else
+        }
+        else
         {
             ranges::move(m_nova, std::back_inserter(m_populacao));
             _geracao++;
@@ -251,6 +253,16 @@ namespace GA
     [[nodiscard]] icar_ptr_t CGa::getBest() const
     {
         return m_populacao.front()->clone();
+    }
+
+    const lst_car_t & CGa::getPopulacao() const
+    {
+        return m_populacao;
+    }
+
+    const vec_melhores_t & CGa::getMelhores() const
+    {
+        return m_melhores;
     }
 
     // TODO: Mover esta função para um lugar mais apropriado

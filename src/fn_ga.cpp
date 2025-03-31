@@ -55,6 +55,7 @@ void fnGa(void *pParam)
     double gps = -1;
     size_t nCount = 0;
     constexpr size_t N = 10;
+    size_t nLastGeneration = 0;
 
     crGa.Start();
 
@@ -62,38 +63,33 @@ void fnGa(void *pParam)
     while (!tp->m_bStopGa.load())
     {
         ga.Ordena(world, tp->m_bStopGa);
-        if (crInfo.Get() > .250)
+        if (crInfo.Get() > .250 && !tp->m_bStopGa.load())
         {
-            // Create status update and broadcast to GUI
-            ipc::GaStatus status;
-            status.generation = ga.getGeracao();
-            status.gps = gps;
-            status.bestFitness = ga.getBest()->getFitness();
-            status.bestGenes = ga.getBest()->getGenes();
-            gaServer.broadcastStatus(status);
-
-            // cout << "Info: " << ga.getGeracao() << " " << gps << " " << ga.getBest()->getFitness() << endl;
-
-            // pGaInfo->Lock();
-            // pGaInfo->m_geracao = ga.getGeracao();
-            // pGaInfo->m_gps = gps;
-            // ga.CopyPopulacao(&pGaInfo->m_populacao);
-            //
-            // if (pGaInfo->m_reqMelhores)
-            // {
-            //     pGaInfo->m_reqMelhores = false;
-            //     pGaInfo->m_vecMelhores = ga.m_melhores;
-            // }
-            // if (pGaInfo->m_reqExtincao)
-            // {
-            //     pGaInfo->m_reqExtincao = false;
-            //     ga.MassExtinctionEvent();
-            // }
-            //
-            // pGaInfo->Release();
             crInfo.Start();
-            // PostMessage(hWndNotify,IDM_GA_INFO, 0, 0);
+
+            if (ga.getGeracao() > nLastGeneration)
+            {
+                nLastGeneration = ga.getGeracao();
+
+                // Create status update and broadcast to GUI
+                ipc::GaStatus status;
+                status.generation = ga.getGeracao();
+                status.gps = gps;
+                status.bestFitness = ga.getBest()->getFitness();
+                status.bestGenes = ga.getBest()->getGenes();
+                status.population.clear();
+                for (const auto& car: ga.getPopulacao())
+                {
+                    status.population.emplace_back(car->getFitness(), car->getGenes());
+                }
+                status.best_history.clear();
+                status.best_history = ga.getMelhores();
+
+                gaServer.broadcastStatus(status);
+            }
         }
+
+        if (tp->m_bStopGa.load()) break;
 
         ga.Step();
 

@@ -4,14 +4,16 @@
 
 #include <IGaBox2dView.h>
 #include "GaBox2dDoc.h"
-#include <SFML/Window/Keyboard.hpp>
 #undef CDT_USE_AS_COMPILED_LIBRARY
 #include <CDT.hpp>
 
-#include <GaInfoDlg.h>
 #include <GaInfo.h>
 #include <ga_ipc.h>
 #include <thread_params.h>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+
+#include "GaParamsDlg.h"
 
 using namespace GA;
 
@@ -25,6 +27,12 @@ namespace GUI
         bool connected_ = false;
         ipc::GaStatus current_status_{};
         std::thread client_thread_;
+        const size_t BUFFER_SIZE = 40960;
+        ipc::GaStatusSerializer status_serializer;
+
+        CGaParamsDlg _dlgGaParams;
+        bool _show_dlg_ga_params = false;
+
 
         void startClient();
         void attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer);
@@ -32,6 +40,7 @@ namespace GUI
 
     public:
         CGaBox2dView();
+        ~CGaBox2dView() override;
 
         void startGa(ga_params_t params) override;
         void SetDocument(IGaBox2dDocPtr doc) override;
@@ -44,10 +53,11 @@ namespace GUI
         void toggleDrawDebugGround() override;
         void ShowHelp() override;
         void toggleFollowCar() override;
-        void OnGaIniciarga() override;
+        void OnGaIniciar() override;
         void OnKeyPressed(void *pParam) override;
         void OnKeyReleased(void *pParam) override;
         void draw(void *pParam) override;
+        void OnEditEnvironment() override;
 
         [[nodiscard]] unsigned getVelocidade() const override;
         [[nodiscard]] IGaBox2dDocPtr GetDocument() const override;
@@ -56,6 +66,9 @@ namespace GUI
         [[nodiscard]] bool isDebugGround() const override;
         [[nodiscard]] bool isShowHelp() const override;
         [[nodiscard]] string getDeadReason() const override;
+        [[nodiscard]] const ipc::GaStatus& getCurrentStatus() const override;
+
+        bool _confirm_stop_ga();
 
         IGaBox2dViewPtr getPtr();
         // Attributes
@@ -101,7 +114,7 @@ namespace GUI
 
         void _stop_ga();
 
-        void _start_ga(ga_params_t params);
+        void _start_ga(const ga_params_t &params);
 
         void _show_start_ga_params();
 
@@ -118,7 +131,6 @@ namespace GUI
         void OnVelocidade10x();
 
         void OnVelocidade100x();
-
 
         void OnMostrarMelhor();
 

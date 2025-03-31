@@ -5,16 +5,16 @@
 #include <thread>
 
 GaServer::GaServer()
-    : io_context_()
-      , acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 9876))
+    : acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 9876))
 {
     startAccept();
-    server_thread_ = std::thread([this]()
+    server_thread_ = std::thread([this]
     {
         try
         {
             io_context_.run();
-        } catch (const std::exception &e)
+        }
+        catch (const std::exception &e)
         {
             std::cerr << "Server error: " << e.what() << std::endl;
         }
@@ -37,7 +37,7 @@ void GaServer::startAccept()
     {
         if (!error)
         {
-            std::lock_guard<std::mutex> lock(clients_mutex_);
+            std::lock_guard lock(clients_mutex_);
             clients_.push_back(socket);
         }
         startAccept();
@@ -46,8 +46,8 @@ void GaServer::startAccept()
 
 void GaServer::broadcastStatus(const ipc::GaStatus &status)
 {
-    std::string data = ipc::serializeGaStatus(status);
-    std::lock_guard<std::mutex> lock(clients_mutex_);
+    std::string data = ipc::GaStatusSerializer::serializeGaStatus(status);
+    std::lock_guard lock(clients_mutex_);
 
     for (auto it = clients_.begin(); it != clients_.end();)
     {
@@ -55,7 +55,8 @@ void GaServer::broadcastStatus(const ipc::GaStatus &status)
         {
             boost::asio::write(**it, boost::asio::buffer(data));
             ++it;
-        } catch (const std::exception &)
+        }
+        catch (const std::exception &)
         {
             it = clients_.erase(it);
         }

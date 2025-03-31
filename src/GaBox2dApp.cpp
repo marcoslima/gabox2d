@@ -1,6 +1,4 @@
 #include <GaBox2dApp.h>
-#include "GaBox2d.h"
-#include "GaParamsDlg.h"
 #include "EditorChaoDlg.h"
 #include "GaBox2dView.h"
 #include <iostream>
@@ -41,9 +39,6 @@ namespace GUI
         sf::Clock deltaClock;
         // bool bMouseDown = false;
         // sf::Vector2i ptMouse, lastPtMouse;
-        CGaParamsDlg dlgParams(_view);
-        CEditorChaoDlg dlgEditorChao;
-        CGaInfoDlg dlgGaInfo(_view);
 
         while (window.isOpen())
         {
@@ -71,8 +66,11 @@ namespace GUI
                 window.close();
             }
 
-            for (int i = 0; i < _view->getVelocidade(); i++)
-                _doc->GetCar()->doStep();
+            if (_doc->isSimulating())
+            {
+                for (int i = 0; i < _view->getVelocidade(); i++)
+                    _doc->GetCar()->doStep();
+            }
 
             ImGui::SFML::Update(window, deltaClock.restart());
             ImGui::ShowDemoWindow();
@@ -81,7 +79,8 @@ namespace GUI
 
             // VIEW.DRAW
             // dlgEditorChao.OnInitDialog();
-            _menu->draw(dlgParams, dlgEditorChao, dlgGaInfo);
+            _menu->draw();
+
             // dlgParams.draw();
             // if(ImGui::Button("Open")) dlgParams.show();
             _view->draw(&window);

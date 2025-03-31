@@ -1,64 +1,51 @@
 #include <imgui.h>
-#if 1
 #include <GaInfoDlg.h>
 #include <GaBox2dView.h>
 
 
 namespace GUI
 {
-    CGaInfoDlg::CGaInfoDlg(IGaBox2dViewPtr view)
-        : _view(view)
-          , m_nGeracao(0)
-          , m_nPopulacao(0) {}
+    CGaInfoDlg::CGaInfoDlg(const IGaBox2dViewPtr &view)
+        : _wndName("GA Info")
+        , _view(view)
+        , m_nGeracao(0)
+        , m_nPopulacao(0) {}
 
     CGaInfoDlg::~CGaInfoDlg() {}
     
-    void CGaInfoDlg::OnInitDialog(CGaInfo *pInfo)
+    void CGaInfoDlg::OnInitDialog()
     {
-        // m_lstGenes.InsertColumn(0, "Pts");
-        // m_lstGenes.InsertColumn(1, "Genes");
-        // m_lstGenes.AdjustColumns();
-        //
-        // return TRUE;
         ImGui::BeginPopup(_wndName, ImGuiWindowFlags_Popup);
-        Render(pInfo);
-        // ImGui::EndPopup();
-
-    }
-    void CGaInfoDlg::show() const
-    {
-        ImGui::OpenPopup(_wndName);
+        Render();
     }
 
-    void CGaInfoDlg::Render(CGaInfo *pInfo)
+    void CGaInfoDlg::Render()
     {
+        const ipc::GaStatus& status = _view->getCurrentStatus();
         ImGui::BeginGroup();
-        ImGui::Text("Geração: %d", pInfo->m_geracao);
-        ImGui::Text("População: %ld", pInfo->m_populacao.size());
+        ImGui::Text("Geração: %d", status.generation);
+        ImGui::Text("População: %ld", status.population.size());
+        ImGui::Text("Gens p/s: %f", status.gps);
+        ImGui::Text("Melhor fitness: %f", status.bestFitness);
+        ImGui::Text("Melhor genes: %s", status.bestGenes.c_str());
+        ImGui::Text("Histórico: %ld", status.best_history.size());
+
+        constexpr auto flags = ImGuiTableFlags_Resizable;
+        ImGui::BeginTable("Genes", 2, flags);
+        ImGui::TableSetupColumn("Pts");
+        ImGui::TableSetupColumn("Genes", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
+        for (const auto& gene : status.population)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("%.01f", gene.first);
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", gene.second.c_str());
+        }
+        ImGui::EndTable();
 
         ImGui::EndGroup();
-#if 0
-        m_nGeracao = pInfo->m_geracao;
-        m_nPopulacao = (UINT) pInfo->m_populacao.size();
-
-        m_lstGenes.SetRedraw(FALSE);
-        m_lstGenes.DeleteAllItems();
-
-        int iItem;
-        lst_car_t::iterator it;
-        for (it = pInfo->m_populacao.begin();
-             it != pInfo->m_populacao.end();
-             it++)
-        {
-            iItem = m_lstGenes.InsertItem();
-            m_lstGenes.SetItemData(iItem, 0, (int) it->_pontos);
-            m_lstGenes.SetItemData(iItem, 1, it->_genes.c_str());
-        }
-        m_lstGenes.AdjustColumns();
-        m_lstGenes.SetRedraw(TRUE);
-
-        UpdateData(FALSE);
-#endif
     }
 
     // void CGaInfoDlg::OnNMDblclkGenes(NMHDR *pn, LRESULT *pResult)
@@ -78,7 +65,5 @@ namespace GUI
     //
     //     delete szGenes;
     // }
-}; //namespace GUI
+}
 
-
-#endif

@@ -11,18 +11,49 @@
 #include <GaParamsDlg.h>
 #include <phys.h>
 #include <fn_ga.h>
+#include <ga_server.h>
 
 using namespace DevUtils;
 
 namespace GUI
 {
     CGaBox2dView::CGaBox2dView()
-        : m_nVelocidade(1)
-          , m_bGaRunning(false)
-          , m_bGaExited(false)
-          , m_bShowInfoId(true)
-          , m_bShowInfoGaGenes(false)
-          , m_bWaitingEvolucao(false) {}
+        : _dlgGaParams([this](const ga_params_t& params){this->startGa(params);})
+        , m_nVelocidade(1)
+        , m_bGaRunning(false)
+        , m_bGaExited(false)
+        , m_bShowInfoId(true)
+        , m_bShowInfoGaGenes(false)
+        , m_bWaitingEvolucao(false) {}
+
+    CGaBox2dView::~CGaBox2dView()
+    {
+        // Stop the IO context to cancel any outstanding operations
+        if (io_context_)
+        {
+            io_context_->stop();
+        }
+
+        // Close the socket
+        if (socket_ && socket_->is_open())
+        {
+            boost::system::error_code ec;
+            socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+            socket_->close(ec);
+        }
+
+        // Wait for the client thread to finish
+        if (client_thread_.joinable())
+        {
+            client_thread_.join();
+        }
+
+        // Clean up the GA thread if still running
+        if (isGaRunning())
+        {
+            _stop_ga();
+        }
+    }
 
     void CGaBox2dView::startGa(const ga_params_t params)
     {
@@ -236,7 +267,8 @@ namespace GUI
         if (pDoc->isSimulating())
         {
             pDoc->EndSimulation();
-        } else
+        }
+        else
         {
             pDoc->BeginSimulation();
         }
@@ -244,12 +276,12 @@ namespace GUI
 
     void CGaBox2dView::OnSimulaReset() const
     {
-        auto pDoc = GetDocument();
-        if (pDoc.get() == nullptr)
+        const auto doc = GetDocument();
+        if (doc.get() == nullptr)
             return;
 
-        pDoc->GetCar()->createGaRandomCar();
-        pDoc->GetCar()->beginSimulate(pDoc->GetWorld());
+        doc->GetCar()->createGaRandomCar();
+        doc->GetCar()->beginSimulate(doc->GetWorld());
     }
 
     void CGaBox2dView::setVelocidade(const unsigned nVelocidade)
@@ -305,27 +337,72 @@ namespace GUI
         m_nVelocidade = 100;
     }
 
-    void CGaBox2dView::_stop_ga()
-    {
-#if 0
-            // Já está rodando, então é para parar:
-            if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
-                return;
+//     void CGaBox2dView::_stop_ga()
+//     {
+// #if 0
+//             // Já está rodando, então é para parar:
+//             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
+//                 return;
+//
+//             // Ok, vamos parar:
+//             CMessageDlg dlgMsg;
+//             dlgMsg.BeginMessage("Interrompendo GA...", this);
+//             dlgMsg.EndMessage();
+// #endif
+//
+//         cout << "Commanding GA to stop..." << endl;
+//         _thread_params.m_bStopGa.store(true);
+//         _ga_thread.join();
+//         m_bGaRunning = false;
+//         cout << "GA stopped." << endl;
+//    }
+void CGaBox2dView::_stop_ga()
+{
+    static bool showStopGaDialog = false;
 
-            // Ok, vamos parar:
-            CMessageDlg dlgMsg;
-            dlgMsg.BeginMessage("Interrompendo GA...", this);
-            dlgMsg.EndMessage();
-#endif
-
-        cout << "Commanding GA to stop..." << endl;
-        _thread_params.m_bStopGa.store(true);
-        _ga_thread.join();
-        m_bGaRunning = false;
-        cout << "GA stopped." << endl;
+    // If this is the first call, show the dialog
+    if (!showStopGaDialog) {
+        showStopGaDialog = true;
+        return;
     }
 
-    void CGaBox2dView::_start_ga(ga_params_t params)
+    // Draw the confirmation dialog
+    if (showStopGaDialog) {
+        ImGui::OpenPopup("Stop GA?");
+
+        // Center the popup
+        // const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        // ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Stop GA?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Are you sure you want to stop the Genetic Algorithm?");
+            ImGui::Separator();
+
+            if (ImGui::Button("Yes", ImVec2(120, 0)))
+            {
+                // User confirmed - stop the GA
+                cout << "Commanding GA to stop..." << endl;
+                _thread_params.m_bStopGa.store(true);
+                _ga_thread.join();
+                m_bGaRunning = false;
+                cout << "GA stopped." << endl;
+
+                showStopGaDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("No", ImVec2(120, 0))) {
+                // User canceled
+                showStopGaDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+}
+
+    void CGaBox2dView::_start_ga(const ga_params_t &params)
     {
         _thread_params.m_Params = params;
         _thread_params.m_bStopGa = false;
@@ -341,17 +418,18 @@ namespace GUI
 
     void CGaBox2dView::_show_start_ga_params()
     {
+        _dlgGaParams.Show();
         // Obtemos os parâmetros do GA:
-        CGaParamsDlg dlgParams(getPtr());
-        dlgParams.OnInitDialog();
-        dlgParams.show();
+        // CGaParamsDlg dlgParams(getPtr());
+        // dlgParams.OnInitDialog();
+        // dlgParams.show();
     }
 
-    void CGaBox2dView::OnGaIniciarga()
+    void CGaBox2dView::OnGaIniciar()
     {
         if (m_bGaRunning)
         {
-            _stop_ga();
+            // TODO: Show confirmation dialog
             return;
         }
 
@@ -406,7 +484,7 @@ namespace GUI
 #endif
 
         // Ok, podemos colar:
-        auto doc = GetDocument();
+        const auto doc = GetDocument();
 
         // m_pdlgIdInfo->set(0, 0, 0, "nenhum");
         // if (m_nSimTimer != 0)
@@ -622,7 +700,7 @@ namespace GUI
 
     void CGaBox2dView::OnKeyPressed(void *pParam)
     {
-        const auto key = *(static_cast<sf::Keyboard::Key *>(pParam));
+        const auto key = *static_cast<sf::Keyboard::Key *>(pParam);
         switch (key)
         {
             case sf::Keyboard::Add:
@@ -655,7 +733,7 @@ namespace GUI
 
     void CGaBox2dView::OnKeyReleased(void *pParam)
     {
-        const auto key = *(static_cast<sf::Keyboard::Key *>(pParam));
+        const auto key = *static_cast<sf::Keyboard::Key *>(pParam);
         const auto pDoc = GetDocument();
         switch (key)
         {
@@ -724,6 +802,8 @@ namespace GUI
 
     void CGaBox2dView::draw(void *pParam)
     {
+        _dlgGaParams.Render();
+        // _dlgGaParams.Show();
         const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);
     }
@@ -731,6 +811,16 @@ namespace GUI
     string CGaBox2dView::getDeadReason() const
     {
         return GetDocument()->GetCar()->deadReason();
+    }
+
+    const ipc::GaStatus& CGaBox2dView::getCurrentStatus() const
+    {
+        return current_status_;
+    }
+
+    bool CGaBox2dView::_confirm_stop_ga()
+    {
+        return false;
     }
 
     IGaBox2dViewPtr CGaBox2dView::getPtr()
@@ -744,11 +834,11 @@ namespace GUI
         socket_ = std::make_unique<boost::asio::ip::tcp::socket>(*io_context_);
         connected_ = false;
         // Start a reconnection timer
-        auto timer = std::make_shared<boost::asio::steady_timer>(*io_context_, boost::asio::chrono::seconds(1));
+        const auto timer = std::make_shared<boost::asio::steady_timer>(*io_context_, chrono::seconds(1));
         attemptConnect(timer);
 
         // Run IO context in separate thread
-        client_thread_ = std::thread([this]()
+        client_thread_ = std::thread([this]
         {
             try
             {
@@ -771,17 +861,18 @@ namespace GUI
             std::cout << "Connected to GA server" << std::endl;
 
             // Start async read
-            receive_buffer_.resize(1024);
+            receive_buffer_.resize(BUFFER_SIZE);
             socket_->async_read_some(
                 boost::asio::buffer(receive_buffer_),
                 std::bind(&CGaBox2dView::handleRead, this,
                           std::placeholders::_1, std::placeholders::_2));
-        } catch (const std::exception &e)
+        }
+        catch ([[maybe_unused]] const std::exception &e)
         {
             std::cerr << "Connection attempt failed, retrying in 1 second..." << std::endl;
 
             // Schedule reconnection attempt
-            timer->expires_after(boost::asio::chrono::seconds(1));
+            timer->expires_after(chrono::seconds(1));
             timer->async_wait([this, timer](const boost::system::error_code &error)
             {
                 if (!error)
@@ -794,28 +885,49 @@ namespace GUI
 
     void CGaBox2dView::handleRead(const boost::system::error_code &error, const size_t bytes_transferred)
     {
-        if (!error)
+        if (error) return;
+
+        const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + bytes_transferred);
+
+        try
         {
-            const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + bytes_transferred);
-            current_status_ = ipc::deserializeGaStatus(data);
-            std::cout << "Received status: "
-                    << "Generation: " << current_status_.generation
-                    << ", GPS: " << current_status_.gps
-                    << ", Best Fitness: " << current_status_.bestFitness
-                    << ", Best Genes: " << current_status_.bestGenes
-                    << std::endl;
+            if (status_serializer.deserializeGaStatus(data))
+            {
+                current_status_ = status_serializer.getStatus();
+                // std::cout << "Received status: "
+                //         << "Generation: " << current_status_.generation
+                //         << ", GPS: " << current_status_.gps
+                //         << ", Best Fitness: " << current_status_.bestFitness
+                //         << ", History size: " << current_status_.best_history.size()
+                //         << ", Best Genes: " << current_status_.bestGenes
+                //         << std::endl;
+
+
+
+            }
 
             // Schedule redraw or update your UI
             // In SFML you might want to set a flag that's checked in the main loop
-
-            // Continue reading
-            const auto buffers = boost::asio::buffer(receive_buffer_);
-            auto handler = std::bind(
-                &CGaBox2dView::handleRead,
-                this,
-                std::placeholders::_1,
-                std::placeholders::_2);
-            socket_->async_read_some(buffers, handler);
         }
+        catch ([[maybe_unused]] const std::exception &e)
+        {
+            cerr << e.what() << std::endl;
+            cerr << "Error deserializing data" << std::endl;
+            cerr << data << std::endl;
+        }
+        // Continue reading
+        const auto buffers = boost::asio::buffer(receive_buffer_);
+        auto handler = std::bind(
+            &CGaBox2dView::handleRead,
+            this,
+            std::placeholders::_1,
+            std::placeholders::_2);
+        socket_->async_read_some(buffers, handler);
     }
+
+    void CGaBox2dView::OnEditEnvironment()
+    {
+        // TODO: Code to show environment editor.
+    }
+
 }

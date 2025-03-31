@@ -1,10 +1,11 @@
 #pragma once
 
 #include <ga.h>
-
 #include <GaBox2dView.h>
-#include <GaInfo.h>
+
+
 using namespace GA;
+
 
 namespace GUI
 {
@@ -12,11 +13,11 @@ namespace GUI
 
     class CGaInfoDlg
     {
-        const char *_wndName = "GA Info";
+        const char *_wndName;
         IGaBox2dViewPtr _view;
 
     public:
-        explicit CGaInfoDlg(IGaBox2dViewPtr view);
+        explicit CGaInfoDlg(const IGaBox2dViewPtr &view);
 
         ~CGaInfoDlg();
 
@@ -24,9 +25,8 @@ namespace GUI
         unsigned m_nPopulacao;
         genes_vector_t m_lstGenes;
 
-        void OnInitDialog(CGaInfo *pInfo);
+        void OnInitDialog();
 
-        void Render(CGaInfo *pInfo);
-        void show() const;
+        void Render();
     };
 }; //namespace GUI

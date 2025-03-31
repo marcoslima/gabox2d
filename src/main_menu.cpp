@@ -7,14 +7,8 @@
 
 namespace GUI
 {
-    void CMainMenu::DrawMenu(CGaParamsDlg &dlgParams, CEditorChaoDlg &dlgEditorChao)
+    void CMainMenu::_render_menu_file()
     {
-        ImGui::BeginMainMenuBar();
-        dlgEditorChao.OnInitDialog();
-        dlgParams.OnInitDialog();
-
-        bool bShowEditor = false;
-        bool bShowGaParams = false;
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("New", "Ctrl+N")) {}
@@ -27,6 +21,10 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
+    }
+
+    void CMainMenu::_render_menu_edit()
+    {
         if (ImGui::BeginMenu("Edit"))
         {
             if (ImGui::MenuItem("Copy", "Ctrl+C"))
@@ -39,11 +37,14 @@ namespace GUI
             }
             if (ImGui::MenuItem("Ambiente"))
             {
-                bShowEditor = true;
+                _view->OnEditEnvironment();
             }
             ImGui::EndMenu();
         }
+    }
 
+    void CMainMenu::_render_menu_simulacao()
+    {
         if (ImGui::BeginMenu("Simulação"))
         {
             if (ImGui::MenuItem("Play"))
@@ -56,7 +57,7 @@ namespace GUI
             }
             if (ImGui::BeginMenu("Velocidade"))
             {
-                unsigned current_vel = _view->getVelocidade();
+                const unsigned current_vel = _view->getVelocidade();
                 if (ImGui::MenuItem("1x", nullptr, current_vel == 1))
                 {
                     _view->setVelocidade(1);
@@ -85,14 +86,18 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
+    }
 
+    void CMainMenu::_render_menu_ga()
+    {
         if (ImGui::BeginMenu("GA"))
         {
             const string sIniciarGa = _view->isGaRunning() ? "Parar GA" : "Iniciar GA...";
             if (ImGui::MenuItem(sIniciarGa.c_str()))
             {
-                bShowGaParams = true;
+                _view->OnGaIniciar();
             }
+
             if (ImGui::BeginMenu("Mostrar atual"))
             {
                 if (ImGui::MenuItem("Melhor")) {}
@@ -101,6 +106,10 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
+    }
+
+    void CMainMenu::_render_menu_view()
+    {
         if (ImGui::BeginMenu("View"))
         {
             if (ImGui::MenuItem("Follow car\tF", nullptr, _view->isFollowCar()))
@@ -113,6 +122,10 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
+    }
+
+    void CMainMenu::_render_menu_help()
+    {
         if (ImGui::BeginMenu("Help"))
         {
             if (ImGui::MenuItem("Show..."))
@@ -131,9 +144,27 @@ namespace GUI
             }
             ImGui::EndMenu();
         }
-        if (bShowEditor) dlgEditorChao.show();
-        if (bShowGaParams) _view->OnGaIniciarga();
+    }
+
+    void CMainMenu::DrawMenu()
+    {
+        ImGui::BeginMainMenuBar();
+        _render_menu_file();
+        _render_menu_edit();
+        _render_menu_simulacao();
+        _render_menu_ga();
+        _render_menu_view();
+        _render_menu_help();
         ImGui::EndMainMenuBar();
+    }
+
+    void CMainMenu::DrawDialogs()
+    {
+
+        // dlgEditorChao.OnInitDialog();
+        // dlgParams.OnInitDialog();
+        // if (bShowEditor) dlgEditorChao.show();
+        // if (bShowGaParams) _view->OnGaIniciarga();
     }
 
     void CMainMenu::_show_info()
@@ -147,8 +178,7 @@ namespace GUI
 
     void CMainMenu::_show_ga_info(CGaInfoDlg &ga_info_dlg)
     {
-        CGaInfo gaInfo;
-        ga_info_dlg.OnInitDialog(&gaInfo);
+        ga_info_dlg.OnInitDialog();
     }
 
     void CMainMenu::_show_help()
@@ -209,11 +239,9 @@ namespace GUI
     {
     }
 
-    void CMainMenu::draw(CGaParamsDlg &dlgParams,
-                            CEditorChaoDlg &dlgEditorChao,
-                            CGaInfoDlg &dlgGaInfoDlg)
+    void CMainMenu::draw()
     {
-        DrawMenu(dlgParams, dlgEditorChao);
+        DrawMenu();
 
         ////////////////////////////////////
         /// Show Help
@@ -222,7 +250,7 @@ namespace GUI
             _show_help();
         }
 
-        _show_info();
-        _show_ga_info(dlgGaInfoDlg);
+        // _show_info();
+        // _show_ga_info(dlgGaInfoDlg);
     }
 }
