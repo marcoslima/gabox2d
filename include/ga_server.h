@@ -2,13 +2,18 @@
 #include <boost/asio.hpp>
 #include <ga_ipc.h>
 
+using namespace std;
+
+
 class GaServer
 {
+    using vec_socket_t = vector<shared_ptr<boost::asio::ip::tcp::socket>>;
+
     boost::asio::io_context io_context_;
     boost::asio::ip::tcp::acceptor acceptor_;
-    std::vector<std::shared_ptr<boost::asio::ip::tcp::socket>> clients_;
-    std::mutex clients_mutex_;
-    std::thread server_thread_;
+    vec_socket_t clients_;
+    mutex clients_mutex_;
+    thread server_thread_;
 
 public:
     GaServer();

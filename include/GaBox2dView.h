@@ -23,7 +23,7 @@ using namespace GA;
 
 namespace GUI
 {
-    class CGaBox2dView final : public IGaBox2dView, public enable_shared_from_this<CGaBox2dView>
+    class CGaBox2dView final : public IGaBox2dView
     {
         std::unique_ptr<boost::asio::io_context> io_context_;
         std::unique_ptr<boost::asio::ip::tcp::socket> socket_;
@@ -77,7 +77,6 @@ namespace GUI
 
         bool _confirm_stop_ga();
 
-        IGaBox2dViewPtr getPtr();
         // Attributes
     private:
         unsigned m_nVelocidade;

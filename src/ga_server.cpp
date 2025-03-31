@@ -1,11 +1,12 @@
-// In ga_server.cpp
 #include "ga_server.h"
 
 #include <iostream>
 #include <thread>
 
+using namespace boost::asio::ip;
+
 GaServer::GaServer()
-    : acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 9876))
+    : acceptor_(io_context_, tcp::endpoint(tcp::v4(), 9876))
 {
     startAccept();
     server_thread_ = std::thread([this]
@@ -32,7 +33,7 @@ GaServer::~GaServer()
 
 void GaServer::startAccept()
 {
-    auto socket = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
+    auto socket = std::make_shared<tcp::socket>(io_context_);
     acceptor_.async_accept(*socket, [this, socket](const boost::system::error_code &error)
     {
         if (!error)

@@ -3,8 +3,7 @@ add_library(GaBox2dLib
     src/car_helpers.cpp
     src/CarDef.cpp 
     src/CCronometro.cpp 
-    src/devutils.cpp 
-    src/doublex.cpp 
+    src/doublex.cpp
     src/EditorChaoDlg.cpp 
     src/env.cpp 
     src/EvolucaoDlg.cpp 
@@ -39,7 +38,6 @@ add_library(GaBox2dLib
     include/CarDef.h
     include/CCronometro.h
     include/CRandom.h
-    include/devutils.h
     include/doublex.h
     include/EditorChaoDlg.h
     include/env.h

@@ -4,7 +4,6 @@
 #include <GaBox2dDoc.h>
 #include <GaBox2dView.h>
 #include <EvolucaoDlg.h>
-#include <devutils.h>
 #include <Pen.h>
 #include <SolidBrush.h>
 #include <assets.h>
@@ -13,7 +12,6 @@
 #include <fn_ga.h>
 #include <ga_server.h>
 
-using namespace DevUtils;
 
 namespace GUI
 {
@@ -831,11 +829,6 @@ namespace GUI
     bool CGaBox2dView::_confirm_stop_ga()
     {
         return false;
-    }
-
-    IGaBox2dViewPtr CGaBox2dView::getPtr()
-    {
-        return shared_from_this();
     }
 
     void CGaBox2dView::startClient()
