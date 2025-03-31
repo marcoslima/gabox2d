@@ -24,7 +24,7 @@ namespace GUI
 
         void _show_info();
         void _show_ga_info(CGaInfoDlg &ga_info_dlg);
-        static void _show_help();
+        void _show_help();
 
     public:
         explicit CMainMenu(IGaBox2dViewPtr &view);

@@ -14,6 +14,7 @@
 #include <boost/asio/ip/tcp.hpp>
 
 #include "GaParamsDlg.h"
+#include "IdInfoDlg.h"
 
 using namespace GA;
 
@@ -31,8 +32,7 @@ namespace GUI
         ipc::GaStatusSerializer status_serializer;
 
         CGaParamsDlg _dlgGaParams;
-        bool _show_dlg_ga_params = false;
-
+        CIdInfoDlg _panelIdInfo;
 
         void startClient();
         void attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer);
@@ -56,6 +56,7 @@ namespace GUI
         void OnGaIniciar() override;
         void OnKeyPressed(void *pParam) override;
         void OnKeyReleased(void *pParam) override;
+        void updateData() override;
         void draw(void *pParam) override;
         void OnEditEnvironment() override;
 
@@ -96,7 +97,7 @@ namespace GUI
         bool m_bMoveDown = false;
         bool m_bShowHelp = false;
         bool m_bDrawDebugGround = false;
-        bool m_bFollowCar = false;
+        bool m_bFollowCar = true;
 
         IGaBox2dDocPtr _document;
 

@@ -18,13 +18,16 @@ using namespace DevUtils;
 namespace GUI
 {
     CGaBox2dView::CGaBox2dView()
-        : _dlgGaParams([this](const ga_params_t& params){this->startGa(params);})
-        , m_nVelocidade(1)
-        , m_bGaRunning(false)
-        , m_bGaExited(false)
-        , m_bShowInfoId(true)
-        , m_bShowInfoGaGenes(false)
-        , m_bWaitingEvolucao(false) {}
+        : _dlgGaParams([this](const ga_params_t &params)
+          {
+              this->startGa(params);
+          })
+          , m_nVelocidade(2)
+          , m_bGaRunning(false)
+          , m_bGaExited(false)
+          , m_bShowInfoId(true)
+          , m_bShowInfoGaGenes(false)
+          , m_bWaitingEvolucao(false) {}
 
     CGaBox2dView::~CGaBox2dView()
     {
@@ -267,8 +270,7 @@ namespace GUI
         if (pDoc->isSimulating())
         {
             pDoc->EndSimulation();
-        }
-        else
+        } else
         {
             pDoc->BeginSimulation();
         }
@@ -337,70 +339,73 @@ namespace GUI
         m_nVelocidade = 100;
     }
 
-//     void CGaBox2dView::_stop_ga()
-//     {
-// #if 0
-//             // Já está rodando, então é para parar:
-//             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
-//                 return;
-//
-//             // Ok, vamos parar:
-//             CMessageDlg dlgMsg;
-//             dlgMsg.BeginMessage("Interrompendo GA...", this);
-//             dlgMsg.EndMessage();
-// #endif
-//
-//         cout << "Commanding GA to stop..." << endl;
-//         _thread_params.m_bStopGa.store(true);
-//         _ga_thread.join();
-//         m_bGaRunning = false;
-//         cout << "GA stopped." << endl;
-//    }
-void CGaBox2dView::_stop_ga()
-{
-    static bool showStopGaDialog = false;
+    //     void CGaBox2dView::_stop_ga()
+    //     {
+    // #if 0
+    //             // Já está rodando, então é para parar:
+    //             if (AfxMessageBox("Tem certeza de que quer parar o GA?", MB_YESNO) == IDNO)
+    //                 return;
+    //
+    //             // Ok, vamos parar:
+    //             CMessageDlg dlgMsg;
+    //             dlgMsg.BeginMessage("Interrompendo GA...", this);
+    //             dlgMsg.EndMessage();
+    // #endif
+    //
+    //         cout << "Commanding GA to stop..." << endl;
+    //         _thread_params.m_bStopGa.store(true);
+    //         _ga_thread.join();
+    //         m_bGaRunning = false;
+    //         cout << "GA stopped." << endl;
+    //    }
+    void CGaBox2dView::_stop_ga()
+    {
+        static bool showStopGaDialog = false;
 
-    // If this is the first call, show the dialog
-    if (!showStopGaDialog) {
-        showStopGaDialog = true;
-        return;
-    }
-
-    // Draw the confirmation dialog
-    if (showStopGaDialog) {
-        ImGui::OpenPopup("Stop GA?");
-
-        // Center the popup
-        // const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        // ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-        if (ImGui::BeginPopupModal("Stop GA?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        // If this is the first call, show the dialog
+        if (!showStopGaDialog)
         {
-            ImGui::Text("Are you sure you want to stop the Genetic Algorithm?");
-            ImGui::Separator();
+            showStopGaDialog = true;
+            return;
+        }
 
-            if (ImGui::Button("Yes", ImVec2(120, 0)))
+        // Draw the confirmation dialog
+        if (showStopGaDialog)
+        {
+            ImGui::OpenPopup("Stop GA?");
+
+            // Center the popup
+            // const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            // ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+            if (ImGui::BeginPopupModal("Stop GA?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
             {
-                // User confirmed - stop the GA
-                cout << "Commanding GA to stop..." << endl;
-                _thread_params.m_bStopGa.store(true);
-                _ga_thread.join();
-                m_bGaRunning = false;
-                cout << "GA stopped." << endl;
+                ImGui::Text("Are you sure you want to stop the Genetic Algorithm?");
+                ImGui::Separator();
 
-                showStopGaDialog = false;
-                ImGui::CloseCurrentPopup();
+                if (ImGui::Button("Yes", ImVec2(120, 0)))
+                {
+                    // User confirmed - stop the GA
+                    cout << "Commanding GA to stop..." << endl;
+                    _thread_params.m_bStopGa.store(true);
+                    _ga_thread.join();
+                    m_bGaRunning = false;
+                    cout << "GA stopped." << endl;
+
+                    showStopGaDialog = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("No", ImVec2(120, 0)))
+                {
+                    // User canceled
+                    showStopGaDialog = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("No", ImVec2(120, 0))) {
-                // User canceled
-                showStopGaDialog = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
         }
     }
-}
 
     void CGaBox2dView::_start_ga(const ga_params_t &params)
     {
@@ -800,10 +805,24 @@ void CGaBox2dView::_stop_ga()
         }
     }
 
+    void CGaBox2dView::updateData()
+    {
+        const auto doc = GetDocument();
+
+        constexpr int generation = -1;
+
+        _panelIdInfo.set(generation,
+                         doc->GetCar()->getFitness(),
+                         doc->GetCar()->getT(),
+                         doc->GetCar()->getGenes(),
+                         doc->GetCar()->deadReason());
+    }
+
     void CGaBox2dView::draw(void *pParam)
     {
         _dlgGaParams.Render();
-        // _dlgGaParams.Show();
+        _panelIdInfo.render();
+
         const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);
     }
@@ -813,7 +832,7 @@ void CGaBox2dView::_stop_ga()
         return GetDocument()->GetCar()->deadReason();
     }
 
-    const ipc::GaStatus& CGaBox2dView::getCurrentStatus() const
+    const ipc::GaStatus &CGaBox2dView::getCurrentStatus() const
     {
         return current_status_;
     }
@@ -866,8 +885,7 @@ void CGaBox2dView::_stop_ga()
                 boost::asio::buffer(receive_buffer_),
                 std::bind(&CGaBox2dView::handleRead, this,
                           std::placeholders::_1, std::placeholders::_2));
-        }
-        catch ([[maybe_unused]] const std::exception &e)
+        } catch ([[maybe_unused]] const std::exception &e)
         {
             std::cerr << "Connection attempt failed, retrying in 1 second..." << std::endl;
 
@@ -901,15 +919,11 @@ void CGaBox2dView::_stop_ga()
                 //         << ", History size: " << current_status_.best_history.size()
                 //         << ", Best Genes: " << current_status_.bestGenes
                 //         << std::endl;
-
-
-
             }
 
             // Schedule redraw or update your UI
             // In SFML you might want to set a flag that's checked in the main loop
-        }
-        catch ([[maybe_unused]] const std::exception &e)
+        } catch ([[maybe_unused]] const std::exception &e)
         {
             cerr << e.what() << std::endl;
             cerr << "Error deserializing data" << std::endl;
@@ -929,5 +943,4 @@ void CGaBox2dView::_stop_ga()
     {
         // TODO: Code to show environment editor.
     }
-
 }

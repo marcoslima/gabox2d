@@ -1,6 +1,3 @@
-//
-// Created by marcos on 3/28/25.
-//
 #include <main_menu.h>
 
 #include "GaInfoDlg.h"
@@ -167,15 +164,6 @@ namespace GUI
         // if (bShowGaParams) _view->OnGaIniciarga();
     }
 
-    void CMainMenu::_show_info()
-    {
-        ImGui::Begin("Info");
-        ImGui::Text("Dead reason: %s", _view->getDeadReason().c_str());
-        ImGui::Text("Time: %f", _view->GetDocument()->GetCar()->getT());
-        ImGui::Text("Genes: %s", _view->GetDocument()->GetCar()->getGenes().c_str());
-        ImGui::End();
-    }
-
     void CMainMenu::_show_ga_info(CGaInfoDlg &ga_info_dlg)
     {
         ga_info_dlg.OnInitDialog();
@@ -183,7 +171,10 @@ namespace GUI
 
     void CMainMenu::_show_help()
     {
-        constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
+        // TODO: Transformar isso aqui em um IPanel.
+        if (!_view->isShowHelp()) return;
+
+            constexpr ImGuiTableFlags flags1 = ImGuiTableFlags_Borders
                                            | ImGuiTableFlags_NoBordersInBodyUntilResize
                                            | ImGuiTableFlags_NoHostExtendX;
 
@@ -242,15 +233,6 @@ namespace GUI
     void CMainMenu::draw()
     {
         DrawMenu();
-
-        ////////////////////////////////////
-        /// Show Help
-        if (_view->isShowHelp())
-        {
-            _show_help();
-        }
-
-        // _show_info();
-        // _show_ga_info(dlgGaInfoDlg);
+        _show_help();
     }
 }

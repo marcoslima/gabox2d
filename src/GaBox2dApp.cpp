@@ -83,6 +83,7 @@ namespace GUI
 
             // dlgParams.draw();
             // if(ImGui::Button("Open")) dlgParams.show();
+            _view->updateData();
             _view->draw(&window);
             ImGui::SFML::Render(window);
 

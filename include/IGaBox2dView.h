@@ -25,6 +25,7 @@ namespace GUI
         virtual void OnGaIniciar() = 0;
         virtual void OnKeyPressed(void *pParam) = 0;
         virtual void OnKeyReleased(void *pParam) = 0;
+        virtual void updateData() = 0;
         virtual void draw(void *pParam) = 0;
         virtual void OnEditEnvironment() = 0;
 
