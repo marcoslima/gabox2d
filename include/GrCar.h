@@ -6,7 +6,6 @@
 #define Graphics int
 #include <SFML/Graphics.hpp>
 
-#define PointF sf::Vector2f
 
 namespace GUI
 {
@@ -34,15 +33,16 @@ public:
 	void setBroke(bool broke) override;
 	[[nodiscard]] gr_car_ptr_t clone() override;
 
-	using gr_circle_t = struct tagCircle
+	class gr_circle_t
 	{
-		PointF	center;
-		float	radius{};
+	public:
+		sf::Vector2f center;
+		float radius{};
 	};
 
 	using gr_roda_t = struct tagRoda
 	{
-		gr_circle_t	circle		;
+		gr_circle_t	circle	;
 		bool		touch{}	;
 		float		angle{}	;
 
@@ -50,16 +50,16 @@ public:
 
 	using gr_peso_t = struct tagPeso
 	{
-		gr_circle_t	circle		;
+		gr_circle_t	circle	;
 		bool		broke{}	;
 	};
 
-	gr_roda_t	_roda1	= {};
-	gr_roda_t	_roda2	= {};
-	gr_peso_t	_peso1	= {};
-	gr_peso_t	_peso2	= {};
-	PointF	_cm		= {};
-	bool	_broke	= {};
+	gr_roda_t	 _roda1	= {};
+	gr_roda_t	 _roda2	= {};
+	gr_peso_t	 _peso1	= {};
+	gr_peso_t	 _peso2	= {};
+	sf::Vector2f _cm	= {};
+	bool		 _broke	= {};
 };
 
 }

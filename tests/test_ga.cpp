@@ -30,7 +30,7 @@ TEST_CASE("CGa", "[GA]")
         MOCK_METHOD(void, createGaFromGenes, (const string &genes), (override));
         MOCK_METHOD(void, beginSimulate, (PHYS::IWorld &world), (override));
         MOCK_METHOD(void, draw, (void *pParams), (const, override));
-        MOCK_METHOD(IVec2f, getCenter, (), (const, override));
+        MOCK_METHOD(vec2f_t, getCenter, (), (const, override));
         MOCK_METHOD(string, getGenes, (), (const, override));
         // MOCK_METHOD(bool, operator<, (const ICar &rhs), (const, override));
         MOCK_METHOD(float, getT, (), (const, override));
@@ -82,7 +82,7 @@ TEST_CASE("CGa", "[GA]")
             MOCK_METHOD(void, createGaFromGenes, (const string &genes), (override));
             MOCK_METHOD(void, beginSimulate, (PHYS::IWorld &world), (override));
             MOCK_METHOD(void, draw, (void *pParams), (const, override));
-            MOCK_METHOD(IVec2f, getCenter, (), (const, override));
+            MOCK_METHOD(vec2f_t, getCenter, (), (const, override));
             MOCK_METHOD(string, getGenes, (), (const, override));
             MOCK_METHOD(float, getT, (), (const, override));
             MOCK_METHOD(bool, doStep, (), (override));

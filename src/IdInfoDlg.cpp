@@ -1,63 +1,40 @@
-#if 0
-
-// IdInfoDlg.cpp : implementation file
-//
-
-#include "GaBox2d.h"
-#include "IdInfoDlg.h"
-#include "devutils.h"
+#include <imgui.h>
+#include <IdInfoDlg.h>
 
 namespace GUI
 {
+    void CIdInfoDlg::set(const unsigned nGeracao,
+                         const float dPontuacao,
+                         const float dTempo,
+                         const string &strGenes,
+                         const string &strDeathReason)
+    {
+        if (nGeracao != -1)
+            m_strGeracao = std::to_string(nGeracao);
+        else
+            m_strGeracao = "none";
 
-// CIdInfoDlg dialog
-CIdInfoDlg::CIdInfoDlg()
-	: m_nGeracao(0)
-	, m_strPontuacao("")
-	, m_strTempo(_T(""))
-	, m_strGenes(_T(""))
-{
-}
+        if (dPontuacao != -1)
+        {
+            m_strPontuacao = std::to_string(dPontuacao);
+        }
+        else
+        {
+            m_strPontuacao = "none";
+        }
 
-CIdInfoDlg::~CIdInfoDlg()
-{
-}
+        m_strTempo = std::to_string(dTempo);
+        m_strGenes = strGenes;
+        m_strDeathReason = strDeathReason;
+    }
 
-// void CIdInfoDlg::DoDataExchange(CDataExchange* pDX)
-// {
-// 	CDialog::DoDataExchange(pDX);
-// 	DDX_Text(pDX, IDC_GERACAO, m_nGeracao);
-// 	DDX_Text(pDX, IDC_PONTUACAO, m_strPontuacao);
-// 	DDX_Text(pDX, IDC_TEMPO, m_strTempo);
-// 	DDX_Text(pDX, IDC_IDATUAL, m_strGenes);
-// }
-
-
-// CIdInfoDlg message handlers
-bool CIdInfoDlg::OnInitDialog()
-{
-	// m_fnt.CreateFont(-10,0,0,0,0,0,0,0,0,0,0,0,0,"Courier New");
-	// SetFont(&m_fnt,TRUE);
-	return true;
-}
-
-void CIdInfoDlg::set(unsigned nGeracao		, 
-					double 	  dPontuacao	, 
-					double 	  dTempo		,
-					string 	  strGenes		)
-{
-	if(nGeracao != -1)
-		m_nGeracao = nGeracao;
-	if(dPontuacao != -1)
-	{
-		m_strPontuacao = dbl2str(dPontuacao,"%.0f");
-	}
-
-	m_strTempo = dbl2str(dTempo,"%0.02f");
-	m_strGenes = strGenes.c_str();
-	// UpdateData(FALSE);
-}
-
-};//namespace GUI
-
-#endif
+    void CIdInfoDlg::render()
+    {
+        ImGui::Begin("Informações do atual");
+        ImGui::Text("Dead reason: %s", m_strDeathReason.c_str());
+        ImGui::Text("Time: %s", m_strTempo.c_str());
+        ImGui::Text("Generation: %s", m_strGeracao.c_str());
+        ImGui::Text("Genes: %s", m_strGenes.c_str());
+        ImGui::End();
+    }
+}; //namespace GUI

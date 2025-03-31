@@ -12,11 +12,42 @@ namespace GUI
     // CGaBox2dDoc
     // CGaBox2dDoc construction/destruction
     CGaBox2dDoc::CGaBox2dDoc()
-        : m_car(CCarFactory().createRandomCar()) {}
+        : m_car(CCarFactory().createRandomCar())
+    {
+        _world = std::make_shared<PHYS::CWorld>();
+    }
+
+    bool CGaBox2dDoc::isSimulating() const
+    {
+        return _isSimulating;
+    }
+
+    PHYS::IWorldPtr CGaBox2dDoc::GetWorld() const
+    {
+        return _world;
+    }
+
+    bool CGaBox2dDoc::isQuit() const
+    {
+        return m_bQuit;
+    }
+
+    vec_vecs_t CGaBox2dDoc::GetGround() const
+    {
+        return m_vecGround;
+    }
+
+    CEnv CGaBox2dDoc::GetEnv() const
+    {
+        return m_env;
+    }
 
     CGaBox2dDoc::~CGaBox2dDoc()
     {
-        if ( m_World.isValid() ) m_World.destroy();
+        if ( _world->isValid() )
+        {
+            _world->destroy();
+        }
     }
 
     b2Vec2 operator*(const b2Vec2 left, const double mul)
@@ -45,9 +76,9 @@ namespace GUI
 
     void CGaBox2dDoc::_start_world()
     {
-        m_World.create(m_env);
+        _world->create(m_env);
         m_vecGround = m_env.get_vecs();
-        m_car->beginSimulate(m_World);
+        m_car->beginSimulate(_world);
     }
 
     void CGaBox2dDoc::OnEditEditarch()
@@ -70,19 +101,13 @@ namespace GUI
 
     void CGaBox2dDoc::BeginSimulation()
     {
-        m_IsSimulating = true;
-        m_car->beginSimulate(m_World);
+        _isSimulating = true;
+        m_car->beginSimulate(_world);
     }
 
     void CGaBox2dDoc::EndSimulation()
     {
-        m_IsSimulating = false;
-    }
-
-    PointF CGaBox2dDoc::GetCenter() const
-    {
-        auto [x, y] = m_car->getCenter();
-        return PointF(x, y);
+        _isSimulating = false;
     }
 
     void CGaBox2dDoc::Quit()

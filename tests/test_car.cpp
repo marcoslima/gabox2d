@@ -39,7 +39,7 @@ TEST_CASE( "CCar instance", "[CCar]" )
         MOCK_METHOD(void, init, (), (override));
         MOCK_METHOD(void, fill_gr_car, (GUI::IGrCar &car), (override));
         MOCK_METHOD(GA::fitness_params_t, get_ga_fitness_params, (), (override));
-        MOCK_METHOD(IVec2f, getMassCenter, (), (const override));
+        MOCK_METHOD(vec2f_t, getMassCenter, (), (const override));
         MOCK_METHOD(float, getCurrentX, (), (const override));
         MOCK_METHOD(b2BodyId, getR1, (), (const override));
         MOCK_METHOD(b2BodyId, getR2, (), (const override));

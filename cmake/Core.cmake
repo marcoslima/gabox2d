@@ -25,6 +25,13 @@ add_library(GaBox2dLib
     src/PhysCar.cpp 
     src/WndPreviewChao.cpp 
     src/WndShowCarro.cpp
+    src/GaInfo.cpp
+    src/World.cpp
+    src/fn_ga.cpp
+    src/main_menu.cpp
+    src/sfml_primitives.cpp
+    src/ga_server.cpp
+    src/ga_ipc.cpp
 
     include/assets.h
     include/car.h
@@ -59,7 +66,7 @@ add_library(GaBox2dLib
     include/WndPreviewChao.h
     include/WndShowCarro.h
     include/World.h
-        ../src/World.cpp
+    include/GaInfo.h
 )
 
 target_include_directories("GaBox2dLib" PUBLIC ${SFML_INCLUDE_DIRS})

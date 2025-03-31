@@ -1,28 +1,29 @@
 #pragma once
+
+#include <IPanel.h>
 #include <string>
+
+
 using namespace std;
 
-// CIdInfoDlg dialog
+
 namespace GUI
 {
 
-class CIdInfoDlg
+class CIdInfoDlg final : public IPanel
 {
-	public:
-	// CIdInfoDlg(){};
-	virtual ~CIdInfoDlg();
-
-public:
-	virtual bool OnInitDialog();
-	unsigned m_nGeracao;
+	string m_strGeracao;
 	string m_strPontuacao;
 	string m_strTempo;
-
-	void set(unsigned nGeracao	, 
-			 double   dPontuacao, 
-			 double   dTempo	,
-			 string	  strGenes	);
 	string m_strGenes;
+	string m_strDeathReason;
+public:
+	void render() override;
+	void set(unsigned nGeracao      ,
+			 float   dPontuacao	    ,
+			 float   dTempo		    ,
+			 const string &strGenes	,
+			 const string &strDeathReason);
 };
 
-};//namespace GUI
+}

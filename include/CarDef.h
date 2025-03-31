@@ -5,17 +5,15 @@ namespace MODEL
 class CCarDef
 {
 public:
-	class CCircleParams
+	using circle_params_t = struct tagCircleParams
 	{
-	public:
 		float x;
 		float y;
 		float raio;
 	};
 
-	class CBodyParams
+	using body_params_t = struct tagBodyParams
 	{
-	public:
 		float densidade;
 		float friccao;
 		float elasticidade;
@@ -24,8 +22,8 @@ public:
 	class CRodaParams
 	{
 	public:
-		CCircleParams circle;
-		CBodyParams	body;
+		circle_params_t circle;
+		body_params_t	body;
 
 		CRodaParams();
 		CRodaParams(float x, float y, float r, float dens, float fric, float elas);
