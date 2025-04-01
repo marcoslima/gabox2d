@@ -59,6 +59,7 @@ namespace GUI
         void OnKeyReleased(void *pParam) override;
         void OnEditEnvironment() override;
         void OnMostrarMelhor() override;
+        void OnMostrarQualquer() override;
 
         void startGa(ga_params_t params) override;
         void SetDocument(IGaBox2dDocPtr doc) override;
@@ -140,8 +141,6 @@ namespace GUI
         void OnVelocidade10x();
 
         void OnVelocidade100x();
-
-        void OnMostrarQualquer();
 
         void OnInformaGagenes();
 

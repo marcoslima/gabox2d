@@ -102,7 +102,10 @@ namespace GUI
                 {
                     _view->OnMostrarMelhor();
                 }
-                if (ImGui::MenuItem("Qualquer")) {}
+                if (ImGui::MenuItem("Qualquer"))
+                {
+                    _view->OnMostrarQualquer();
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
