@@ -39,7 +39,7 @@ namespace GUI
         CGaInfoDlg _panelGaInfo;
 
         void startClient();
-        void attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer);
+        void attemptConnect(const std::shared_ptr<boost::asio::steady_timer>& timer);
         void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
 
         void updateIdInfo();
@@ -48,23 +48,26 @@ namespace GUI
         CGaBox2dView();
         ~CGaBox2dView() override;
 
-        void startGa(ga_params_t params) override;
-        void SetDocument(IGaBox2dDocPtr doc) override;
+        // Message handlers
         void OnEditCopy() const override;
         void OnEditPaste() const override;
         void OnSimulaPlay() const override;
         void OnSimulaReset() const override;
-        void setVelocidade(unsigned nVelocidade) override;
         void OnSimulaRepetir() const override;
-        void toggleDrawDebugGround() override;
-        void ShowHelp() override;
-        void toggleFollowCar() override;
         void OnGaIniciar() override;
         void OnKeyPressed(void *pParam) override;
         void OnKeyReleased(void *pParam) override;
+        void OnEditEnvironment() override;
+        void OnMostrarMelhor() override;
+
+        void startGa(ga_params_t params) override;
+        void SetDocument(IGaBox2dDocPtr doc) override;
+        void setVelocidade(unsigned nVelocidade) override;
+        void toggleDrawDebugGround() override;
+        void ShowHelp() override;
+        void toggleFollowCar() override;
         void updateData() override;
         void draw(void *pParam) override;
-        void OnEditEnvironment() override;
 
         [[nodiscard]] unsigned getVelocidade() const override;
         [[nodiscard]] IGaBox2dDocPtr GetDocument() const override;
@@ -137,8 +140,6 @@ namespace GUI
         void OnVelocidade10x();
 
         void OnVelocidade100x();
-
-        void OnMostrarMelhor();
 
         void OnMostrarQualquer();
 

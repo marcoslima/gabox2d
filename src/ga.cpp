@@ -118,9 +118,9 @@ namespace GA
 
 	    _carWinner = m_populacao.front()->getGenes();
 
-        if (m_melhores.size() == 0 || _not_in_melhores(_carWinner))
+        if (m_melhores.empty() || _not_in_melhores(_carWinner))
         {
-            m_melhores.push_back(melhor_t(_geracao, _carWinner));
+            m_melhores.emplace_back(_geracao, _carWinner);
             m_melhores_set.insert(_carWinner);
         }
     }
@@ -182,14 +182,21 @@ namespace GA
             if (nId1 == nId2)
                 continue;
 
-            // Faz crossover?
             auto itCar1 = m_populacao.begin();
             for (i = 0; i < nId1; i++, ++itCar1) {}
+
             auto itCar2 = m_populacao.begin();
             for (i = 0; i < nId1; i++, ++itCar2) {}
-            const auto cross_point = random.rand_int(1, GENES - 2);
-            m_nova.push_back((*itCar1)->crossover(*itCar2, cross_point));
-            m_nova.push_back((*itCar2)->crossover(*itCar1, cross_point));
+
+            // Faz crossover?
+            if (random.real_random(0.0, 100.0) < _crossover)
+            {
+                const auto cross_point = random.rand_int(1, GENES - 2);
+                m_nova.push_back((*itCar1)->crossover(*itCar2, cross_point));
+                m_nova.push_back((*itCar2)->crossover(*itCar1, cross_point));
+            }
+            m_nova.push_back(_carFactory->createCarFromGenes((*itCar1)->getGenes()));
+            m_nova.push_back(_carFactory->createCarFromGenes((*itCar2)->getGenes()));
         }
     }
 
@@ -198,7 +205,10 @@ namespace GA
         const size_t first_new = _elitismo + _alienismo;
         const size_t nova_len = m_nova.size();
         for (auto i = first_new; i < nova_len; i++)
-            m_nova[i]->mutate();
+        {
+            if (random.real_random(0.0, 100.0) > _mutacao)
+                m_nova[i]->mutate();
+        }
     }
 
     void CGa::_4AdvanceGeneration()

@@ -37,9 +37,9 @@ public:
 
     ga_params_t()
         : m_nPopulacao(90)
-          , m_fCrossover(0.7)
+          , m_fCrossover(95.0f)
           , m_nElitismo(2)
-          , m_fMutacao(0.65)
+          , m_fMutacao(75.0f)
           , m_nAlienismo(0)
           , m_nMutInt(10),
           m_fMaxT(60) {}

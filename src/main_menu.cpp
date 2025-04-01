@@ -98,7 +98,10 @@ namespace GUI
 
             if (ImGui::BeginMenu("Mostrar atual"))
             {
-                if (ImGui::MenuItem("Melhor")) {}
+                if (ImGui::MenuItem("Melhor"))
+                {
+                    _view->OnMostrarMelhor();
+                }
                 if (ImGui::MenuItem("Qualquer")) {}
                 ImGui::EndMenu();
             }

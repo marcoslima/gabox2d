@@ -268,7 +268,8 @@ namespace GUI
         if (pDoc->isSimulating())
         {
             pDoc->EndSimulation();
-        } else
+        }
+        else
         {
             pDoc->BeginSimulation();
         }
@@ -499,6 +500,16 @@ namespace GUI
 
     void CGaBox2dView::OnMostrarMelhor()
     {
+        const auto doc = GetDocument();
+
+        if (current_status_.population.empty())
+        {
+            cerr << "Population is empty." << endl;
+            return;
+        }
+
+        doc->GetCar()->createGaFromGenes(current_status_.bestGenes);
+        OnSimulaRepetir();
 #if 0
           CGaBox2dDoc *pDoc = GetDocument();
         ASSERT_VALID(pDoc);
@@ -726,6 +737,7 @@ namespace GUI
                 break;
             case sf::Keyboard::F:
                 toggleFollowCar();
+                break;
             default:
                 break;
         }
@@ -795,6 +807,9 @@ namespace GUI
             case sf::Keyboard::Down:
                 m_bMoveDown = false;
                 break;
+            case sf::Keyboard::M:
+                OnMostrarMelhor();
+                break;
             default:
                 break;
         }
@@ -853,7 +868,7 @@ namespace GUI
         });
     }
 
-    void CGaBox2dView::attemptConnect(std::shared_ptr<boost::asio::steady_timer> timer)
+    void CGaBox2dView::attemptConnect(const std::shared_ptr<boost::asio::steady_timer>& timer)
     {
         try
         {
