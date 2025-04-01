@@ -40,7 +40,10 @@ public:
     {
         return discrete_random(aMin, aMax);
     }
-
+    std::mt19937& get_engine()
+    {
+        return generator;
+    }
 };
 
 // Explicit instantiation for double, float, char and size_t:
