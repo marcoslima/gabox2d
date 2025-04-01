@@ -160,20 +160,19 @@ namespace GA
         _do_elitism();
         _do_alienism();
         _do_manual_include();
+        _populate_weights();
     }
 
     void CGa::_2Crossover()
     {
-        size_t i;
         const size_t nSize = m_populacao.size();
         const size_t nMaxIndex = nSize - 1;
 
         while (m_nova.size() < _populacao)
         {
-            constexpr size_t zero = 0;
             // Escolha dos pais:
-            size_t nId1 = random.rand_int(zero, nSize);
-            size_t nId2 = random.rand_int(zero, nSize);
+            size_t nId1 = _roulette_select();
+            size_t nId2 = _roulette_select();
 
             // Clamp no range permitido
             nId1 = std::min(nMaxIndex, nId1);
@@ -182,11 +181,8 @@ namespace GA
             if (nId1 == nId2)
                 continue;
 
-            auto itCar1 = m_populacao.begin();
-            for (i = 0; i < nId1; i++, ++itCar1) {}
-
-            auto itCar2 = m_populacao.begin();
-            for (i = 0; i < nId1; i++, ++itCar2) {}
+            auto itCar1 = std::next(m_populacao.begin(), static_cast<long>(nId1));
+            auto itCar2 = std::next(m_populacao.begin(), static_cast<long>(nId2));
 
             // Faz crossover?
             if (random.real_random(0.0, 100.0) < _crossover)
@@ -230,6 +226,26 @@ namespace GA
         }
 
         m_nova.clear();
+    }
+
+    void CGa::_populate_weights()
+    {
+        _vec_weights.clear();
+        _vec_weights.reserve(m_populacao.size());
+        // Extract fitness values and add them as weights
+        for (const auto& car : m_populacao) {
+            // Use fitness as weight (higher fitness = higher probability)
+            // May need to invert depending on how fitness is calculated
+            _vec_weights.push_back(1.0/car->getFitness());
+        }
+
+        // Create a discrete distribution based on the weights
+        _roulette_distribution = std::discrete_distribution<size_t> (_vec_weights.begin(), _vec_weights.end());
+    }
+
+    size_t CGa::_roulette_select()
+    {
+        return _roulette_distribution(random.get_engine());
     }
 
     void CGa::MassExtinctionEvent()

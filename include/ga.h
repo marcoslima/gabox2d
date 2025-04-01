@@ -3,7 +3,7 @@
 #include <atomic>
 #include <string>
 #include <unordered_set>
-
+#include <random>
 #include "lmfisica.h"
 
 
@@ -67,6 +67,10 @@ namespace GA
         vec_melhores_t m_melhores;
         unordered_set<std::string> m_melhores_set;
 
+        // Pesos para seleção por roleta:
+        vec_double_t _vec_weights;
+        std::discrete_distribution<size_t> _roulette_distribution;
+
         // Funções internas
     private:
         void _do_elitism();
@@ -80,6 +84,8 @@ namespace GA
         void _2Crossover();
         void _3Mutate();
         void _4AdvanceGeneration();
+        void _populate_weights();
+        size_t _roulette_select();
 
         // Interface
     public:
