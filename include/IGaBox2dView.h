@@ -11,23 +11,27 @@ namespace GUI
     {
     public:
         virtual ~IGaBox2dView() = default;
-        virtual void SetDocument(IGaBox2dDocPtr) = 0;;
-        virtual void startGa(ga_params_t) = 0;
+        virtual void SetDocument(IGaBox2dDocPtr) = 0;
+
+        // Message handlers
         virtual void OnEditCopy() const = 0;
         virtual void OnEditPaste() const = 0;
         virtual void OnSimulaPlay() const = 0;
         virtual void OnSimulaReset() const = 0;
-        virtual void setVelocidade(unsigned) = 0;
         virtual void OnSimulaRepetir() const = 0;
+        virtual void OnGaIniciar() = 0;
+        virtual void OnMostrarMelhor() = 0;
+        virtual void OnKeyPressed(void *pParam) = 0;
+        virtual void OnKeyReleased(void *pParam) = 0;
+        virtual void OnEditEnvironment() = 0;
+
+        virtual void startGa(ga_params_t) = 0;
+        virtual void setVelocidade(unsigned) = 0;
         virtual void toggleDrawDebugGround() = 0;
         virtual void ShowHelp() = 0;
         virtual void toggleFollowCar() = 0;
-        virtual void OnGaIniciar() = 0;
-        virtual void OnKeyPressed(void *pParam) = 0;
-        virtual void OnKeyReleased(void *pParam) = 0;
         virtual void updateData() = 0;
         virtual void draw(void *pParam) = 0;
-        virtual void OnEditEnvironment() = 0;
 
         [[nodiscard]] virtual IGaBox2dDocPtr GetDocument() const = 0;
         [[nodiscard]] virtual unsigned getVelocidade() const = 0;
