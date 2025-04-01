@@ -8,6 +8,7 @@ class CRandom
 
 public:
     explicit CRandom(const unsigned seed): generator(seed) {}
+    CRandom(): generator(static_cast<unsigned>(time(nullptr))) {} // NOLINT(*-msc51-cpp)
     
     void set_seed(const unsigned seed) const
     {

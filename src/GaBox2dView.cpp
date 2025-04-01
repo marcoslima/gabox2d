@@ -12,6 +12,8 @@
 #include <fn_ga.h>
 #include <ga_server.h>
 
+#include "CRandom.h"
+
 
 namespace GUI
 {
@@ -542,6 +544,21 @@ namespace GUI
 
     void CGaBox2dView::OnMostrarQualquer()
     {
+        const auto doc = GetDocument();
+
+        if (current_status_.population.empty())
+        {
+            cerr << "Population is empty." << endl;
+            return;
+        }
+
+        auto it = std::next(
+            current_status_.population.begin(),
+            CRandom().discrete_random<long>(0, static_cast<long>(current_status_.population.size()) - 1)
+        );
+
+        doc->GetCar()->createGaFromGenes(it->second);
+        OnSimulaRepetir();
 #if 0
           CGaBox2dDoc *pDoc = GetDocument();
         ASSERT_VALID(pDoc);
@@ -773,7 +790,7 @@ namespace GUI
             case sf::Keyboard::R:
                 OnSimulaRepetir();
                 break;
-            case sf::Keyboard::Q:
+            case sf::Keyboard::X:
                 pDoc->Quit();
                 break;
             case sf::Keyboard::Add:
@@ -809,6 +826,9 @@ namespace GUI
                 break;
             case sf::Keyboard::M:
                 OnMostrarMelhor();
+                break;
+            case sf::Keyboard::Q:
+                OnMostrarQualquer();
                 break;
             default:
                 break;
