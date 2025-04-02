@@ -27,23 +27,16 @@ public:
 	void createGaRandomCar() override;
 	void beginSimulate(PHYS::IWorldPtr world) override;
 	void draw(void *pParams) const override;
-	void mutate() override;
 	void doStep() override;
 	[[nodiscard]] float getFitness() const override;
 	[[nodiscard]] float getT() const override;
 	[[nodiscard]] bool operator<(const ICar &rhs) const override;
 	[[nodiscard]] bool doStepGetContinue() override;
 	[[nodiscard]] string deadReason() const override;
-	[[nodiscard]] icar_ptr_t crossover(const icar_ptr_t &rhs, size_t crosspoint) const override;
 	[[nodiscard]] icar_ptr_t clone() override;
 	[[nodiscard]] string getGenes() const override;
 	[[nodiscard]] vec2f_t getCenter() const override;
 };
-
-inline void CCar::mutate()
-{
-	m_ga_car_ptr->mutate();
-}
 
 class CCarFactory final : public ICarFactory
 {

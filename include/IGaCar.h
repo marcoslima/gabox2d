@@ -20,7 +20,6 @@ namespace GA
         [[nodiscard]] virtual string getGenes() const = 0;
         [[nodiscard]] virtual float getPontuacao() const = 0;
         [[nodiscard]] virtual MODEL::CCarDef getCarro() const = 0;
-        [[nodiscard]] virtual string crossover(const string &genes, size_t crosspoint) const = 0;
         [[nodiscard]] virtual ga_car_ptr_t clone() = 0;
         virtual void decode() = 0; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)
         virtual void calc_fitness(fitness_params_t fitness_params, float max_t) = 0;

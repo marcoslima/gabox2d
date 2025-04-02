@@ -95,14 +95,6 @@ string CCar::deadReason() const
     return m_phys_car_ptr->deadReason();
 }
 
-icar_ptr_t CCar::crossover(const icar_ptr_t &rhs, const size_t crosspoint) const
-{
-    const auto genes = m_ga_car_ptr->crossover(rhs->getGenes(), crosspoint);
-    auto result = make_unique<CCar>();
-    result->createGaFromGenes(genes);
-    return result;
-}
-
 float CCar::getT() const
 {
     return m_phys_car_ptr->getT();

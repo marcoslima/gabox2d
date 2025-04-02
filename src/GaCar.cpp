@@ -44,11 +44,6 @@ namespace GA
         return _carro;
     }
 
-    string CGaCar::crossover(const string &genes, const size_t crosspoint) const
-    {
-        return _genes.substr(0, crosspoint) + genes.substr(crosspoint);
-    }
-
     ga_car_ptr_t CGaCar::clone()
     {
         auto car = make_shared<CGaCar>();
@@ -115,11 +110,19 @@ namespace GA
     void CGaCar::mutate()
     {
         const auto point_of_mutation = random.rand_int(0, GENES-1);
-        const char intensidade = random.discrete_random<char>(1, 10);
-        const char direcao = random.discrete_random<char>(0, 1)?(1):(-1);
-        const char mutacao = intensidade * direcao;
-        const auto g = std::clamp<char>(_genes[point_of_mutation] + mutacao, 'A', 'Z');
-        _genes[point_of_mutation] = g;
+
+        ///// O legível:
+        // const auto intensidade = random.discrete_random<char>(1, 10);
+        // const auto direcao = random.discrete_random<char>(0, 1)?(1):(-1);
+        // const auto mutacao = static_cast<char>(intensidade * direcao);
+        // const auto new_gene = static_cast<char>(_genes[point_of_mutation] + mutacao);
+        // const auto g = std::clamp<char>(new_gene, 'A', 'Z');
+        // _genes[point_of_mutation] = g;
+
+        //// O performático: (nunca edite: faça acima e depois remonte o abaixo)
+        _genes[point_of_mutation] = std::clamp<char>(static_cast<char>(_genes[point_of_mutation]
+            + static_cast<char>(random.discrete_random<char>(1, 10)
+                * random.discrete_random<char>(0, 1)?(1):(-1))), 'A', 'Z');
     }
 
     void CGaCar::decode()

@@ -21,6 +21,7 @@ namespace GA
     using melhor_t = pair<size_t, string>;
     using vec_melhores_t = vector<melhor_t>;
     using vec_genes_t = vector<pair<float, string>>;
+    using genes_pair_t = pair<string, string>;
 
     class CGa
     {
@@ -53,7 +54,7 @@ namespace GA
         lst_car_t m_populacao;
 
         // Nova população
-        vec_car_t m_nova;
+        vec_string_t m_nova;
 
         vec_double_t _vec_select,
                      _vec_crossover,
@@ -74,6 +75,7 @@ namespace GA
         // Funções internas
     private:
         void _do_elitism();
+        static string _generate_random_genes();
         void _do_alienism();
         void _do_manual_include();
         void _do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const;
@@ -81,7 +83,12 @@ namespace GA
         void _do_sort();
         void _cria_populacao();
         void _1Select();
+        pair<string, string> _get_parents();
+        bool _random_do_crossover_or_not() const;
+        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint) ;
+        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint1, size_t crosspoint2) ;
         void _2Crossover();
+        static void _mutate_genes(string &genes);
         void _3Mutate();
         void _4AdvanceGeneration();
         void _populate_weights();

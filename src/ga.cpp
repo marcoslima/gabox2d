@@ -40,9 +40,11 @@ namespace GA
     void CGa::_cria_populacao()
     {
         m_populacao.clear();
-
-        for (size_t i = 0; i < _populacao; i++)
-            m_populacao.push_back(_carFactory->createRandomCar());
+        generate_n(back_inserter(m_populacao), _populacao,
+                   [&]()
+                   {
+                       return _carFactory->createRandomCar();
+                   });
     }
 
     void CGa::setParams(const size_t nPopulacao,
@@ -116,7 +118,7 @@ namespace GA
         _do_calc_points();
         _do_sort();
 
-	    _carWinner = m_populacao.front()->getGenes();
+        _carWinner = m_populacao.front()->getGenes();
 
         if (m_melhores.empty() || _not_in_melhores(_carWinner))
         {
@@ -127,29 +129,42 @@ namespace GA
 
     void CGa::_do_elitism()
     {
-        lst_car_t::iterator it;
-        size_t i;
-        for (it = m_populacao.begin(), i = 0;
-             it != m_populacao.end() && i < _elitismo;
-             ++it, i++)
-        {
-            m_nova.push_back((*it)->clone());
-        }
+        const auto it = m_populacao.begin();
+        const auto end = std::next(it, static_cast<long>(_elitismo));
+        m_nova.reserve(_populacao);
+        transform(it, end, back_inserter(m_nova),
+                  [](const auto &car)
+                  {
+                      return car->getGenes();
+                  });
+    }
+
+    string CGa::_generate_random_genes()
+    {
+        string genes;
+        genes.reserve(GENES);
+        generate_n(back_inserter(genes), GENES,
+                   [&]()
+                   {
+                       return random.discrete_random('A', 'Z');
+                   });
+        return genes;
     }
 
     void CGa::_do_alienism()
     {
-        for (size_t i = 0; i < _alienismo; i++)
-        {
-            m_nova.push_back(CCarFactory().createRandomCar());
-        }
+        generate_n(back_inserter(m_nova), _alienismo,
+                   [&]()
+                   {
+                       return _generate_random_genes();
+                   });
     }
 
     void CGa::_do_manual_include()
     {
         if (!_strId2Include.empty())
         {
-            m_nova.push_back(_carFactory->createCarFromGenes(_strId2Include));
+            m_nova.push_back(_strId2Include);
             _strId2Include.clear();
         }
     }
@@ -163,37 +178,115 @@ namespace GA
         _populate_weights();
     }
 
-    void CGa::_2Crossover()
+    genes_pair_t CGa::_get_parents()
     {
-        const size_t nSize = m_populacao.size();
-        const size_t nMaxIndex = nSize - 1;
-
-        while (m_nova.size() < _populacao)
+        size_t nId1, nId2;
+        while (true)
         {
-            // Escolha dos pais:
-            size_t nId1 = _roulette_select();
-            size_t nId2 = _roulette_select();
+            nId1 = _roulette_select();
+            nId2 = _roulette_select();
 
             // Clamp no range permitido
-            nId1 = std::min(nMaxIndex, nId1);
-            nId2 = std::min(nMaxIndex, nId2);
+            nId1 = std::min(nId1, m_populacao.size() - 1);
+            nId2 = std::min(nId2, m_populacao.size() - 1);
 
-            if (nId1 == nId2)
-                continue;
+            if (nId1 != nId2)
+                break;
+        }
 
-            auto itCar1 = std::next(m_populacao.begin(), static_cast<long>(nId1));
-            auto itCar2 = std::next(m_populacao.begin(), static_cast<long>(nId2));
+        const auto itCar1 = std::next(m_populacao.begin(), static_cast<long>(nId1));
+        const auto itCar2 = std::next(m_populacao.begin(), static_cast<long>(nId2));
+
+        return make_pair((*itCar1)->getGenes(), (*itCar2)->getGenes());
+    }
+
+    bool CGa::_random_do_crossover_or_not() const
+    {
+        return random.real_random(0.0, 100.0) < _crossover;
+    }
+
+    genes_pair_t crossover(const genes_pair_t &genes_pair, const size_t crosspoint)
+    {
+        const auto parent1 = genes_pair.first;
+        const auto parent2 = genes_pair.second;
+
+        auto child1 = parent1.substr(0, crosspoint) + parent2.substr(crosspoint);
+        auto child2 = parent2.substr(0, crosspoint) + parent1.substr(crosspoint);
+
+        return make_pair(child1, child2);
+    }
+
+    string _double_point_crossover(const string &parent1, const string &parent2, const size_t crosspoint1,
+                                   const size_t crosspoint2)
+    {
+        return parent1.substr(0, crosspoint1) +
+               parent2.substr(crosspoint1, crosspoint2 - crosspoint1) +
+               parent1.substr(crosspoint2);
+    }
+
+    genes_pair_t crossover(const genes_pair_t &genes_pair, const size_t crosspoint1, const size_t crosspoint2)
+    {
+        const auto parent1 = genes_pair.first;
+        const auto parent2 = genes_pair.second;
+
+        auto child1 = _double_point_crossover(parent1, parent2, crosspoint1, crosspoint2);
+        auto child2 = _double_point_crossover(parent2, parent1, crosspoint1, crosspoint2);
+        return make_pair(child1, child2);
+    }
+
+    genes_pair_t _make_single_point_crossover(const string &car1, const string &car2)
+    {
+        const auto cross_point = random.rand_int(1, GENES - 2);
+        return crossover(make_pair(car1, car2), cross_point);
+    }
+
+    genes_pair_t _make_double_point_crossover(const string &car1, const string &car2)
+    {
+        const auto cross_point1 = random.rand_int(1, GENES - 2);
+        const auto cross_point2 = random.rand_int(cross_point1 + 1, GENES - 1);
+
+        return crossover(make_pair(car1, car2), cross_point1, cross_point2);
+    }
+
+    void CGa::_2Crossover()
+    {
+        while (m_nova.size() < _populacao)
+        {
+            const auto parents = _get_parents();
 
             // Faz crossover?
-            if (random.real_random(0.0, 100.0) < _crossover)
+            if (_random_do_crossover_or_not())
             {
-                const auto cross_point = random.rand_int(1, GENES - 2);
-                m_nova.push_back((*itCar1)->crossover(*itCar2, cross_point));
-                m_nova.push_back((*itCar2)->crossover(*itCar1, cross_point));
+                const auto childs = _make_single_point_crossover(parents.first, parents.second);
+                m_nova.push_back(childs.first);
+                m_nova.push_back(childs.second);
+            } else
+            {
+                m_nova.push_back(parents.first);
+                m_nova.push_back(parents.second);
             }
-            m_nova.push_back(_carFactory->createCarFromGenes((*itCar1)->getGenes()));
-            m_nova.push_back(_carFactory->createCarFromGenes((*itCar2)->getGenes()));
         }
+    }
+
+    void CGa::_mutate_genes(string &genes)
+    {
+        const auto point_of_mutation = random.rand_int(0, GENES - 1);
+
+        ///// O legível:
+        // const auto intensidade = random.discrete_random<char>(1, 10);
+        // const auto direcao = random.discrete_random<char>(0, 1)?(1):(-1);
+        // const auto mutacao = static_cast<char>(intensidade * direcao);
+        // const auto new_gene = static_cast<char>(_genes[point_of_mutation] + mutacao);
+        // const auto g = std::clamp<char>(new_gene, 'A', 'Z');
+        // _genes[point_of_mutation] = g;
+
+        //// O performático: (nunca edite: faça acima e depois remonte o abaixo)
+        genes[point_of_mutation] = std::clamp<char>(static_cast<char>(genes[point_of_mutation]
+                                                                      + static_cast<char>(
+                                                                          random.discrete_random<char>(1, 10)
+                                                                          * random.discrete_random<char>(0, 1)
+                                                                              ? (1)
+                                                                              : (-1))), 'A', 'Z');
     }
 
     void CGa::_3Mutate()
@@ -203,7 +296,7 @@ namespace GA
         for (auto i = first_new; i < nova_len; i++)
         {
             if (random.real_random(0.0, 100.0) > _mutacao)
-                m_nova[i]->mutate();
+                _mutate_genes(m_nova[i]);
         }
     }
 
@@ -218,10 +311,13 @@ namespace GA
             _cria_populacao();
             _bMassExtintion = false;
             _geracao = 1;
-        }
-        else
+        } else
         {
-            ranges::move(m_nova, std::back_inserter(m_populacao));
+            ranges::transform(m_nova, back_inserter(m_populacao),
+                [&](const auto &genes)
+                {
+                  return _carFactory->createCarFromGenes(genes);
+                });
             _geracao++;
         }
 
@@ -233,14 +329,15 @@ namespace GA
         _vec_weights.clear();
         _vec_weights.reserve(m_populacao.size());
         // Extract fitness values and add them as weights
-        for (const auto& car : m_populacao) {
+        for (const auto &car: m_populacao)
+        {
             // Use fitness as weight (higher fitness = higher probability)
             // May need to invert depending on how fitness is calculated
-            _vec_weights.push_back(1.0/car->getFitness());
+            _vec_weights.push_back(1.0 / car->getFitness());
         }
 
         // Create a discrete distribution based on the weights
-        _roulette_distribution = std::discrete_distribution<size_t> (_vec_weights.begin(), _vec_weights.end());
+        _roulette_distribution = std::discrete_distribution<size_t>(_vec_weights.begin(), _vec_weights.end());
     }
 
     size_t CGa::_roulette_select()
@@ -281,12 +378,12 @@ namespace GA
         return m_populacao.front()->clone();
     }
 
-    const lst_car_t & CGa::getPopulacao() const
+    const lst_car_t &CGa::getPopulacao() const
     {
         return m_populacao;
     }
 
-    const vec_melhores_t & CGa::getMelhores() const
+    const vec_melhores_t &CGa::getMelhores() const
     {
         return m_melhores;
     }
