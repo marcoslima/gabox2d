@@ -35,7 +35,6 @@ namespace GA
         [[nodiscard]] string getGenes() const override;
         [[nodiscard]] float getPontuacao() const override;
         [[nodiscard]] CCarDef getCarro() const override;
-        [[nodiscard]] string crossover(const string &genes, size_t crosspoint) const override;
         [[nodiscard]] ga_car_ptr_t clone() override;
 
         void decode() override; // Decodifica o carro dos genes (_genes) criando-o nas definições (_carro)

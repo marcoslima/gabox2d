@@ -23,7 +23,6 @@ public:
     virtual void createGaFromGenes(const string &genes) = 0;
     virtual void beginSimulate(PHYS::IWorldPtr world) = 0;
     virtual void draw(void *pParams) const = 0;
-    virtual void mutate() = 0;
     virtual void doStep() = 0;
     [[nodiscard]] virtual float getFitness() const = 0;
     [[nodiscard]] virtual bool doStepGetContinue() = 0;
@@ -32,7 +31,6 @@ public:
     [[nodiscard]] virtual bool operator<(const ICar &rhs) const = 0;
     [[nodiscard]] virtual float getT() const = 0;
     [[nodiscard]] virtual string deadReason() const = 0;
-    [[nodiscard]] virtual icar_ptr_t crossover(const icar_ptr_t &rhs, size_t crosspoint) const = 0;
     [[nodiscard]] virtual icar_ptr_t clone() = 0;
 
 };
