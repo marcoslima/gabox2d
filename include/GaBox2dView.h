@@ -4,11 +4,6 @@
 
 #include <IGaBox2dView.h>
 #include "GaBox2dDoc.h"
-#undef CDT_USE_AS_COMPILED_LIBRARY
-
-// ReSharper disable once CppUnusedIncludeDirective
-#include <CDT.hpp>
-
 #include <GaInfo.h>
 #include <ga_ipc.h>
 #include <thread_params.h>
@@ -18,6 +13,8 @@
 #include "GaInfoDlg.h"
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
+#include "triangulation.h"
+
 
 using namespace GA;
 
