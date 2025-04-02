@@ -31,6 +31,7 @@ add_library(GaBox2dLib
     src/sfml_primitives.cpp
     src/ga_server.cpp
     src/ga_ipc.cpp
+    src/triangulation.cpp
 
     include/assets.h
     include/car.h

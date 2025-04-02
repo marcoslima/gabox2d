@@ -165,23 +165,11 @@ namespace GUI
 
         // Triangularização para preenchimento do polígono:
         // (Delunay Triangulation)
-        CDT::Triangulation<float> cdt;
-        vector<CDT::V2d<float> > vecVertices;
-        for (const auto &v: vecGround)
-        {
-            vecVertices.emplace_back(v.x, v.y);
-        }
-        cdt.insertVertices(vecVertices);
-        vector<CDT::Edge> vecEdges;
-        vecEdges.reserve(vecGround.size());
-        for (int i = 0; i < vecGround.size(); i++)
-        {
-            vecEdges.emplace_back(i, (i + 1) % vecGround.size());
-        }
-        cdt.insertEdges(vecEdges);
-        cdt.eraseOuterTrianglesAndHoles();
+        auto triangulation = triangularize(vecGround);
+        auto &cdt = triangulation.first;
+        auto &vecVertices = triangulation.second;
+
         // const CPen penDebug(sf::Color(255, 0, 0), 0.1);
-        // ReSharper disable once CppUseStructuredBinding
         for (const auto &triangle: cdt.triangles)
         {
             sf::ConvexShape polygon(3);
