@@ -1,10 +1,9 @@
-#include <cstring>
 #include "GaCar.h"
 #include <stdexcept>
-#include <global_random.h>
 #include <iostream>
 #include <sstream>
 #include <ga_car_helpers.h>
+#include <random_genes_generator.h>
 
 
 namespace GA
@@ -21,12 +20,7 @@ namespace GA
 
     void CGaCar::_generate_random_genes()
     {
-        _genes.clear();
-
-        for (int i = 0; i < GENES; i++)
-        {
-            _genes.push_back(random.discrete_random('0', '1'));
-        }
+        generate_random_genes(GENES, _genes);
     }
 
     string CGaCar::getGenes() const

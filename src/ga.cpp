@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <random_genes_generator.h>
 
 #include "car.h"
 using namespace std;
@@ -141,14 +142,7 @@ namespace GA
 
     string CGa::_generate_random_genes()
     {
-        string genes;
-        genes.reserve(GENES);
-        generate_n(back_inserter(genes), GENES,
-                   [&]()
-                   {
-                       return random.discrete_random('A', 'Z');
-                   });
-        return genes;
+        return generate_random_genes(GENES);
     }
 
     void CGa::_do_alienism()
