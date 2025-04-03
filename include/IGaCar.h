@@ -25,6 +25,5 @@ namespace GA
         virtual void calc_fitness(fitness_params_t fitness_params, float max_t) = 0;
         virtual void CreateCarFromGenes(const string &genes) = 0;
         virtual void CreateRandomCar() = 0;
-        virtual void mutate() = 0;
     };
 }

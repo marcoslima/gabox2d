@@ -25,7 +25,7 @@ namespace GA
 
         for (int i = 0; i < GENES; i++)
         {
-            _genes.push_back(random.discrete_random('A', 'Z'));
+            _genes.push_back(random.discrete_random('0', '1'));
         }
     }
 
@@ -107,45 +107,61 @@ namespace GA
         _pontos = pts;
     }
 
-    void CGaCar::mutate()
+    CCarDef::CRodaParams CGaCar::decodeBinaryWheel(const string& genes, size_t& pos)
     {
-        const auto point_of_mutation = random.rand_int(0, GENES-1);
-
-        ///// O legível:
-        // const auto intensidade = random.discrete_random<char>(1, 10);
-        // const auto direcao = random.discrete_random<char>(0, 1)?(1):(-1);
-        // const auto mutacao = static_cast<char>(intensidade * direcao);
-        // const auto new_gene = static_cast<char>(_genes[point_of_mutation] + mutacao);
-        // const auto g = std::clamp<char>(new_gene, 'A', 'Z');
-        // _genes[point_of_mutation] = g;
-
-        //// O performático: (nunca edite: faça acima e depois remonte o abaixo)
-        _genes[point_of_mutation] = std::clamp<char>(static_cast<char>(_genes[point_of_mutation]
-            + static_cast<char>(random.discrete_random<char>(1, 10)
-                * random.discrete_random<char>(0, 1)?(1):(-1))), 'A', 'Z');
+        constexpr CCarDef::circle_params_bits circle_bits;
+        constexpr CCarDef::body_params_bits body_bits;
+        return {
+            decodeBinaryValue(genes, pos, circle_bits.x, -8, 8),    // x
+            decodeBinaryValue(genes, pos, circle_bits.y, 2, 8),     // y
+            decodeBinaryValue(genes, pos, circle_bits.raio, 0.2, 3),   // radius
+            decodeBinaryValue(genes, pos, body_bits.densidade, 0.1, 10),  // densidade
+            decodeBinaryValue(genes, pos, body_bits.friccao, 0.1, 2),   // friccao
+            decodeBinaryValue(genes, pos, body_bits.elasticidade, 0, 1)      // elasticidade
+        };
     }
 
+    float CGaCar::decodeBinaryValue(const string& genes, size_t& pos, const size_t bits, const float min, const float max)
+    {
+        // Extract the binary substring
+        unsigned int value = 0;
+        const auto genes_size = genes.size();
+        for (size_t i = 0; i < bits && pos < genes_size; i++, pos++)
+        {
+            value = (value << 1) | (genes[pos] == '1' ? 1 : 0);
+        }
+
+        // Map binary value to float range
+        const unsigned int maxValue = (1 << bits) - 1;
+        return min + (max - min) * static_cast<float>(value) / static_cast<float>(maxValue);
+    }
     void CGaCar::decode()
     {
-        size_t nPos = 0;
+        size_t pos = 0;
 
-        // Obtemos os body's e shape's def's dos genes:
-        _carro._roda1 = DecodeRoda(_genes.c_str(), nPos);
-        _carro._roda2 = DecodeRoda(_genes.c_str(), nPos);
-        _carro._peso1 = DecodeRoda(_genes.c_str(), nPos);
-        _carro._peso2 = DecodeRoda(_genes.c_str(), nPos);
+        // Decode wheels and weights
+        _carro._roda1 = decodeBinaryWheel(_genes, pos);
+        _carro._roda2 = decodeBinaryWheel(_genes, pos);
+        _carro._peso1 = decodeBinaryWheel(_genes, pos);
+        _carro._peso2 = decodeBinaryWheel(_genes, pos);
 
+        // Decode joint parameters (torque, frequency, damping)
+        constexpr int nMaxTorqueIndex = 3;
+        constexpr float dMaxDamp = 2.0f;
+        constexpr float dMinDamp = 0.0f;
+        constexpr float dMaxFreq = 30.0f;
+        constexpr float dMinFreq = 0.1f;
+        constexpr float dFp = 50.0f;
+        const CCarDefBits bits;
         for (int i = 0; i < 6; i++)
         {
-            constexpr int nLen = 4;
-            constexpr float dMaxDamp = 2.0f;
-            constexpr float dMinDamp = 0.0f;
-            constexpr float dMaxFreq = 30.0f;
-            constexpr float dMinFreq = 0.1f;
-            constexpr float dFp = 50.0f;
-            if (i < 4) _carro._torque[i] = DecodeGen(nLen, _genes.c_str(), -dFp, dFp, nPos);
-            _carro._freq[i] = DecodeGen(nLen, _genes.c_str(), dMinFreq, dMaxFreq, nPos);
-            _carro._damp[i] = DecodeGen(nLen, _genes.c_str(), dMinDamp, dMaxDamp, nPos);
+            // Only decode torque for the first 4 indices
+            if (i <= nMaxTorqueIndex) {
+                _carro._torque[i] = decodeBinaryValue(_genes, pos, bits._torque, -dFp, dFp);
+            }
+
+            _carro._freq[i] = decodeBinaryValue(_genes, pos, bits._freq, dMinFreq, dMaxFreq);
+            _carro._damp[i] = decodeBinaryValue(_genes, pos, bits._damp, dMinDamp, dMaxDamp);
         }
     }
 }

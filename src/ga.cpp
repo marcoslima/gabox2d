@@ -236,13 +236,13 @@ namespace GA
 
     genes_pair_t _make_single_point_crossover(const string &car1, const string &car2)
     {
-        const auto cross_point = random.rand_int(1, GENES - 2);
+        const auto cross_point = random.rand_int<size_t>(1, GENES - 2);
         return crossover(make_pair(car1, car2), cross_point);
     }
 
     genes_pair_t _make_double_point_crossover(const string &car1, const string &car2)
     {
-        const auto cross_point1 = random.rand_int(1, GENES - 2);
+        const auto cross_point1 = random.rand_int<size_t>(1, GENES - 2);
         const auto cross_point2 = random.rand_int(cross_point1 + 1, GENES - 1);
 
         return crossover(make_pair(car1, car2), cross_point1, cross_point2);
@@ -250,6 +250,7 @@ namespace GA
 
     void CGa::_2Crossover()
     {
+        unordered_set<string> in_population;
         while (m_nova.size() < _populacao)
         {
             const auto parents = _get_parents();
@@ -258,9 +259,16 @@ namespace GA
             if (_random_do_crossover_or_not())
             {
                 const auto childs = _make_single_point_crossover(parents.first, parents.second);
+
+                // Verifica se o filho já existe na população
+                if (in_population.contains(childs.first) || in_population.contains(childs.second)) continue;
+
+                in_population.insert(childs.first);
+                in_population.insert(childs.second);
                 m_nova.push_back(childs.first);
                 m_nova.push_back(childs.second);
-            } else
+            }
+            else
             {
                 m_nova.push_back(parents.first);
                 m_nova.push_back(parents.second);
@@ -270,7 +278,7 @@ namespace GA
 
     void CGa::_mutate_genes(string &genes)
     {
-        const auto point_of_mutation = random.rand_int(0, GENES - 1);
+        const auto point_of_mutation = random.rand_int<size_t>(0, GENES - 1);
 
         ///// O legível:
         // const auto intensidade = random.discrete_random<char>(1, 10);
@@ -281,12 +289,13 @@ namespace GA
         // _genes[point_of_mutation] = g;
 
         //// O performático: (nunca edite: faça acima e depois remonte o abaixo)
-        genes[point_of_mutation] = std::clamp<char>(static_cast<char>(genes[point_of_mutation]
-                                                                      + static_cast<char>(
-                                                                          random.discrete_random<char>(1, 10)
-                                                                          * random.discrete_random<char>(0, 1)
-                                                                              ? (1)
-                                                                              : (-1))), 'A', 'Z');
+        // genes[point_of_mutation] = std::clamp<char>(static_cast<char>(genes[point_of_mutation]
+        //                                                               + static_cast<char>(
+        //                                                                   random.discrete_random<char>(1, 10)
+        //                                                                   * random.discrete_random<char>(0, 1)
+        //                                                                       ? (1)
+        //                                                                       : (-1))), 'A', 'Z');
+        genes[point_of_mutation] = genes[point_of_mutation] == '0' ? '1' : '0';
     }
 
     void CGa::_3Mutate()
