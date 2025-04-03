@@ -32,6 +32,7 @@ add_library(GaBox2dLib
     src/ga_server.cpp
     src/ga_ipc.cpp
     src/triangulation.cpp
+    src/random_genes_generator.cpp
 
     include/assets.h
     include/car.h

@@ -7,8 +7,8 @@
 using namespace std;
 using namespace MODEL;
 
-#define GENES 300
-#define GENES_LEN (GENES+1)
+const auto GENES = CCarDefBits().bits();
+const auto GENES_LEN = GENES + 1;
 
 namespace GA
 {
@@ -24,7 +24,9 @@ namespace GA
         // Suporte ao algoritmo genético:
         float _pontos;
 
-        // Internas
+        static CCarDef::CRodaParams decodeBinaryWheel(const string &genes, size_t &pos);
+        static float decodeBinaryValue(const string &genes, size_t &pos, size_t bits, float min, float max);
+
     protected:
         void _generate_random_genes();
 
@@ -41,6 +43,5 @@ namespace GA
         void CreateCarFromGenes(const string &genes) override;
         void CreateRandomCar() override;
         void calc_fitness(fitness_params_t fitness_params, float max_t) override;
-        void mutate() override;
     };
 }
