@@ -44,7 +44,7 @@ namespace ipc
 
     bool GaStatusSerializer::_try_parse()
     {
-        if (_data.size() == 0) return false;
+        if (_data.empty()) return false;
 
         const auto start = _data.rfind(START);
         const auto end = _data.rfind(END);
@@ -83,7 +83,7 @@ namespace ipc
         for (size_t i = 0; i < populationSize; i++)
         {
             std::getline(stream, line);
-            float points = std::stod(line);
+            float points = std::stof(line);
             std::getline(stream, genes);
             current_status_.population.emplace_back(points, genes);
         }
