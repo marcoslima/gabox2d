@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <ga.h>
+#include <msgpack/msgpack.hpp>
 
 namespace ipc {
     struct GaStatus {

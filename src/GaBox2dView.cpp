@@ -818,6 +818,9 @@ namespace GUI
             case sf::Keyboard::Q:
                 OnMostrarQualquer();
                 break;
+            case sf::Keyboard::Space:
+                OnSimulaPlay();
+                break;
             default:
                 break;
         }
