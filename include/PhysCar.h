@@ -57,7 +57,6 @@ namespace PHYS
         b2WorldId m_WorldId{};
         string m_dead_reason;
 
-        bool _bInStep{};
         bool m_bDead{};
         float m_distancia{};
         float m_contatoR1{};

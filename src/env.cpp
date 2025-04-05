@@ -14,7 +14,7 @@ namespace MODEL
           , _dym(0), _dys(0.3f), _dyo(0)
           , _phi(0), _omega(0), _a(0)
           , _tlx(-100), _tly(500)
-          , _brx(2500), _bry(-50) {}
+          , _brx(500), _bry(-50) {}
 
     void CEnv::set(const unsigned seed,
                    const float dxm, const float dxs, const float dxo,

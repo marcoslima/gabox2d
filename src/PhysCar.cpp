@@ -57,29 +57,11 @@ namespace PHYS
         shape_def.density = roda.body.densidade;
         shape_def.restitution = roda.body.elasticidade;
 
+
         b2CreateCircleShape(RodaId, &shape_def, &car_def.b2_circle);
         b2Body_SetUserData(RodaId, IdBody);
 
         return RodaId;
-    }
-
-    void showTouch(const string &name, const bool bContact, const float touch_strength)
-    {
-        cout << name << " Touch(" << bContact << "): " << touch_strength << endl;
-    }
-
-    void applyTouchIfBody(const b2BodyId bodyId,
-                          const b2BodyId targetBody,
-                          bool &targetFlag,
-                          const string &targetName,
-                          const bool bContact,
-                          const float touch_strength)
-    {
-        if (B2_ID_EQUALS(bodyId, targetBody))
-        {
-            showTouch(targetName, bContact, touch_strength);
-            targetFlag = bContact;
-        }
     }
 
     bool is_body_contacting(const b2BodyId bodyId)
@@ -175,7 +157,7 @@ namespace PHYS
         jd.bodyIdB = bodyB;
         jd.localAnchorA = b2Vec2(0, 0); //anchorA;
         jd.localAnchorB = b2Vec2(0, 0); //anchorB;
-        jd.collideConnected = false;
+        jd.collideConnected = true;
         jd.hertz = car_def.freq[param_index];
         jd.dampingRatio = car_def.damp[param_index];
         jd.enableLimit = true;
@@ -254,13 +236,9 @@ namespace PHYS
     // Executa um passo da simulação.
     void CPhysCar::simulation_step()
     {
-        _bInStep = true;
-
         _simulation_pre_tick();
         b2World_Step(m_WorldId, _timeStep, _iterations);
         _simulation_pos_tick();
-
-        _bInStep = false;
     }
 
     void CPhysCar::_simulation_pre_tick() const
@@ -442,7 +420,6 @@ namespace PHYS
         car->m_dead_reason = m_dead_reason;
         car->_timeStep = _timeStep;
         car->_iterations = _iterations;
-        car->_bInStep = _bInStep;
         car->m_bDead = m_bDead;
         car->m_distancia = m_distancia;
         car->m_contatoR1 = m_contatoR1;
@@ -514,7 +491,6 @@ namespace PHYS
 
         _timeStep = 1.0f / 60.0f;
         _iterations = 10;
-        _bInStep = false;
         m_bDead = false;
         m_dead_reason = "Alive";
     }
