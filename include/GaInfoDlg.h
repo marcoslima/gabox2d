@@ -4,16 +4,14 @@
 #include <ga_ipc.h>
 
 
-using namespace GA;
-
-
 namespace GUI
 {
     class CGaInfoDlg final : public IPanel
     {
-        ipc::GaStatus _status{};
+        ipc::GaStatus _status;
 
     public:
+        CGaInfoDlg();
         void render() override;
         void set(const ipc::GaStatus& status);
 

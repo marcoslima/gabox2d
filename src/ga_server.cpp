@@ -45,9 +45,9 @@ void GaServer::startAccept()
     });
 }
 
-void GaServer::broadcastStatus(const ipc::GaStatus &status)
+void GaServer::broadcastStatus(ipc::GaStatus &status)
 {
-    std::string data = ipc::GaStatusSerializer::serializeGaStatus(status);
+    auto data = ipc::GaStatusSerializer::serializeGaStatus(status);
     std::lock_guard lock(clients_mutex_);
 
     for (auto it = clients_.begin(); it != clients_.end();)

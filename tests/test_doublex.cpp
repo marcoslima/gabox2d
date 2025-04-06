@@ -1,23 +1,24 @@
+#include <cfloat>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <tuple>
-
 #include <doublex.h>
 
 
-TEST_CASE( "Doublex Instance", "[doublex]" ) 
+// ReSharper disable once CppDFATimeOver
+TEST_CASE( "Doublex Instance", "[doublex]" )
 {
-    LmFisica::doublex n(1.5, 0.3);
-    
+    const LmFisica::doublex n(1.5, 0.3);
+
     REQUIRE(n.V() == 1.5);
     REQUIRE(n.S() == 0.3);
 }
 
 TEST_CASE("Copy ctor", "[doublex]")
 {
-    LmFisica::doublex v1(1.5, 0.5);
-    LmFisica::doublex v2(v1);
+    const LmFisica::doublex v1(1.5, 0.5);
+    const LmFisica::doublex v2(v1); // NOLINT(*-unnecessary-copy-initialization)
 
     REQUIRE(v2.V() == 1.5);
     REQUIRE(v2.S() == 0.5);
@@ -25,9 +26,9 @@ TEST_CASE("Copy ctor", "[doublex]")
 
 TEST_CASE("Add", "[doublex]")
 {
-    LmFisica::doublex v1(1.5, 3.0);
-    LmFisica::doublex v2(2.7, 4.0);
-    LmFisica::doublex r = v1 + v2;
+    const LmFisica::doublex v1(1.5, 3.0);
+    const LmFisica::doublex v2(2.7, 4.0);
+    const LmFisica::doublex r = v1 + v2;
 
     REQUIRE(r.V() == 4.2);
     REQUIRE(r.S() == 5.0);
@@ -36,7 +37,7 @@ TEST_CASE("Add", "[doublex]")
 TEST_CASE("Add Attribution", "[doublex]")
 {
     LmFisica::doublex v1(1.5, 3.0);
-    LmFisica::doublex v2(2.7, 4.0);
+    const LmFisica::doublex v2(2.7, 4.0);
     v1 += v2;
 
     REQUIRE(v1.V() == 4.2);
@@ -45,9 +46,9 @@ TEST_CASE("Add Attribution", "[doublex]")
 
 TEST_CASE("Add double", "[doublex]")
 {
-    LmFisica::doublex v1(1.5, 3.0);
-    double v2(2.7);
-    auto r = v1 + v2;
+    const LmFisica::doublex v1(1.5, 3.0);
+    const double v2(2.7);
+    const auto r = v1 + v2;
 
     REQUIRE(r.V() == 4.2);
     REQUIRE(r.S() == 3.0);
@@ -56,7 +57,7 @@ TEST_CASE("Add double", "[doublex]")
 TEST_CASE("Add double Attribution", "[doublex]")
 {
     LmFisica::doublex v1(1.5, 3.0);
-    double v2(2.7);
+    const double v2(2.7);
     v1 += v2;
 
     REQUIRE(v1.V() == 4.2);
@@ -65,9 +66,9 @@ TEST_CASE("Add double Attribution", "[doublex]")
 
 TEST_CASE("Sub", "[doublex]")
 {
-    LmFisica::doublex v1(4.2, 3.0);
-    LmFisica::doublex v2(1.7, 4.0);
-    LmFisica::doublex r = v1 - v2;
+    const LmFisica::doublex v1(4.2, 3.0);
+    const LmFisica::doublex v2(1.7, 4.0);
+    const LmFisica::doublex r = v1 - v2;
 
     REQUIRE(r.V() == 2.5);
     REQUIRE(r.S() == 5.0);
@@ -76,7 +77,7 @@ TEST_CASE("Sub", "[doublex]")
 TEST_CASE("Sub Attribution", "[doublex]")
 {
     LmFisica::doublex v1(4.2, 3.0);
-    LmFisica::doublex v2(1.7, 4.0);
+    const LmFisica::doublex v2(1.7, 4.0);
     v1 -= v2;
 
     REQUIRE(v1.V() == 2.5);
@@ -85,9 +86,9 @@ TEST_CASE("Sub Attribution", "[doublex]")
 
 TEST_CASE("Sub double", "[doublex]")
 {
-    LmFisica::doublex v1(4.2, 3.0);
-    double v2(1.7);
-    auto r = v1 - v2;
+    const LmFisica::doublex v1(4.2, 3.0);
+    const double v2(1.7);
+    const auto r = v1 - v2;
 
     REQUIRE(r.V() == 2.5);
     REQUIRE(r.S() == 3.0);
@@ -96,7 +97,7 @@ TEST_CASE("Sub double", "[doublex]")
 TEST_CASE("Sub double Attribution", "[doublex]")
 {
     LmFisica::doublex v1(4.2, 3.0);
-    double v2(1.7);
+    const double v2(1.7);
     v1 -= v2;
 
     REQUIRE(v1.V() == 2.5);
@@ -105,9 +106,9 @@ TEST_CASE("Sub double Attribution", "[doublex]")
 
 TEST_CASE("Mul", "[doublex]")
 {
-    LmFisica::doublex v1(2.0, sqrt(9.0));
-    LmFisica::doublex v2(1.0, 2.0);
-    LmFisica::doublex r = v1 * v2;
+    const LmFisica::doublex v1(2.0, sqrt(9.0));
+    const LmFisica::doublex v2(1.0, 2.0);
+    const LmFisica::doublex r = v1 * v2;
 
     REQUIRE(r.V() == 2.0);
     REQUIRE(r.S() == 5.0);
@@ -116,7 +117,7 @@ TEST_CASE("Mul", "[doublex]")
 TEST_CASE("Mul Atribution", "[doublex]")
 {
     LmFisica::doublex v1(2.0, sqrt(9.0));
-    LmFisica::doublex v2(1.0, 2.0);
+    const LmFisica::doublex v2(1.0, 2.0);
     v1 *= v2;
 
     REQUIRE(v1.V() == 2.0);
@@ -125,9 +126,9 @@ TEST_CASE("Mul Atribution", "[doublex]")
 
 TEST_CASE("Mul double", "[doublex]")
 {
-    LmFisica::doublex v1(2.0, 3.0);
-    double v2(4.0);
-    auto r = v1 * v2;
+    const LmFisica::doublex v1(2.0, 3.0);
+    const double v2(4.0);
+    const auto r = v1 * v2;
 
     REQUIRE(r.V() == 8.0);
     REQUIRE(r.S() == 12.0);
@@ -136,7 +137,7 @@ TEST_CASE("Mul double", "[doublex]")
 TEST_CASE("Mul double Atribution", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 3.0);
-    double v2(3.0);
+    const double v2(3.0);
     v1 *= v2;
 
     REQUIRE(v1.V() == 6.0);
@@ -145,9 +146,9 @@ TEST_CASE("Mul double Atribution", "[doublex]")
 
 TEST_CASE("Div", "[doublex]")
 {
-    LmFisica::doublex v1(9.0, 9.0);
-    LmFisica::doublex v2(3.0, 4.0);
-    LmFisica::doublex r = v1 / v2;
+    const LmFisica::doublex v1(9.0, 9.0);
+    const LmFisica::doublex v2(3.0, 4.0);
+    const LmFisica::doublex r = v1 / v2;
 
     REQUIRE(r.V() == 3.0);
     REQUIRE(r.S() == 5.0);
@@ -156,7 +157,7 @@ TEST_CASE("Div", "[doublex]")
 TEST_CASE("Div Attribution", "[doublex]")
 {
     LmFisica::doublex v1(9.0, 9.0);
-    LmFisica::doublex v2(3.0, 4.0);
+    const LmFisica::doublex v2(3.0, 4.0);
     v1 /= v2;
 
     REQUIRE(v1.V() == 3.0);
@@ -165,9 +166,9 @@ TEST_CASE("Div Attribution", "[doublex]")
 
 TEST_CASE("Div double", "[doublex]")
 {
-    LmFisica::doublex v1(9.0, 9.0);
-    double v2(3.0);
-    auto r = v1 / v2;
+    const LmFisica::doublex v1(9.0, 9.0);
+    const double v2(3.0);
+    const auto r = v1 / v2;
 
     REQUIRE(r.V() == 3.0);
     REQUIRE(r.S() == 3.0);
@@ -176,7 +177,7 @@ TEST_CASE("Div double", "[doublex]")
 TEST_CASE("Div double Attribution", "[doublex]")
 {
     LmFisica::doublex v1(9.0, 12.0);
-    double v2(3.0);
+    const double v2(3.0);
     v1 /= v2;
 
     REQUIRE(v1.V() == 3.0);
@@ -185,56 +186,56 @@ TEST_CASE("Div double Attribution", "[doublex]")
 
 TEST_CASE("Pow", "[doublex]")
 {
-    LmFisica::doublex v1(2.0, 1.0);
-    LmFisica::doublex v2(3.0, 0.1);
-    LmFisica::doublex r = v1 ^ v2;
+    const LmFisica::doublex v1(2.0, 1.0);
+    const LmFisica::doublex v2(3.0, 0.1);
+    const LmFisica::doublex r = v1 ^ v2;
 
     REQUIRE(r.V() == 8.0);
-    REQUIRE_THAT(r.S(), 
-                Catch::Matchers::WithinAbs(12.0128052481, 
+    REQUIRE_THAT(r.S(),
+                Catch::Matchers::WithinAbs(12.0128052481,
                                             0.0000000001));
 }
 
 TEST_CASE("Pow Attribution", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 1.0);
-    LmFisica::doublex v2(3.0, 0.1);
+    const LmFisica::doublex v2(3.0, 0.1);
     v1 ^= v2;
 
     REQUIRE(v1.V() == 8.0);
-    REQUIRE_THAT(v1.S(), 
-                Catch::Matchers::WithinAbs(12.0128052481, 
+    REQUIRE_THAT(v1.S(),
+                Catch::Matchers::WithinAbs(12.0128052481,
                                             0.0000000001));
 }
 
 TEST_CASE("Pow double", "[doublex]")
 {
-    LmFisica::doublex v1(2.0, 1.0);
-    double v2(3.0);
-    LmFisica::doublex r = v1 ^ v2;
+    const LmFisica::doublex v1(2.0, 1.0);
+    const double v2(3.0);
+    const LmFisica::doublex r = v1 ^ v2;
 
     REQUIRE(r.V() == 8.0);
-    REQUIRE_THAT(r.S(), 
-                Catch::Matchers::WithinAbs(12.0, 
+    REQUIRE_THAT(r.S(),
+                Catch::Matchers::WithinAbs(12.0,
                                             0.0000000001));
 }
 
 TEST_CASE("Pow double Attribution", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 1.0);
-    double v2(3.0);
+    const double v2(3.0);
     v1 ^= v2;
 
     REQUIRE(v1.V() == 8.0);
-    REQUIRE_THAT(v1.S(), 
-                Catch::Matchers::WithinAbs(12.0, 
+    REQUIRE_THAT(v1.S(),
+                Catch::Matchers::WithinAbs(12.0,
                                             0.0000000001));
 }
 
 TEST_CASE("Minus", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 1.0);
-    auto r = -v1;
+    const auto r = -v1;
 
     REQUIRE(r.V() == -2.0);
     REQUIRE(r.S() == v1.S());
@@ -242,8 +243,8 @@ TEST_CASE("Minus", "[doublex]")
 
 TEST_CASE("Attribution", "[doublex]")
 {
-    LmFisica::doublex v1(3.0, 0.42);
-    auto r = v1;
+    const LmFisica::doublex v1(3.0, 0.42);
+    const auto r = v1;
 
     REQUIRE(r.V() == 3.0);
     REQUIRE(r.S() == 0.42);
@@ -281,7 +282,7 @@ TEST_CASE("Attribution int", "[doublex]")
 TEST_CASE("Is Less", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 1.0);
-    LmFisica::doublex v2(3.0, 1.0);
+    const LmFisica::doublex v2(3.0, 1.0);
     bool r = v1 < v2;
 
     REQUIRE(r);
@@ -290,15 +291,15 @@ TEST_CASE("Is Less", "[doublex]")
 TEST_CASE("Is not Less", "[doublex]")
 {
     LmFisica::doublex v1(3.0, 1.0);
-    LmFisica::doublex v2(2.0, 1.0);
-    bool r = v1 < v2;
+    const LmFisica::doublex v2(2.0, 1.0);
+    const bool r = v1 < v2;
     REQUIRE(!r);
 }
 
 TEST_CASE("Is Greater", "[doublex]")
 {
     LmFisica::doublex v1(3.0, 1.0);
-    LmFisica::doublex v2(2.0, 1.0);
+    const LmFisica::doublex v2(2.0, 1.0);
     bool r = v1 > v2;
 
     REQUIRE(r);
@@ -307,8 +308,8 @@ TEST_CASE("Is Greater", "[doublex]")
 TEST_CASE("Is not Greater", "[doublex]")
 {
     LmFisica::doublex v1(2.0, 1.0);
-    LmFisica::doublex v2(3.0, 1.0);
-    bool r = v1 > v2;
+    const LmFisica::doublex v2(3.0, 1.0);
+    const bool r = v1 > v2;
     REQUIRE(!r);
 }
 ////////////////////
@@ -320,7 +321,7 @@ TEST_CASE("Is Less or equal", "[doublex]")
         using dbx = LmFisica::doublex;
         dbx v1, v2;
         bool expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1, v2, expected) =
             GENERATE
             (
                 table<dbx, dbx, bool>
@@ -336,7 +337,7 @@ TEST_CASE("Is Less or equal", "[doublex]")
                                     false)
                 })
             );
-        auto result = v1 <= v2;
+        const auto result = v1 <= v2;
         REQUIRE(result == expected);
     }
 }
@@ -348,7 +349,7 @@ TEST_CASE("Is Greather or equal", "[doublex]")
         using dbx = LmFisica::doublex;
         dbx v1, v2;
         bool expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1, v2, expected) =
             GENERATE
             (
                 table<dbx, dbx, bool>
@@ -364,7 +365,7 @@ TEST_CASE("Is Greather or equal", "[doublex]")
                                     false)
                 })
             );
-        auto result = v1 >= v2;
+        const auto result = v1 >= v2;
         REQUIRE(result == expected);
     }
 }
@@ -377,7 +378,7 @@ TEST_CASE("Equal", "[doublex]")
         using dbx = LmFisica::doublex;
         dbx v1, v2;
         bool expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1, v2, expected) =
             GENERATE
             (
                 table<dbx, dbx, bool>
@@ -393,7 +394,7 @@ TEST_CASE("Equal", "[doublex]")
                                     false)
                 })
             );
-        auto result = v1 == v2;
+        const auto result = v1 == v2;
         CAPTURE(v1.V(), v1.S(), v2.V(), v2.S());
         REQUIRE(result == expected);
     }
@@ -407,7 +408,7 @@ TEST_CASE("Not equal", "[doublex]")
         using dbx = LmFisica::doublex;
         dbx v1, v2;
         bool expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1, v2, expected) =
             GENERATE
             (
                 table<dbx, dbx, bool>
@@ -423,7 +424,7 @@ TEST_CASE("Not equal", "[doublex]")
                                     true)
                 })
             );
-        auto result = v1 != v2;
+        const auto result = v1 != v2;
         CAPTURE(v1.V(), v1.S(), v2.V(), v2.S());
         REQUIRE(result == expected);
     }
@@ -437,7 +438,7 @@ TEST_CASE("Sin", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -447,12 +448,12 @@ TEST_CASE("Sin", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::sin(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::sin(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.V()/10.0, 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.V()/10.0,
                                        0.0000000001));
     }
 }
@@ -463,7 +464,7 @@ TEST_CASE("Cos", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -473,12 +474,12 @@ TEST_CASE("Cos", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::cos(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::cos(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -489,7 +490,7 @@ TEST_CASE("Tan", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -499,12 +500,12 @@ TEST_CASE("Tan", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::tan(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::tan(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -515,7 +516,7 @@ TEST_CASE("ASin", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -525,12 +526,12 @@ TEST_CASE("ASin", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::asin(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::asin(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -541,7 +542,7 @@ TEST_CASE("ACos", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -551,12 +552,12 @@ TEST_CASE("ACos", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::acos(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::acos(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -567,7 +568,7 @@ TEST_CASE("ATan", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -577,12 +578,12 @@ TEST_CASE("ATan", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::atan(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::atan(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -593,7 +594,7 @@ TEST_CASE("SinH", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -603,12 +604,12 @@ TEST_CASE("SinH", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::sinh(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::sinh(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -619,7 +620,7 @@ TEST_CASE("CosH", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -629,12 +630,12 @@ TEST_CASE("CosH", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::cosh(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::cosh(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -645,7 +646,7 @@ TEST_CASE("TanH", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -655,12 +656,12 @@ TEST_CASE("TanH", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::tanh(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::tanh(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -672,7 +673,7 @@ TEST_CASE("Floor", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -688,12 +689,12 @@ TEST_CASE("Floor", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::floor(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::floor(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -705,7 +706,7 @@ TEST_CASE("Ceil", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -721,12 +722,12 @@ TEST_CASE("Ceil", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::ceil(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::ceil(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -737,7 +738,7 @@ TEST_CASE("Significativos", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v, expected;
-        std::tie(v, expected) = 
+        std::tie(v, expected) =
             GENERATE
             (
                 table<dbx, dbx>
@@ -749,12 +750,12 @@ TEST_CASE("Significativos", "[doublex]")
                 })
             );
         CAPTURE(v.V(), v.S(), expected.V(), expected.S());
-        auto result = LmFisica::signi(v);
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = LmFisica::signi(v);
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -766,23 +767,23 @@ TEST_CASE("Mul left double", "[doublex]")
         using dbx = LmFisica::doublex;
         double vd;
         dbx vdbx, expected;
-        std::tie(vd, vdbx, expected) = 
+        std::tie(vd, vdbx, expected) =
             GENERATE
             (
                 table<double, dbx, dbx>
                 ({
-                    std::make_tuple(2.0, 
+                    std::make_tuple(2.0,
                                     dbx(3.0, 0.1),
                                     dbx(6.0, 0.2)),
                 })
             );
         CAPTURE(vd, vdbx.V(), vdbx.S(), expected.V(), expected.S());
-        auto result = vd * vdbx;
-        REQUIRE_THAT(result.V(), 
-            Catch::Matchers::WithinAbs(expected.V(), 
+        const auto result = vd * vdbx;
+        REQUIRE_THAT(result.V(),
+            Catch::Matchers::WithinAbs(expected.V(),
                                        0.0000000001));
-        REQUIRE_THAT(result.S(), 
-            Catch::Matchers::WithinAbs(expected.S(), 
+        REQUIRE_THAT(result.S(),
+            Catch::Matchers::WithinAbs(expected.S(),
                                        0.0000000001));
     }
 }
@@ -794,7 +795,7 @@ TEST_CASE("Mod", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v1, v2, expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1, v2, expected) =
             GENERATE
             (
                 table<dbx, dbx, dbx>
@@ -804,7 +805,7 @@ TEST_CASE("Mod", "[doublex]")
                                     dbx(2.1, 0.1414213562)),
                 })
             );
-        auto result = LmFisica::mod(v1, v2);
+        const auto result = LmFisica::mod(v1, v2);
         CAPTURE(v1.V(), v1.S(), v2.V(), v2.S());
         REQUIRE_THAT(result.V(), 
             Catch::Matchers::WithinAbs(expected.V(), 
@@ -821,18 +822,17 @@ TEST_CASE("Log", "[doublex]")
     {
         using dbx = LmFisica::doublex;
         dbx v1, v2, expected;
-        std::tie(v1, v2, expected) = 
+        std::tie(v1,expected) =
             GENERATE
             (
-                table<dbx, dbx, dbx>
+                table<dbx, dbx>
                 ({
                     std::make_tuple(dbx(12.1, 0.1),
-                                    dbx(10.0, 0.1),
                                     dbx(1.0827853703, 0.0035892106)),
                 })
             );
-        auto result = LmFisica::log(v1, v2);
-        CAPTURE(v1.V(), v1.S(), v2.V(), v2.S());
+        const auto result = LmFisica::log(v1);
+        CAPTURE(v1.V(), v1.S());
         REQUIRE_THAT(result.V(), 
             Catch::Matchers::WithinAbs(expected.V(), 
                                        0.0000000001));

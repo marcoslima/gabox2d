@@ -21,6 +21,7 @@ TEST_CASE( "CCar instance", "[CCar]" )
     class MockCGaCar : public GA::IGaCar
     {
     public:
+        MOCK_METHOD(GA::ga_car_ptr_t, clone, (), (override));
         MOCK_METHOD(string, getGenes, (), (const override));
         MOCK_METHOD(float, getPontuacao, (), (const override));
         MOCK_METHOD(CCarDef, getCarro, (), (const override));
@@ -33,9 +34,12 @@ TEST_CASE( "CCar instance", "[CCar]" )
     class MockCPhysCar : public PHYS::IPhysCar
     {
     public:
+        MOCK_METHOD(void, create, (PHYS::IWorldPtr world, const CCarDef &carro), (override));
+        MOCK_METHOD(void, simulation_step, (), (override));
+        MOCK_METHOD(bool, simulation_step_get_dead, (), (override));
+        MOCK_METHOD(void, measure, (PHYS::IWorldPtr world, const CCarDef &carro, float max_t), (override));
+        MOCK_METHOD(PHYS::phys_car_ptr_t, clone, (), (const, override));
         MOCK_METHOD(void, reset, (), (override));
-        MOCK_METHOD(bool, simulation_step, (), (override));
-        MOCK_METHOD(void, measure, (PHYS::IWorld& world, const MODEL::CCarDef &carro, float max_t), (override));
         MOCK_METHOD(void, init, (), (override));
         MOCK_METHOD(void, fill_gr_car, (GUI::IGrCar &car), (override));
         MOCK_METHOD(GA::fitness_params_t, get_ga_fitness_params, (), (override));
@@ -48,7 +52,6 @@ TEST_CASE( "CCar instance", "[CCar]" )
         MOCK_METHOD(float, getT, (), (const override));
         MOCK_METHOD(bool, isDead, (), (const override));
         MOCK_METHOD(string, deadReason, (), (const override));
-        MOCK_METHOD(void, create, (PHYS::IWorld &world, const MODEL::CCarDef &carro), (override));
         MOCK_METHOD(void, destroy, (), (override));
         MOCK_METHOD(void, init_simulation_vars, (), (override));
     };
@@ -56,6 +59,7 @@ TEST_CASE( "CCar instance", "[CCar]" )
     class MockCGrCar : public GUI::IGrCar
     {
     public:
+        MOCK_METHOD(GUI::gr_car_ptr_t, clone, (), (override));
         MOCK_METHOD(void, setBroke, (bool), (override));
         MOCK_METHOD(void, draw, (void *pParams), (const override));
         MOCK_METHOD(void, setRoda1, (float center_x, float center_y, float radius, float angle, bool touch), (override));
@@ -88,11 +92,11 @@ TEST_CASE( "CCar instance", "[CCar]" )
     SECTION("CCar beginSimulate") 
     {
         testing::InSequence seq;
-        MockCWorld testWorld;
+        auto testWorld = make_shared<MockCWorld>();
 
         {
             EXPECT_CALL(*ga_car, decode()).Times(1);
-            EXPECT_CALL(*phys_car, create(testing::Ref(testWorld), testing::_)).Times(1);
+            EXPECT_CALL(*phys_car, create(testing::_, testing::_)).Times(1);
         }
 
         sut.beginSimulate(testWorld);
