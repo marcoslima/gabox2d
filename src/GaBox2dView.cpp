@@ -915,37 +915,29 @@ namespace GUI
     {
         if (error) return;
 
-        const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + bytes_transferred);
+        const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + static_cast<int>(bytes_transferred));
 
         try
         {
-            if (status_serializer.deserializeGaStatus(data))
+            const vector<uint8_t> data_vector(data.begin(), data.end());
+            if (status_serializer.deserializeGaStatus(data_vector))
             {
                 current_status_ = status_serializer.getStatus();
-                // std::cout << "Received status: "
-                //         << "Generation: " << current_status_.generation
-                //         << ", GPS: " << current_status_.gps
-                //         << ", Best Fitness: " << current_status_.bestFitness
-                //         << ", History size: " << current_status_.best_history.size()
-                //         << ", Best Genes: " << current_status_.bestGenes
-                //         << std::endl;
             }
-
-            // Schedule redraw or update your UI
-            // In SFML you might want to set a flag that's checked in the main loop
-        } catch ([[maybe_unused]] const std::exception &e)
+        }
+        catch ([[maybe_unused]] const std::exception &e)
         {
             cerr << e.what() << std::endl;
             cerr << "Error deserializing data" << std::endl;
             cerr << data << std::endl;
         }
+
         // Continue reading
         const auto buffers = boost::asio::buffer(receive_buffer_);
-        auto handler = std::bind(
-            &CGaBox2dView::handleRead,
-            this,
-            std::placeholders::_1,
-            std::placeholders::_2);
+        auto handler = [this]<typename T0, typename T1>(T0 && PH1, T1 && PH2)
+        {
+            handleRead(std::forward<T0>(PH1), std::forward<T1>(PH2));
+        };
         socket_->async_read_some(buffers, handler);
     }
 

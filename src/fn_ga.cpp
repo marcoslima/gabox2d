@@ -72,18 +72,14 @@ void fnGa(void *pParam)
                 nLastGeneration = ga.getGeracao();
 
                 // Create status update and broadcast to GUI
-                ipc::GaStatus status;
-                status.generation = ga.getGeracao();
-                status.gps = gps;
-                status.bestFitness = ga.getBest()->getFitness();
-                status.bestGenes = ga.getBest()->getGenes();
-                status.population.clear();
-                for (const auto& car: ga.getPopulacao())
-                {
-                    status.population.emplace_back(car->getFitness(), car->getGenes());
-                }
-                status.best_history.clear();
-                status.best_history = ga.getMelhores();
+                ipc::GaStatus status(
+                    ga.getGeracao(),
+                    gps,
+                    ga.getBest()->getFitness(),
+                    ga.getBest()->getGenes(),
+                    ga.getPopulacao(),
+                    ga.getMelhores()
+                );
 
                 gaServer.broadcastStatus(status);
             }

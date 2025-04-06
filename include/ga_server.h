@@ -19,7 +19,7 @@ public:
     GaServer();
     ~GaServer();
     void startAccept();
-    void broadcastStatus(const ipc::GaStatus& status);
+    void broadcastStatus(ipc::GaStatus &status);
     bool isReady() const
     {
         return acceptor_.is_open();

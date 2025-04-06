@@ -5,6 +5,11 @@
 
 namespace GUI
 {
+    CGaInfoDlg::CGaInfoDlg()
+    : _status(0, 0.0, 0.0, "", {}, {})
+    {
+    }
+
     void CGaInfoDlg::render()
     {
         ImGui::Begin("GA Info");

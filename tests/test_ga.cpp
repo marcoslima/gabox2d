@@ -7,35 +7,43 @@ using namespace GA;
 
 TEST_CASE("CGa", "[GA]")
 {
-    class MockCWorld : public PHYS::IWorld
+    class MockWorld : public PHYS::IWorld
     {
         unsigned world_id;
-        bool operator==(const MockCWorld &rhs) const { return world_id == rhs.world_id; }
+
+        bool operator==(const MockWorld &rhs) const
+        {
+            return world_id == rhs.world_id;
+        }
+
         MOCK_METHOD(void*, getWorld, (), (override));
         MOCK_METHOD(void*, getGround, (), (override));
         MOCK_METHOD(void*, getChain, (), (override));
         MOCK_METHOD(void, create, (const MODEL::CEnv &env), (override));
         MOCK_METHOD(void, destroy, (), (override));
         MOCK_METHOD(bool, isValid, (), (override));
+
     public:
-        explicit MockCWorld(const unsigned id = 0U) : world_id(id) {}
+        explicit MockWorld(const unsigned id = 0U) : world_id(id) {}
     };
-    class MockCar: public ICar
+    class MockCar : public ICar
     {
+    public:
         MOCK_METHOD(void, calc_fitness, (float max_t), (override));
-        MOCK_METHOD(void, Medir, (PHYS::IWorld &world, float max_t), (override));
-        MOCK_METHOD(float, getFitness, (), (const, override));
+        MOCK_METHOD(void, Medir, (PHYS::IWorldPtr world, float max_t), (override));
         MOCK_METHOD(void, resetPhysCar, (), (override));
         MOCK_METHOD(void, createGaRandomCar, (), (override));
         MOCK_METHOD(void, createGaFromGenes, (const string &genes), (override));
-        MOCK_METHOD(void, beginSimulate, (PHYS::IWorld &world), (override));
+        MOCK_METHOD(void, beginSimulate, (PHYS::IWorldPtr world), (override));
         MOCK_METHOD(void, draw, (void *pParams), (const, override));
+        MOCK_METHOD(void, doStep, (), (override));
+        MOCK_METHOD(float, getFitness, (), (const, override));
+        MOCK_METHOD(bool, doStepGetContinue, (), (override));
         MOCK_METHOD(vec2f_t, getCenter, (), (const, override));
         MOCK_METHOD(string, getGenes, (), (const, override));
-        // MOCK_METHOD(bool, operator<, (const ICar &rhs), (const, override));
         MOCK_METHOD(float, getT, (), (const, override));
-        MOCK_METHOD(bool, doStep, (), (override));
         MOCK_METHOD(string, deadReason, (), (const, override));
+        MOCK_METHOD(icar_ptr_t, clone, (), (override));
     };
     class MockCarFactory : public ICarFactory
     {
@@ -50,7 +58,7 @@ TEST_CASE("CGa", "[GA]")
 
     SECTION("Instance")
     {
-        REQUIRE(make_sut()->m_melhores.empty());
+        REQUIRE(make_sut()->getPopulacaoLen() == 0);
     }
 
     SECTION("setParams")
@@ -70,30 +78,32 @@ TEST_CASE("CGa", "[GA]")
 
     SECTION("Ordena")
     {
-        MockCWorld world(42);
-        class MockCarOrdena: public ICar
+        class MockCarOrdena : public ICar
         {
         public:
+            [[nodiscard]] bool operator<(const ICar &rhs) const override {return true;};
             MOCK_METHOD(void, calc_fitness, (float max_t), (override));
-            MOCK_METHOD(void, Medir, (PHYS::IWorld &world, float max_t), (override));
-            MOCK_METHOD(float, getFitness, (), (const, override));
+            MOCK_METHOD(void, Medir, (PHYS::IWorldPtr world, float max_t), (override));
             MOCK_METHOD(void, resetPhysCar, (), (override));
             MOCK_METHOD(void, createGaRandomCar, (), (override));
             MOCK_METHOD(void, createGaFromGenes, (const string &genes), (override));
-            MOCK_METHOD(void, beginSimulate, (PHYS::IWorld &world), (override));
+            MOCK_METHOD(void, beginSimulate, (PHYS::IWorldPtr world), (override));
             MOCK_METHOD(void, draw, (void *pParams), (const, override));
+            MOCK_METHOD(void, doStep, (), (override));
+            MOCK_METHOD(float, getFitness, (), (const, override));
+            MOCK_METHOD(bool, doStepGetContinue, (), (override));
             MOCK_METHOD(vec2f_t, getCenter, (), (const, override));
             MOCK_METHOD(string, getGenes, (), (const, override));
             MOCK_METHOD(float, getT, (), (const, override));
-            MOCK_METHOD(bool, doStep, (), (override));
             MOCK_METHOD(string, deadReason, (), (const, override));
-            bool operator<(const ICar &rhs) const override
-                { return getFitness() < rhs.getFitness(); }
+            MOCK_METHOD(icar_ptr_t, clone, (), (override));
         };
+
         class MockCarFactoryOrdena : public ICarFactory
         {
         public:
             MOCK_METHOD(icar_ptr_t, createCarFromGenes, (const std::string& genes), (override));
+
             icar_ptr_t createRandomCar() override
             {
                 return make_unique<MockCarOrdena>();
@@ -101,6 +111,7 @@ TEST_CASE("CGa", "[GA]")
         };
         auto factory = make_unique<MockCarFactoryOrdena>();
         const auto sut = make_sut(std::move(factory));
+        const auto world = make_shared<MockWorld>(0U);
 
         sut->setParams(90, 1, 70, 65, 0, 5, 60);
         atomic<bool> stop_ga;
