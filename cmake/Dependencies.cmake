@@ -177,8 +177,7 @@ set(CDT_USE_AS_COMPILED_LIBRARY OFF)
 # Clone the CDT library from its GitHub repository
 IF (NOT EXISTS "${CDT_PATH}")
     execute_process(
-            COMMAND git clone https://github.com/artem-ogre/CDT.git ${CDT_PATH}
-
+            COMMAND git clone https://github.com/marcoslima/CDT.git ${CDT_PATH}
     )
 ELSE ()
     execute_process(
@@ -190,12 +189,6 @@ ELSE ()
             WORKING_DIRECTORY ${CDT_PATH}
     )
 ENDIF ()
-
-# MONKEY PATCH para resolver o problema do "redefinition etc":
-# Add #pragma once to CDT.hpp
-execute_process(
-    COMMAND bash -c "sed -i '1i#pragma once' ${CDT_PATH}/CDT/include/CDT.hpp"
-)
 
 # Build the CDT library
 execute_process(
