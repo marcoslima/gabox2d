@@ -18,9 +18,9 @@ namespace PHYS
 
     void _copy_dyn_params(const CCarDef &carro, car_t &car_def)
     {
-        copy(begin(carro._torque), end(carro._torque), begin(car_def.torque));
-        copy(begin(carro._freq), end(carro._freq), begin(car_def.freq));
-        copy(begin(carro._damp), end(carro._damp), begin(car_def.damp));
+        ranges::copy(carro._torque, begin(car_def.torque));
+        ranges::copy(carro._freq, begin(car_def.freq));
+        ranges::copy(carro._damp, begin(car_def.damp));
     }
 
     b2_roda_ou_peso_def _translate_roda(const CCarDef::CRodaParams &roda)
@@ -87,7 +87,7 @@ namespace PHYS
 
     void _read_circle_data(const b2BodyId body_id,
                            float &center_x, float &center_y,
-                           float &radius)
+                           float &radius, float& friction, float& density, float& restitution)
     {
         b2ShapeId shapes[1];
         b2Body_GetShapes(body_id, shapes, 1);
@@ -96,6 +96,11 @@ namespace PHYS
         auto [posCircle, _radius] = b2Shape_GetCircle(shapes[0]);
         const auto [x, y] = posRoda + posCircle;
 
+        friction = b2Shape_GetFriction(shapes[0]);
+        density = b2Shape_GetDensity(shapes[0]);
+        restitution = b2Shape_GetRestitution(shapes[0]);
+
+
         center_x = x;
         center_y = y;
         radius = _radius;
@@ -103,18 +108,20 @@ namespace PHYS
 
     void _read_roda_data(const b2BodyId roda_id,
                          float &center_x, float &center_y,
-                         float &radius, float &angle)
+                         float &radius, float &angle, float &friction, float &density, float &restitution)
     {
-        _read_circle_data(roda_id, center_x, center_y, radius);
+        _read_circle_data(roda_id, center_x, center_y, radius, friction, density, restitution);
 
         const auto rotation = b2Body_GetRotation(roda_id);
 
         angle = b2Rot_GetAngle(rotation);
+
     }
 
     void _read_peso_data(const b2BodyId peso_id, float &center_x, float &center_y, float &radius)
     {
-        _read_circle_data(peso_id, center_x, center_y, radius);
+        float friction, density, restitution;
+        _read_circle_data(peso_id, center_x, center_y, radius, friction, density, restitution);
     }
 
     CPhysCar::CPhysCar()
@@ -445,12 +452,12 @@ namespace PHYS
 
     void CPhysCar::fill_gr_car(GUI::IGrCar &car)
     {
-        float center_x, center_y, radius, angle;
-        _read_roda_data(m_Roda1Id, center_x, center_y, radius, angle);
-        car.setRoda1(center_x, center_y, radius, angle, m_bContactR1);
+        float center_x, center_y, radius, angle, friction, density, restitution;
+        _read_roda_data(m_Roda1Id, center_x, center_y, radius, angle, friction, density, restitution);
+        car.setRoda1(center_x, center_y, radius, angle, m_bContactR1, friction, density, restitution);
 
-        _read_roda_data(m_Roda2Id, center_x, center_y, radius, angle);
-        car.setRoda2(center_x, center_y, radius, angle, m_bContactR2);
+        _read_roda_data(m_Roda2Id, center_x, center_y, radius, angle, friction, density, restitution);
+        car.setRoda2(center_x, center_y, radius, angle, m_bContactR2, friction, density, restitution);
 
         _read_peso_data(m_Peso1Id, center_x, center_y, radius);
         car.setPeso1(center_x, center_y, radius, m_bDead);

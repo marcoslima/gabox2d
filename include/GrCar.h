@@ -25,12 +25,13 @@ public:
 
 	void draw(void *pParams) const override;
 
-	void setRoda1(float center_x, float center_y, float radius, float angle, bool touch) override;
-	void setRoda2(float center_x, float center_y, float radius, float angle, bool touch) override;
+	void setRoda1(float center_x, float center_y, float radius, float angle, bool touch, float friction, float density, float restitution) override;
+	void setRoda2(float center_x, float center_y, float radius, float angle, bool touch, float friction, float density, float restitution) override;
 	void setPeso1(float center_x, float center_y, float radius, bool broke) override;
 	void setPeso2(float center_x, float center_y, float radius, bool broke) override;
 	void setCenter(float center_x, float center_y) override;
 	void setBroke(bool broke) override;
+	void setShowRodaParams(bool show) override;
 	[[nodiscard]] gr_car_ptr_t clone() override;
 
 	class gr_circle_t
@@ -42,10 +43,12 @@ public:
 
 	using gr_roda_t = struct tagRoda
 	{
-		gr_circle_t	circle	;
-		bool		touch{}	;
-		float		angle{}	;
-
+		gr_circle_t	circle			;
+		bool		touch{}			;
+		float		angle{}			;
+		float		friction{}		;
+		float		density{}		;
+		float       restitution{}	;
 	};
 
 	using gr_peso_t = struct tagPeso
@@ -60,6 +63,7 @@ public:
 	gr_peso_t	 _peso2	= {};
 	sf::Vector2f _cm	= {};
 	bool		 _broke	= {};
+	bool _showRodaParams = false;;
 };
 
 }

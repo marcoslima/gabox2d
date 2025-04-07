@@ -34,6 +34,7 @@ namespace GUI
         CGaParamsDlg _dlgGaParams;
         CIdInfoDlg _panelIdInfo;
         CGaInfoDlg _panelGaInfo;
+        bool m_bShowParams = false;
 
         void startClient();
         void attemptConnect(const std::shared_ptr<boost::asio::steady_timer>& timer);
@@ -57,6 +58,7 @@ namespace GUI
         void OnEditEnvironment() override;
         void OnMostrarMelhor() override;
         void OnMostrarQualquer() override;
+        void OnToggleShowParams() override;
 
         void startGa(ga_params_t params) override;
         void SetDocument(IGaBox2dDocPtr doc) override;

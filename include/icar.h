@@ -24,6 +24,7 @@ public:
     virtual void beginSimulate(PHYS::IWorldPtr world) = 0;
     virtual void draw(void *pParams) const = 0;
     virtual void doStep() = 0;
+    virtual void setShowRodaParams(bool show) = 0;
     [[nodiscard]] virtual float getFitness() const = 0;
     [[nodiscard]] virtual bool doStepGetContinue() = 0;
     [[nodiscard]] virtual vec2f_t getCenter() const = 0;

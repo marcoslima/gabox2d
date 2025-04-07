@@ -28,6 +28,7 @@ public:
 	void beginSimulate(PHYS::IWorldPtr world) override;
 	void draw(void *pParams) const override;
 	void doStep() override;
+	void setShowRodaParams(bool show) override;
 	[[nodiscard]] float getFitness() const override;
 	[[nodiscard]] float getT() const override;
 	[[nodiscard]] bool operator<(const ICar &rhs) const override;
