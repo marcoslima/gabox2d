@@ -39,6 +39,7 @@ if(GABOX2D_BUILD_TESTS)
     ${CMAKE_SOURCE_DIR}/tests/test_random.cpp
     ${CMAKE_SOURCE_DIR}/tests/test_doublex.cpp
     ${CMAKE_SOURCE_DIR}/tests/test_msgpack.cpp
+    ${CMAKE_SOURCE_DIR}/tests/test_reedsolomon.cpp
   )
 
   # Link against the main project and Catch2

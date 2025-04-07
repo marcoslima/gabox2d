@@ -2,7 +2,6 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <ga_ipc.h>
-#include <ga.h>
 #include <msgpack/msgpack.hpp>
 #include <iostream>
 
@@ -33,12 +32,12 @@ TEST_CASE("MsgPack", "[msgpack]")
     }
 
     auto serialized = msgpack::pack(status);
-    cout << "Serialized size: " << serialized.size() << endl;
-    for (auto &byte: serialized)
-    {
-        cout << std::hex << (int) byte << " ";
-    }
-    cout << endl;
+    // cout << "Serialized size: " << serialized.size() << endl;
+    // for (auto &byte: serialized)
+    // {
+    //     cout << std::hex << static_cast<int>(byte) << " ";
+    // }
+    // cout << endl;
     auto deserialized = msgpack::unpack<ipc::GaStatus>(serialized.data(), serialized.size());
     REQUIRE(deserialized.generation == 1);
     REQUIRE(deserialized.gps == status.gps);
