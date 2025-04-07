@@ -144,7 +144,7 @@ IF (NOT EXISTS "${BOX2D_PATH}/build/bin/libbox2d.a")
     message(STATUS ">>>>> Building Box2D library")
     execute_process(
             WORKING_DIRECTORY ${BOX2D_PATH}/build
-            COMMAND cmake .. -DBOX2D_BUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Debug
+            COMMAND cmake .. -DCMAKE_BUILD_TYPE=Release -DBOX2D_AVX2=ON -DBOX2D_UNIT_TESTS=OFF -DBOX2D_ENABLE_SIMD=ON -DBOX2D_SAMPLES=OFF -DBOX2D_UNIT_TESTS=OFF
     )
     execute_process(
             WORKING_DIRECTORY ${BOX2D_PATH}/build
