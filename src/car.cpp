@@ -43,6 +43,11 @@ void CCar::doStep()
     _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
 }
 
+void CCar::setShowRodaParams(const bool show)
+{
+    m_gr_car_ptr->setShowRodaParams(show);
+}
+
 void CCar::Medir(const PHYS::IWorldPtr world, const float max_t)
 {
     m_ga_car_ptr->decode();

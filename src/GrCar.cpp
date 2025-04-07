@@ -28,11 +28,14 @@ namespace GUI
         circle.radius = radius;
     }
 
-    void fill_roda(CGrCar::gr_roda_t& roda, float center_x, float center_y, float radius, float angle, bool touch)
+    void fill_roda(CGrCar::gr_roda_t& roda, const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
     {
         fill_circle(roda.circle, center_x, center_y, radius);
         roda.angle = angle;
         roda.touch = touch;
+        roda.friction = friction;
+        roda.density = density;
+        roda.restitution = restitution;
     }
 
     void fill_peso(CGrCar::gr_peso_t& peso, const float center_x, const float center_y, const float radius, const bool broke)
@@ -41,14 +44,14 @@ namespace GUI
         peso.broke = broke;
     }
 
-    void CGrCar::setRoda1(const float center_x, const float center_y, const float radius, const float angle, const bool touch)
+    void CGrCar::setRoda1(const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
     {
-        fill_roda(_roda1, center_x, center_y, radius, angle, touch);
+        fill_roda(_roda1, center_x, center_y, radius, angle, touch, friction, density, restitution);
     }
 
-    void CGrCar::setRoda2(const float center_x, const float center_y, const float radius, const float angle, const bool touch)
+    void CGrCar::setRoda2(const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
     {
-        fill_roda(_roda2, center_x, center_y, radius, angle, touch);
+        fill_roda(_roda2, center_x, center_y, radius, angle, touch, friction, density, restitution);
     }
 
     void CGrCar::setPeso1(const float center_x, const float center_y, const float radius, const bool broke)
@@ -72,6 +75,11 @@ namespace GUI
         _broke = broke;
     }
 
+    void CGrCar::setShowRodaParams(const bool show)
+    {
+        _showRodaParams = show;
+    }
+
     gr_car_ptr_t CGrCar::clone()
     {
         auto car = std::make_shared<CGrCar>();
@@ -82,6 +90,16 @@ namespace GUI
         car->_cm = _cm;
         car->_broke = _broke;
         return car;
+    }
+
+    std::pair<sf::Vector2f, sf::Vector2f> calc_tick_line_points(const CGrCar::gr_circle_t& c, const float &angle)
+    {
+        const auto p1 = c.center;
+        const auto vx = c.radius * cos(angle);
+        const auto vy = c.radius * sin(angle);
+        const auto v = sf::Vector2f(vx, vy);
+        const auto p2 = p1 + v;
+        return std::make_pair(p1, p2);
     }
 
     void DrawRoda(sf::RenderWindow &window,
@@ -99,13 +117,8 @@ namespace GUI
 
         if(!draw_angle) return;
 
-        const auto p1 = c.center;
-        const auto vx = c.radius * cos(angle);
-        const auto vy = c.radius * sin(angle);
-        const auto v = sf::Vector2f(vx, vy);
-        const auto p2 = p1 + v;
-
-        DrawTickLine(window, p1, p2, pen);
+        const auto points = calc_tick_line_points(c, angle);
+        DrawTickLine(window, points.first, points.second, pen);
     }
 
     void DrawPeso(sf::RenderWindow &window,
@@ -113,6 +126,22 @@ namespace GUI
               const CPen &pen)
     {
         DrawDashedCircle(window, c.center, c.radius, pen, 0.2f, 0.2f);
+    }
+
+    void drawRodaParams(sf::Text& text, const CGrCar::gr_roda_t& roda, sf::RenderWindow& window)
+    {
+        constexpr auto xfactor = 1.3f;
+        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+1);
+        text.setString("f: " + std::to_string(roda.friction));
+        window.draw(text);
+
+        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+0.5f);
+        text.setString("d: " + std::to_string(roda.density));
+        window.draw(text);
+
+        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+0);
+        text.setString("r: " + std::to_string(roda.restitution));
+        window.draw(text);
     }
 
     void CGrCar::Draw(sf::RenderWindow &window) const
@@ -199,5 +228,14 @@ namespace GUI
         shapeCm.setRadius(radius2);
         shapeCm.setPosition(_cm.x - radius2, _cm.y - radius2);
         window.draw(shapeCm);
+
+        text.setCharacterSize(10);
+
+        if (_showRodaParams)
+        {
+            drawRodaParams(text, _roda1, window);
+            drawRodaParams(text, _roda2, window);
+        }
+
     }
 }

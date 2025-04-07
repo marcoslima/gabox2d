@@ -238,6 +238,7 @@ namespace GUI
         _draw_sky(window, env);
         _draw_ground(window);
         _draw_border(window, env);
+        doc->GetCar()->setShowRodaParams(m_bShowParams);
         doc->GetCar()->draw(&window);
     }
 
@@ -575,6 +576,11 @@ namespace GUI
 #endif
     }
 
+    void CGaBox2dView::OnToggleShowParams()
+    {
+        m_bShowParams = !m_bShowParams;
+    }
+
     void CGaBox2dView::OnInformaGagenes()
     {
         m_bShowInfoGaGenes = !m_bShowInfoGaGenes;
@@ -820,6 +826,9 @@ namespace GUI
                 break;
             case sf::Keyboard::Space:
                 OnSimulaPlay();
+                break;
+            case sf::Keyboard::P:
+                OnToggleShowParams();
                 break;
             default:
                 break;
