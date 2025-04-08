@@ -243,3 +243,48 @@ ELSE ()
     )
 ENDIF ()
 
+#########################################################################################################################################################
+# ░▒▓███████▓▒░░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░ ░▒▓███████▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓██████▓▒░░▒▓██████████████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+# ░▒▓███████▓▒░░▒▓██████▓▒░ ░▒▓██████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓████████▓▒░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░
+
+set(REEDSOLOMON_GIT_PATH "https://github.com/marcoslima/ReedSolomon.git")
+set(REEDSOLOMON_CHECKOUT "master")
+set(REEDSOLOMON_PATH ${CMAKE_CURRENT_BINARY_DIR}/ReedSolomon)
+
+# Clone the ReedSolomon library from its GitHub repository
+IF (NOT EXISTS "${REEDSOLOMON_PATH}")
+    message(STATUS ">>>>> Cloning ReedSolomon library into ${REEDSOLOMON_PATH}")
+    execute_process(
+            COMMAND git clone ${REEDSOLOMON_GIT_PATH} ${REEDSOLOMON_PATH}
+            COMMAND git checkout ${REEDSOLOMON_CHECKOUT}
+    )
+ELSE ()
+    message(STATUS ">>>>> Pulling ReedSolomon library at ${REEDSOLOMON_PATH}")
+    execute_process(
+            COMMAND git pull ${REEDSOLOMON_GIT_PATH}
+            WORKING_DIRECTORY ${REEDSOLOMON_PATH}
+    )
+ENDIF ()
+
+# Build the ReedSolomon library
+IF (NOT EXISTS "${REEDSOLOMON_PATH}/build")
+    message(STATUS ">>>>> Creating ReedSolomon build directory")
+    execute_process(
+            COMMAND mkdir ${REEDSOLOMON_PATH}/build
+    )
+ENDIF ()
+
+message(STATUS ">>>>> Building ReedSolomon library")
+execute_process(
+        WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
+        COMMAND cmake .. -DCMAKE_BUILD_TYPE=Debug
+)
+execute_process(
+        WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
+        COMMAND cmake --build . -j20
+)

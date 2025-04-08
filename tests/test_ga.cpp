@@ -81,6 +81,7 @@ TEST_CASE("CGa", "[GA]")
         class MockCarOrdena : public ICar
         {
         public:
+            MOCK_METHOD(void, setShowRodaParams, (bool show), (override));
             [[nodiscard]] bool operator<(const ICar &rhs) const override {return true;};
             MOCK_METHOD(void, calc_fitness, (float max_t), (override));
             MOCK_METHOD(void, Medir, (PHYS::IWorldPtr world, float max_t), (override));

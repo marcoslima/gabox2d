@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/asio.hpp>
-#include <ga_ipc.h>
+
+#include "rs_codec.h"
 
 using namespace std;
 
@@ -14,14 +15,14 @@ class GaServer
     vec_socket_t clients_;
     mutex clients_mutex_;
     thread server_thread_;
+    RsCodec rs_codec_;
 
+    std::string compose_message_(const std::string &data);
 public:
     GaServer();
     ~GaServer();
     void startAccept();
-    void broadcastStatus(ipc::GaStatus &status);
-    bool isReady() const
-    {
-        return acceptor_.is_open();
-    }
+    void broadcastStatus(const string &data);
+    [[nodiscard]] bool isReady() const;
 };
+

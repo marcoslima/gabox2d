@@ -3,7 +3,7 @@
 #include <ga_params.h>
 #include <memory>
 #include <IGaBox2dDoc.h>
-#include <ga_ipc.h>
+#include <ga_status.h>
 
 namespace GUI
 {
