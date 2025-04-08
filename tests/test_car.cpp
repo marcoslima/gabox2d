@@ -59,11 +59,12 @@ TEST_CASE( "CCar instance", "[CCar]" )
     class MockCGrCar : public GUI::IGrCar
     {
     public:
+        MOCK_METHOD(void, setShowRodaParams, (bool show), (override));
         MOCK_METHOD(GUI::gr_car_ptr_t, clone, (), (override));
         MOCK_METHOD(void, setBroke, (bool), (override));
         MOCK_METHOD(void, draw, (void *pParams), (const override));
-        MOCK_METHOD(void, setRoda1, (float center_x, float center_y, float radius, float angle, bool touch), (override));
-        MOCK_METHOD(void, setRoda2, (float center_x, float center_y, float radius, float angle, bool touch), (override));
+        MOCK_METHOD(void, setRoda1, (float center_x, float center_y, float radius, float angle, bool touch, float, float, float), (override));
+        MOCK_METHOD(void, setRoda2, (float center_x, float center_y, float radius, float angle, bool touch, float, float, float), (override));
         MOCK_METHOD(void, setPeso1, (float center_x, float center_y, float radius, bool broke), (override));
         MOCK_METHOD(void, setPeso2, (float center_x, float center_y, float radius, bool broke), (override));
         MOCK_METHOD(void, setCenter, (float center_x, float center_y), (override));

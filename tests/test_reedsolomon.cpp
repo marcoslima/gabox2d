@@ -157,4 +157,72 @@ TEST_CASE("ReedSolomon", "[reedsolomon]")
         // Compare with original message:
         REQUIRE(unpacked_data_envelope.data == test_string);
     }
+
+    SECTION("With unrecovarable errors")
+    {
+        // Divide into chunks
+        const auto chunks = RS::DataChunker::ChunkData(data, 100);
+        // cout << "Number of chunks: " << chunks.size() << endl;
+        // for (auto &chunk: chunks)
+        // {
+        //     cout << "Chunk size: " << std::dec << chunk.size() << endl;
+        //     for (auto &byte: chunk)
+        //     {
+        //         cout << std::hex << static_cast<int>(byte) << " ";
+        //     }
+        //     cout << endl;
+        // }
+
+        // Encode chunks with Reed-Solomon
+        ReedSolomon rs(8 * sizeof(RSWord), 5);
+        vector<vector<RSWord>> encoded_chunks;
+        ranges::transform(chunks, std::back_inserter(encoded_chunks),
+                          [&rs](const auto &chunk)
+                          {
+                              return rs.Encode(vector<RSWord>(chunk.begin(), chunk.end()));
+                          });
+        // cout << "Encoded chunks size: " << std::dec << encoded_chunks.size() << endl;
+
+        // Introduce some errors:
+        // Corrupt message with random letters (errors with unknown position)
+        encoded_chunks[0][2] = 'X';
+        encoded_chunks[0][10] = 'X';
+        encoded_chunks[1][0] = 'Q';
+        encoded_chunks[1][15] = 'Q';
+        encoded_chunks[5][5] = 'Q';
+        encoded_chunks[5][3] = 'Q';
+        encoded_chunks[5][6] = 'Q';
+        encoded_chunks[5][8] = 'Q';
+        // encoded_chunks[5][23] = 'Q';
+        vector corrupted_chunks{0, 1, 5};
+        constexpr auto expected_errors = 6;
+
+        // Verify if chunks are corrupted
+        try
+        {
+            for (const auto i : ranges::views::iota(0u, encoded_chunks.size()))
+            {
+                REQUIRE(rs.IsMessageCorrupted(encoded_chunks[i]) == (std::find(corrupted_chunks.begin(), corrupted_chunks.end(), i) != corrupted_chunks.end()));
+            }
+        }
+        catch (const std::exception &e)
+        {
+            cout << "Exception: " << e.what() << endl;
+        }
+
+        // Decode chunks with Reed-Solomon
+        vector<vector<RSWord>> decoded_chunks;
+        uint64_t total_errors_found = 0;
+        REQUIRE_THROWS([&]
+        {
+            ranges::transform(encoded_chunks, std::back_inserter(decoded_chunks),
+                              [&rs, &total_errors_found](const auto &chunk)
+                              {
+                                  uint64_t errors_found = 0;
+                                  auto result = rs.Decode(chunk, nullptr, &errors_found);
+                                  total_errors_found += errors_found;
+                                  return result;
+                              });
+        }());
+    }
 }
