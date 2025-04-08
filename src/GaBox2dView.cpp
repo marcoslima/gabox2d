@@ -10,7 +10,7 @@
 #include <GaParamsDlg.h>
 #include <phys.h>
 #include <fn_ga.h>
-#include <ga_server.h>
+#include <network/ga_server.h>
 #include <triangulation.h>
 
 #include "CRandom.h"

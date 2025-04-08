@@ -14,8 +14,6 @@ class GaServer
     mutex clients_mutex_;
     thread server_thread_;
 
-    string _compose_message(const string& data);
-
 public:
     GaServer();
     ~GaServer();
@@ -23,3 +21,4 @@ public:
     void broadcastStatus(const string &data);
     [[nodiscard]] bool isReady() const;
 };
+

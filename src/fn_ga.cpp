@@ -6,7 +6,7 @@
 #include "ga.h"
 #include "World.h"
 #include <ga_status.h>
-#include <ga_server.h>
+#include <network/ga_server.h>
 
 using namespace std;
 

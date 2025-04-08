@@ -28,7 +28,7 @@ add_library(GaBox2dLib
         src/fn_ga.cpp
         src/main_menu.cpp
         src/sfml_primitives.cpp
-        src/ga_server.cpp
+        src/network/ga_server.cpp
         src/network/ipc_client.cpp
         src/triangulation.cpp
         src/random_genes_generator.cpp

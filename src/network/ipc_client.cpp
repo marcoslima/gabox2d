@@ -1,4 +1,5 @@
 #include <network/ipc_client.h>
+#include <network/common.h>
 
 
 namespace Net
@@ -94,8 +95,6 @@ namespace Net
     void IpcClient::handleRead(const boost::system::error_code &error, const size_t bytes_transferred)
     {
         if (error) return;
-        const std::string START_OF_MESSAGE = "GA_SERVER_START_OF_MESSAGE";
-        const std::string END_OF_MESSAGE = "GA_SERVER_END_OF_MESSAGE";
 
         std::string data(receive_buffer_.begin(), receive_buffer_.begin() + static_cast<int>(bytes_transferred));
         _message_buffer.append(data);
