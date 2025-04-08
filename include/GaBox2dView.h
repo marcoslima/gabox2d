@@ -5,15 +5,12 @@
 #include <IGaBox2dView.h>
 #include "GaBox2dDoc.h"
 #include <GaInfo.h>
-#include <ga_ipc.h>
+#include <network/ipc_client.h>
 #include <thread_params.h>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/ip/tcp.hpp>
 
 #include "GaInfoDlg.h"
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
-#include "triangulation.h"
 
 
 using namespace GA;
@@ -22,24 +19,14 @@ namespace GUI
 {
     class CGaBox2dView final : public IGaBox2dView
     {
-        std::unique_ptr<boost::asio::io_context> io_context_;
-        std::unique_ptr<boost::asio::ip::tcp::socket> socket_;
-        std::vector<char> receive_buffer_;
-        bool connected_ = false;
         ipc::GaStatus current_status_{};
-        std::thread client_thread_;
-        const size_t BUFFER_SIZE = 40960;
-        ipc::GaStatusSerializer status_serializer;
 
         CGaParamsDlg _dlgGaParams;
         CIdInfoDlg _panelIdInfo;
         CGaInfoDlg _panelGaInfo;
         bool m_bShowParams = false;
-
-        void startClient();
-        void attemptConnect(const std::shared_ptr<boost::asio::steady_timer>& timer);
-        void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
-
+        ipc::GaStatusSerializer status_serializer;
+        Net::IpcClient ipc_client;
         void updateIdInfo();
         void updateGaInfo();
     public:
@@ -79,6 +66,8 @@ namespace GUI
         [[nodiscard]] const ipc::GaStatus& getCurrentStatus() const override;
 
         bool _confirm_stop_ga();
+
+        void onDataReceived(string &data);
 
         // Attributes
     private:

@@ -11,6 +11,7 @@
 #include <phys.h>
 #include <fn_ga.h>
 #include <ga_server.h>
+#include <triangulation.h>
 
 #include "CRandom.h"
 
@@ -22,35 +23,20 @@ namespace GUI
           {
               this->startGa(params);
           })
+          , ipc_client("127.0.0.1", 9876, [this](std::string &data)
+          {
+              onDataReceived(data);
+          })
           , m_nVelocidade(2)
           , m_bGaRunning(false)
           , m_bGaExited(false)
           , m_bShowInfoId(true)
           , m_bShowInfoGaGenes(false)
-          , m_bWaitingEvolucao(false) {}
+          , m_bWaitingEvolucao(false)
+    {}
 
     CGaBox2dView::~CGaBox2dView()
     {
-        // Stop the IO context to cancel any outstanding operations
-        if (io_context_)
-        {
-            io_context_->stop();
-        }
-
-        // Close the socket
-        if (socket_ && socket_->is_open())
-        {
-            boost::system::error_code ec;
-            socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-            socket_->close(ec);
-        }
-
-        // Wait for the client thread to finish
-        if (client_thread_.joinable())
-        {
-            client_thread_.join();
-        }
-
         // Clean up the GA thread if still running
         if (isGaRunning())
         {
@@ -408,7 +394,7 @@ namespace GUI
         m_bGaRunning = true;
         cout << "Iniciando thread do GA..." << endl;
         _ga_thread = thread(fnGa, &_thread_params);
-        startClient();
+        ipc_client.startClient();
     }
 
     void CGaBox2dView::_show_start_ga_params()
@@ -866,88 +852,21 @@ namespace GUI
         return false;
     }
 
-    void CGaBox2dView::startClient()
+    void CGaBox2dView::onDataReceived(string &data)
     {
-        io_context_ = std::make_unique<boost::asio::io_context>();
-        socket_ = std::make_unique<boost::asio::ip::tcp::socket>(*io_context_);
-        connected_ = false;
-        // Start a reconnection timer
-        const auto timer = std::make_shared<boost::asio::steady_timer>(*io_context_, chrono::seconds(1));
-        attemptConnect(timer);
-
-        // Run IO context in separate thread
-        client_thread_ = std::thread([this]
-        {
-            try
-            {
-                io_context_->run();
-            } catch (const std::exception &e)
-            {
-                std::cerr << "Client error: " << e.what() << std::endl;
-            }
-        });
-    }
-
-    void CGaBox2dView::attemptConnect(const std::shared_ptr<boost::asio::steady_timer>& timer)
-    {
+        const vector<uint8_t> data_vector(data.begin(), data.end());
         try
         {
-            socket_->connect(boost::asio::ip::tcp::endpoint(
-                boost::asio::ip::address::from_string("127.0.0.1"), 9876));
-            connected_ = true;
-
-            std::cout << "Connected to GA server" << std::endl;
-
-            // Start async read
-            receive_buffer_.resize(BUFFER_SIZE);
-            socket_->async_read_some(
-                boost::asio::buffer(receive_buffer_),
-                std::bind(&CGaBox2dView::handleRead, this,
-                          std::placeholders::_1, std::placeholders::_2));
-        } catch ([[maybe_unused]] const std::exception &e)
-        {
-            std::cerr << "Connection attempt failed, retrying in 1 second..." << std::endl;
-
-            // Schedule reconnection attempt
-            timer->expires_after(chrono::seconds(1));
-            timer->async_wait([this, timer](const boost::system::error_code &error)
-            {
-                if (!error)
-                {
-                    attemptConnect(timer);
-                }
-            });
-        }
-    }
-
-    void CGaBox2dView::handleRead(const boost::system::error_code &error, const size_t bytes_transferred)
-    {
-        if (error) return;
-
-        const std::string data(receive_buffer_.begin(), receive_buffer_.begin() + static_cast<int>(bytes_transferred));
-
-        try
-        {
-            const vector<uint8_t> data_vector(data.begin(), data.end());
             if (status_serializer.deserializeGaStatus(data_vector))
             {
                 current_status_ = status_serializer.getStatus();
             }
-        }
-        catch ([[maybe_unused]] const std::exception &e)
+        } catch ([[maybe_unused]] const std::exception &e)
         {
             cerr << e.what() << std::endl;
             cerr << "Error deserializing data" << std::endl;
             cerr << data << std::endl;
         }
-
-        // Continue reading
-        const auto buffers = boost::asio::buffer(receive_buffer_);
-        auto handler = [this]<typename T0, typename T1>(T0 && PH1, T1 && PH2)
-        {
-            handleRead(std::forward<T0>(PH1), std::forward<T1>(PH2));
-        };
-        socket_->async_read_some(buffers, handler);
     }
 
     void CGaBox2dView::updateIdInfo()
@@ -961,7 +880,6 @@ namespace GUI
                          doc->GetCar()->getT(),
                          doc->GetCar()->getGenes(),
                          doc->GetCar()->deadReason());
-
     }
 
     void CGaBox2dView::updateGaInfo()

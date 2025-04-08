@@ -1,7 +1,7 @@
 #pragma once
 
 #include <IPanel.h>
-#include <ga_ipc.h>
+#include <ga_status.h>
 
 
 namespace GUI

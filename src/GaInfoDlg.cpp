@@ -14,7 +14,7 @@ namespace GUI
     {
         ImGui::Begin("GA Info");
         ImGui::BeginGroup();
-        ImGui::Text("Geração: %d", _status.generation);
+        ImGui::Text("Geração: %lu", _status.generation);
         ImGui::Text("População: %ld", _status.population.size());
         ImGui::Text("Gens p/s: %f", _status.gps);
         ImGui::Text("Melhor fitness: %f", _status.bestFitness);
