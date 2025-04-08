@@ -1,6 +1,7 @@
 #include "GrCar.h"
 
 #include <cmath>
+#include <random>
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -18,17 +19,19 @@ namespace GUI
 
     void CGrCar::draw(void *pParams) const
     {
-        Draw(*static_cast<sf::RenderWindow*>(pParams));
+        Draw(*static_cast<sf::RenderWindow *>(pParams));
     }
 
-    void fill_circle(CGrCar::gr_circle_t& circle, const float center_x, const float center_y, const float radius)
+    void fill_circle(CGrCar::gr_circle_t &circle, const float center_x, const float center_y, const float radius)
     {
         circle.center.x = center_x;
         circle.center.y = center_y;
         circle.radius = radius;
     }
 
-    void fill_roda(CGrCar::gr_roda_t& roda, const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
+    void fill_roda(CGrCar::gr_roda_t &roda, const float center_x, const float center_y, const float radius,
+                   const float angle, const bool touch, const float friction, const float density,
+                   const float restitution)
     {
         fill_circle(roda.circle, center_x, center_y, radius);
         roda.angle = angle;
@@ -38,18 +41,21 @@ namespace GUI
         roda.restitution = restitution;
     }
 
-    void fill_peso(CGrCar::gr_peso_t& peso, const float center_x, const float center_y, const float radius, const bool broke)
+    void fill_peso(CGrCar::gr_peso_t &peso, const float center_x, const float center_y, const float radius,
+                   const bool broke)
     {
         fill_circle(peso.circle, center_x, center_y, radius);
         peso.broke = broke;
     }
 
-    void CGrCar::setRoda1(const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
+    void CGrCar::setRoda1(const float center_x, const float center_y, const float radius, const float angle,
+                          const bool touch, const float friction, const float density, const float restitution)
     {
         fill_roda(_roda1, center_x, center_y, radius, angle, touch, friction, density, restitution);
     }
 
-    void CGrCar::setRoda2(const float center_x, const float center_y, const float radius, const float angle, const bool touch, const float friction, const float density, const float restitution)
+    void CGrCar::setRoda2(const float center_x, const float center_y, const float radius, const float angle,
+                          const bool touch, const float friction, const float density, const float restitution)
     {
         fill_roda(_roda2, center_x, center_y, radius, angle, touch, friction, density, restitution);
     }
@@ -92,7 +98,7 @@ namespace GUI
         return car;
     }
 
-    std::pair<sf::Vector2f, sf::Vector2f> calc_tick_line_points(const CGrCar::gr_circle_t& c, const float &angle)
+    std::pair<sf::Vector2f, sf::Vector2f> calc_tick_line_points(const CGrCar::gr_circle_t &c, const float &angle)
     {
         const auto p1 = c.center;
         const auto vx = c.radius * cos(angle);
@@ -115,31 +121,32 @@ namespace GUI
         brush.apply(circle_shape);
         window.draw(circle_shape);
 
-        if(!draw_angle) return;
+        if (!draw_angle) return;
 
         const auto points = calc_tick_line_points(c, angle);
         DrawTickLine(window, points.first, points.second, pen);
     }
 
     void DrawPeso(sf::RenderWindow &window,
-              const CGrCar::gr_circle_t &c,
-              const CPen &pen)
+                  const CGrCar::gr_circle_t &c,
+                  const CPen &pen)
     {
         DrawDashedCircle(window, c.center, c.radius, pen, 0.2f, 0.2f);
     }
 
-    void drawRodaParams(sf::Text& text, const CGrCar::gr_roda_t& roda, sf::RenderWindow& window)
+    void CGrCar::drawRodaParams(sf::Text &text, const gr_roda_t &roda, sf::RenderWindow &window)
     {
         constexpr auto xfactor = 1.3f;
-        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+1);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(roda.circle.center.x + roda.circle.radius * xfactor, roda.circle.center.y + 1);
         text.setString("f: " + std::to_string(roda.friction));
         window.draw(text);
 
-        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+0.5f);
+        text.setPosition(roda.circle.center.x + roda.circle.radius * xfactor, roda.circle.center.y + 0.5f);
         text.setString("d: " + std::to_string(roda.density));
         window.draw(text);
 
-        text.setPosition(roda.circle.center.x+roda.circle.radius*xfactor, roda.circle.center.y+0);
+        text.setPosition(roda.circle.center.x + roda.circle.radius * xfactor, roda.circle.center.y + 0);
         text.setString("r: " + std::to_string(roda.restitution));
         window.draw(text);
     }
@@ -164,29 +171,17 @@ namespace GUI
         text.setOrigin(12, 12);
 
         // Roda 1
-        const CSolidBrush *pBsh = (_roda1.touch) ? &bshRodaC : &bshRoda;
-        const CPen *pPen = (_roda1.touch) ? &penRodaC : &penRoda;
+        const CSolidBrush *pBsh = _roda1.touch ? &bshRodaC : &bshRoda;
+        const CPen *pPen = _roda1.touch ? &penRodaC : &penRoda;
         DrawRoda(window, _roda1.circle, _roda1.angle, *pPen, *pBsh);
 
-        // TODO: Adicionar opção para desenhar ou não o texto
-        // text.setPosition(_roda1.circle.center.x, _roda1.circle.center.y);
-        // text.setString("R1");
-        // window.draw(text);
-
         // Roda 2
-        pBsh = (_roda2.touch) ? (&bshRodaC) : (&bshRoda);
-        pPen = (_roda2.touch) ? (&penRodaC) : (&penRoda);
+        pBsh = _roda2.touch ? &bshRodaC : &bshRoda;
+        pPen = _roda2.touch ? &penRodaC : &penRoda;
         DrawRoda(window, _roda2.circle, _roda2.angle, *pPen, *pBsh);
 
-        // TODO: Adicionar opção para desenhar ou não o texto
-        // text.setPosition(_roda2.circle.center.x, _roda2.circle.center.y);
-        // text.setString("R2");
-        // window.draw(text);
-
         // Pesos 1 e 2
-        const CSolidBrush bshNull(sf::Color(0, 0, 0, 0));
         const CPen penPeso(sf::Color(255, 0, 0), 0.2);
-        // penPeso.SetDashStyle(DashStyleDot);
 
         DrawPeso(window, _peso1.circle, penPeso);
         DrawPeso(window, _peso2.circle, penPeso);
@@ -236,6 +231,5 @@ namespace GUI
             drawRodaParams(text, _roda1, window);
             drawRodaParams(text, _roda2, window);
         }
-
     }
 }

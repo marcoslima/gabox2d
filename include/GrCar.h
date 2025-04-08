@@ -64,6 +64,10 @@ public:
 	sf::Vector2f _cm	= {};
 	bool		 _broke	= {};
 	bool _showRodaParams = false;;
+
+private:
+	static void drawRodaParams(sf::Text &text, const gr_roda_t &roda, sf::RenderWindow &window) ;
+
 };
 
 }

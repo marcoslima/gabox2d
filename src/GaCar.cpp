@@ -53,7 +53,7 @@ namespace GA
         {
             stringstream ss;
             ss << "Invalid genes size: " << genes.size();
-            throw(length_error(ss.str().c_str()));
+            throw length_error(ss.str().c_str());
         }
 
         _genes = genes;
@@ -93,7 +93,7 @@ namespace GA
         const float p4 = 1000 - fitness_params.distance;
         const float p5 = fitness_params.time; // 0 - t = -t, mas como será ao quadrado, deixa t mesmo.
 
-        float pts = (p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5);
+        float pts = p1*p1 + p2*p2 + p3*p3 + p4*p4 + p5*p5;
 
         // Se quebrou, vale um décimo de um que não quebrou:
         if(fitness_params.is_dead) pts *= 10;
@@ -106,12 +106,12 @@ namespace GA
         constexpr CCarDef::circle_params_bits circle_bits;
         constexpr CCarDef::body_params_bits body_bits;
         return {
-            decodeBinaryValue(genes, pos, circle_bits.x, -8, 8),    // x
-            decodeBinaryValue(genes, pos, circle_bits.y, 2, 8),     // y
-            decodeBinaryValue(genes, pos, circle_bits.raio, 0.2, 3),   // radius
-            decodeBinaryValue(genes, pos, body_bits.densidade, 0.1, 10),  // densidade
-            decodeBinaryValue(genes, pos, body_bits.friccao, 0.1, 2),   // friccao
-            decodeBinaryValue(genes, pos, body_bits.elasticidade, 0, 1)      // elasticidade
+            decodeBinaryValue(genes, pos, circle_bits.x, -8.0, 8.0),    // x
+            decodeBinaryValue(genes, pos, circle_bits.y, 2.0, 8.0),     // y
+            decodeBinaryValue(genes, pos, circle_bits.raio, 0.2, 3.0),   // radius
+            decodeBinaryValue(genes, pos, body_bits.densidade, 0.1, 10.0),  // densidade
+            decodeBinaryValue(genes, pos, body_bits.friccao, 0.1, 5.0),   // friccao
+            decodeBinaryValue(genes, pos, body_bits.elasticidade, 0.0, 1.0)      // elasticidade
         };
     }
 
@@ -122,7 +122,7 @@ namespace GA
         const auto genes_size = genes.size();
         for (size_t i = 0; i < bits && pos < genes_size; i++, pos++)
         {
-            value = (value << 1) | (genes[pos] == '1' ? 1 : 0);
+            value = value << 1 | (genes[pos] == '1' ? 1 : 0);
         }
 
         // Map binary value to float range
