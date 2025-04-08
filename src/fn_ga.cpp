@@ -5,7 +5,7 @@
 #include "CCronometro.h"
 #include "ga.h"
 #include "World.h"
-#include <ga_ipc.h>
+#include <ga_status.h>
 #include <ga_server.h>
 
 using namespace std;
@@ -31,7 +31,6 @@ void fnGa(void *pParam)
     world->create(tp->m_env);
 
     GaServer gaServer;
-    // gaServer.startAccept();
 
     GA::CGa ga(make_unique<CCarFactory>());
     const float cross = gaParams.m_fCrossover;
@@ -52,7 +51,7 @@ void fnGa(void *pParam)
     crInfo.Start();
 
     // Medição da velocidade gerações por segundo:
-    double gps = -1;
+    float gps = -1;
     size_t nCount = 0;
     constexpr size_t N = 10;
     size_t nLastGeneration = 0;
@@ -80,8 +79,8 @@ void fnGa(void *pParam)
                     ga.getPopulacao(),
                     ga.getMelhores()
                 );
-
-                gaServer.broadcastStatus(status);
+                auto data = ipc::GaStatusSerializer::serializeGaStatus(status);
+                gaServer.broadcastStatus(data);
             }
         }
 
@@ -92,7 +91,7 @@ void fnGa(void *pParam)
         nCount++;
         if (nCount == N)
         {
-            gps = static_cast<double>(N) / crGa.Get();
+            gps = N / static_cast<float>(crGa.Get());
             nCount = 0;
             crGa.Start();
         }
