@@ -45,16 +45,27 @@ void GaServer::startAccept()
     });
 }
 
-void GaServer::broadcastStatus(ipc::GaStatus &status)
+string GaServer::_compose_message(const string& data)
 {
-    auto data = ipc::GaStatusSerializer::serializeGaStatus(status);
-    std::lock_guard lock(clients_mutex_);
+    const string START_OF_MESSAGE = "GA_SERVER_START_OF_MESSAGE";
+    const string END_OF_MESSAGE = "GA_SERVER_END_OF_MESSAGE";
 
+    auto message = string(data.begin(), data.end());
+    message.insert(0, START_OF_MESSAGE);
+    message.append(END_OF_MESSAGE);
+
+    return std::move(message);
+}
+
+void GaServer::broadcastStatus(const string &data)
+{
+    std::lock_guard lock(clients_mutex_);
+    auto message = _compose_message(data);
     for (auto it = clients_.begin(); it != clients_.end();)
     {
         try
         {
-            boost::asio::write(**it, boost::asio::buffer(data));
+            boost::asio::write(**it, boost::asio::buffer(message));
             ++it;
         }
         catch (const std::exception &)
@@ -62,4 +73,9 @@ void GaServer::broadcastStatus(ipc::GaStatus &status)
             it = clients_.erase(it);
         }
     }
+}
+
+bool GaServer::isReady() const
+{
+    return acceptor_.is_open();
 }

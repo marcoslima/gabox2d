@@ -1,6 +1,5 @@
 #pragma once
 #include <boost/asio.hpp>
-#include <ga_ipc.h>
 
 using namespace std;
 
@@ -15,13 +14,12 @@ class GaServer
     mutex clients_mutex_;
     thread server_thread_;
 
+    string _compose_message(const string& data);
+
 public:
     GaServer();
     ~GaServer();
     void startAccept();
-    void broadcastStatus(ipc::GaStatus &status);
-    bool isReady() const
-    {
-        return acceptor_.is_open();
-    }
+    void broadcastStatus(const string &data);
+    [[nodiscard]] bool isReady() const;
 };
