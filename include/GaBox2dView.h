@@ -67,7 +67,7 @@ namespace GUI
 
         bool _confirm_stop_ga();
 
-        void onDataReceived(string &data);
+        void onDataReceived(const string &data);
 
         // Attributes
     private:

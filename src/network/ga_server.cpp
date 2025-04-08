@@ -1,15 +1,14 @@
 #include <network/ga_server.h>
 #include <iostream>
 #include <thread>
+#include <network/common.h>
 
 using namespace boost::asio::ip;
-
-const std::string START_OF_MESSAGE{"GA_SERVER_START_OF_MESSAGE"};
-const std::string END_OF_MESSAGE{"GA_SERVER_END_OF_MESSAGE"};
 
 
 GaServer::GaServer()
     : acceptor_(io_context_, tcp::endpoint(tcp::v4(), 9876))
+    , rs_codec_(RS_CHUNK_SIZE, RS_REDUNDANCY)
 {
     startAccept();
     server_thread_ = std::thread([this]
@@ -48,9 +47,10 @@ void GaServer::startAccept()
     });
 }
 
-string compose_message(const string& data)
+string GaServer::compose_message_(const string& data)
 {
-    auto message = string(data.begin(), data.end());
+    auto rs_encoded = rs_codec_.encode(data);
+    auto message = string(rs_encoded.begin(), rs_encoded.end());
     message.insert(0, START_OF_MESSAGE);
     message.append(END_OF_MESSAGE);
 
@@ -60,7 +60,7 @@ string compose_message(const string& data)
 void GaServer::broadcastStatus(const string &data)
 {
     std::lock_guard lock(clients_mutex_);
-    auto message = compose_message(data);
+    auto message = compose_message_(data);
     for (auto it = clients_.begin(); it != clients_.end();)
     {
         try

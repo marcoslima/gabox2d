@@ -4,10 +4,11 @@
 
 namespace Net
 {
-    IpcClient::IpcClient(const std::string& server_ip, const int server_port, const std::function<void(std::string &)> &onData)
+    IpcClient::IpcClient(const std::string& server_ip, const int server_port, const std::function<void(const std::string &)> &onData)
         : onData(onData)
         , _server_ip(server_ip)
         , _server_port(server_port)
+        , rs_codec_(RS_CHUNK_SIZE, RS_REDUNDANCY)
     {}
 
     IpcClient::~IpcClient()
@@ -109,7 +110,10 @@ namespace Net
                 data = _message_buffer.substr(start_pos + START_OF_MESSAGE.size(), end_pos - start_pos - START_OF_MESSAGE.size());
                 _message_buffer.erase(0, end_pos + END_OF_MESSAGE.size());
 
-                onData(data);
+                if (rs_codec_.decode(data))
+                {
+                    onData(rs_codec_.get_decoded_data());
+                }
             }
             else
             {

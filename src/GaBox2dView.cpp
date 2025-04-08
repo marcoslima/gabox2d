@@ -23,7 +23,7 @@ namespace GUI
           {
               this->startGa(params);
           })
-          , ipc_client("127.0.0.1", 9876, [this](std::string &data)
+          , ipc_client("127.0.0.1", 9876, [this](const std::string &data)
           {
               onDataReceived(data);
           })
@@ -852,7 +852,7 @@ namespace GUI
         return false;
     }
 
-    void CGaBox2dView::onDataReceived(string &data)
+    void CGaBox2dView::onDataReceived(const string &data)
     {
         const vector<uint8_t> data_vector(data.begin(), data.end());
         try

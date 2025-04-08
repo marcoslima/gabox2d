@@ -23,5 +23,5 @@ public:
 
     [[nodiscard]] std::string encode(const std::string &message) const;
     bool decode(const std::string &data);
-    [[nodiscard]] std::string get_decoded_data() const { return _decoded_data; }
+    [[nodiscard]] std::string get_decoded_data() { return std::move(_decoded_data); }
 };

@@ -1,6 +1,8 @@
 #pragma once
 #include <boost/asio.hpp>
 
+#include "rs_codec.h"
+
 using namespace std;
 
 
@@ -13,7 +15,9 @@ class GaServer
     vec_socket_t clients_;
     mutex clients_mutex_;
     thread server_thread_;
+    RsCodec rs_codec_;
 
+    std::string compose_message_(const std::string &data);
 public:
     GaServer();
     ~GaServer();
