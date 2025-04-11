@@ -78,9 +78,6 @@ namespace ipc
                 {"population", to_object(status.population)},
                 {"best_history", to_object(status.best_history)}
             };
-
-            // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << " ";
-            // cout << endl;
             return data.dump();
         }
 
@@ -93,22 +90,14 @@ namespace ipc
         {
             try
             {
-                // // cout << "Deserializing data: " << data.size() << " bytes..." << endl;
-                // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << std::dec << " ";
-                // // cout << endl;
                 std::string err;
                 const auto obj = MsgPack::parse(data, err);
                 _status.generation = obj["generation"].uint32_value();
                 _status.gps = obj["gps"].float32_value();
                 _status.bestFitness = obj["bestFitness"].float32_value();
                 _status.bestGenes = obj["bestGenes"].string_value();
-                _status.population.clear();
-                _status.best_history.clear();
-                for (const auto &item : obj["population"].array_items())
-                {
-                    _status.population.emplace_back(item["first"].float32_value(), item["second"].string_value());
-                }
-                // cout << "               gps: " << status.gps << endl << endl;
+                _status.population = from_object<pair_float_string_t>(obj["population"]);
+                _status.best_history = from_object<pair_size_string_t>(obj["best_history"]);
                 return true;
             } catch (const std::exception &e)
             {
