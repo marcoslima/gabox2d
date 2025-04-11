@@ -69,10 +69,11 @@ add_library(GaBox2dLib
 )
 
 target_include_directories("GaBox2dLib" PUBLIC ${SFML_INCLUDE_DIRS})
-target_include_directories("GaBox2dLib" PUBLIC ${MSGPACK_PATH}/msgpack/include)
+target_include_directories("GaBox2dLib" PUBLIC ${MSGPACK_PATH})
 target_include_directories("GaBox2dLib" PUBLIC ${REEDSOLOMON_PATH}/include)
 target_link_directories("GaBox2dLib" PUBLIC ${REEDSOLOMON_PATH}/build)
-target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2d ReedSolomon ${UUID_LIBRARIES})
+target_link_directories("GaBox2dLib" PUBLIC ${MSGPACK_PATH}/build)
+target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2d ReedSolomon msgpack11 ${UUID_LIBRARIES})
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
