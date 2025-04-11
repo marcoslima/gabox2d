@@ -16,7 +16,7 @@
 #include "CRandom.h"
 
 #include <msgpack/helpers.h>
-#include <msgpack/msgpack.hpp>
+#include <msgpack11.hpp>
 
 
 namespace GUI
@@ -596,8 +596,8 @@ namespace GUI
         vector<uint8_t> packed_data{0xca, 0x3e, 0x8e, 0xca, 0xef};
         // vector<uint8_t> packed_data{0xca, 0x40, 0xb2, 0xa6, 0xf3};
 
-        auto data = msgpack::unpack<Data>(packed_data.data(), packed_data.size());
-        cout << "Unpacked data: " << data.valor << " ?->5.58288<-?" << endl;
+        // auto data = msgpack::unpack<Data>(packed_data.data(), packed_data.size());
+        // cout << "Unpacked data: " << data.valor << " ?->5.58288<-?" << endl;
 #endif
     }
 
@@ -891,10 +891,9 @@ namespace GUI
 
     void CGaBox2dView::onDataReceived(const string &data)
     {
-        const vector<uint8_t> data_vector(data.begin(), data.end());
         try
         {
-            if (status_serializer.deserializeGaStatus(data_vector))
+            if (status_serializer.deserializeGaStatus(data))
             {
                 current_status_ = status_serializer.getStatus();
             }

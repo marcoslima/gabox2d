@@ -6,7 +6,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <msgpack/helpers.h>
-#include <msgpack/msgpack.hpp>
+#include <msgpack11.hpp>
+using namespace msgpack11;
 
 #include "ga.h"
 
@@ -69,11 +70,18 @@ namespace ipc
     public:
         static std::string serializeGaStatus(GaStatus &status)
         {
-            auto data = msgpack::pack(status);
+            const MsgPack data = MsgPack::object{
+                {"gps", status.gps},
+                {"generation", status.generation},
+                {"bestFitness", status.bestFitness},
+                {"bestGenes", status.bestGenes},
+                {"population", to_object(status.population)},
+                {"best_history", to_object(status.best_history)}
+            };
 
             // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << " ";
             // cout << endl;
-            return {data.begin(), data.end()};
+            return data.dump();
         }
 
         GaStatus getStatus()
@@ -81,15 +89,25 @@ namespace ipc
             return _status;
         }
 
-        bool deserializeGaStatus(const std::vector<uint8_t> &data)
+        bool deserializeGaStatus(const std::string &data)
         {
             try
             {
                 // // cout << "Deserializing data: " << data.size() << " bytes..." << endl;
                 // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << std::dec << " ";
                 // // cout << endl;
-                const auto status = msgpack::unpack<GaStatus>(data);
-                _status = status;
+                std::string err;
+                const auto obj = MsgPack::parse(data, err);
+                _status.generation = obj["generation"].uint32_value();
+                _status.gps = obj["gps"].float32_value();
+                _status.bestFitness = obj["bestFitness"].float32_value();
+                _status.bestGenes = obj["bestGenes"].string_value();
+                _status.population.clear();
+                _status.best_history.clear();
+                for (const auto &item : obj["population"].array_items())
+                {
+                    _status.population.emplace_back(item["first"].float32_value(), item["second"].string_value());
+                }
                 // cout << "               gps: " << status.gps << endl << endl;
                 return true;
             } catch (const std::exception &e)

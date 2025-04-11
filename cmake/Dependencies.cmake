@@ -225,15 +225,15 @@ link_directories(${UUID_LIBRARY_DIRS})
 # ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
 # ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
 # ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░
-# https://github.com/mikeloomisgg/cppack
-# Define the path where the Box2D library will be cloned
+# https://github.com/ar90n/msgpack11
+# Define the path where the msgpack library will be cloned
 set(MSGPACK_PATH ${CMAKE_CURRENT_BINARY_DIR}/msgpack)
 
 # Clone the msgpack library from its GitHub repository
 IF (NOT EXISTS "${MSGPACK_PATH}")
     message(STATUS ">>>>> Cloning msgpack library into ${MSGPACK_PATH}")
     execute_process(
-            COMMAND git clone https://github.com/simonspa/cppack ${MSGPACK_PATH}
+            COMMAND git clone https://github.com/ar90n/msgpack11.git ${MSGPACK_PATH}
     )
 ELSE ()
     message(STATUS ">>>>> Pulling msgpack library at ${MSGPACK_PATH}")
@@ -242,6 +242,23 @@ ELSE ()
             WORKING_DIRECTORY ${MSGPACK_PATH}
     )
 ENDIF ()
+# Build the msgpack library
+IF (NOT EXISTS "${MSGPACK_PATH}/build")
+    message(STATUS ">>>>> Creating Msgpack build directory")
+    execute_process(
+            COMMAND mkdir ${MSGPACK_PATH}/build
+    )
+ENDIF ()
+
+message(STATUS ">>>>> Building Msgpack library")
+execute_process(
+        WORKING_DIRECTORY ${MSGPACK_PATH}/build
+        COMMAND cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DMSGPACK11_BUILD_TESTS=OFF
+)
+execute_process(
+        WORKING_DIRECTORY ${MSGPACK_PATH}/build
+        COMMAND cmake --build . -j20
+)
 
 #########################################################################################################################################################
 # ░▒▓███████▓▒░░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░ ░▒▓███████▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓██████▓▒░░▒▓██████████████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░
@@ -282,7 +299,7 @@ ENDIF ()
 message(STATUS ">>>>> Building ReedSolomon library")
 execute_process(
         WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
-        COMMAND cmake .. -DCMAKE_BUILD_TYPE=Debug
+        COMMAND cmake .. -DCMAKE_BUILD_TYPE=Release
 )
 execute_process(
         WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
