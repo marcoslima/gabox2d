@@ -21,7 +21,7 @@ namespace GUI
         ImGui::Text("Melhor genes: %s", _status.bestGenes.c_str());
         ImGui::Text("Histórico: %ld", _status.best_history.size());
 
-        if (_status.population.size() > 0)
+        if (!_status.population.empty())
         {
             constexpr auto flags = ImGuiTableFlags_Resizable;
             ImGui::BeginTable("Genes", 2, flags);

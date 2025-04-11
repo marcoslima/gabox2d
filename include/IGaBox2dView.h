@@ -26,6 +26,7 @@ namespace GUI
         virtual void OnEditEnvironment() = 0;
         virtual void OnMostrarQualquer() = 0;
         virtual void OnToggleShowParams() = 0;
+        virtual void OnGenericLabs() = 0;
 
         virtual void startGa(ga_params_t) = 0;
         virtual void setVelocidade(unsigned) = 0;

@@ -47,14 +47,14 @@ namespace ipc
 
         GaStatus()
             : generation(0)
-              , gps(0.0)
+              , gps(0.0f)
               , bestFitness(0.0) {}
 
         template<class T>
         void pack(T &pack)
         {
-            pack(generation);
             pack(gps);
+            pack(generation);
             pack(bestFitness);
             pack(bestGenes);
             pack(population);
@@ -70,7 +70,10 @@ namespace ipc
         static std::string serializeGaStatus(GaStatus &status)
         {
             auto data = msgpack::pack(status);
-            return string(data.begin(), data.end());
+
+            // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << " ";
+            // cout << endl;
+            return {data.begin(), data.end()};
         }
 
         GaStatus getStatus()
@@ -82,9 +85,12 @@ namespace ipc
         {
             try
             {
-                // cout << "Deserializing data: " << data.size() << " bytes..." << endl;
+                // // cout << "Deserializing data: " << data.size() << " bytes..." << endl;
+                // for (int i = 0; i < 30; i++) cout << "0x" << std::hex << static_cast<int>(data[i]) << std::dec << " ";
+                // // cout << endl;
                 const auto status = msgpack::unpack<GaStatus>(data);
                 _status = status;
+                // cout << "               gps: " << status.gps << endl << endl;
                 return true;
             } catch (const std::exception &e)
             {

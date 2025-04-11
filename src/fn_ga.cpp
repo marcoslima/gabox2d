@@ -11,6 +11,21 @@
 using namespace std;
 
 
+void update_ga_status(GaServer &gaServer, const GA::CGa &ga, const float gps)
+{
+    // Create status update and broadcast to GUI
+    ipc::GaStatus status(
+        ga.getGeracao(),
+        gps,
+        ga.getBest()->getFitness(),
+        ga.getBest()->getGenes(),
+        ga.getPopulacao(),
+        ga.getMelhores()
+    );
+    const auto data = ipc::GaStatusSerializer::serializeGaStatus(status);
+    gaServer.broadcastStatus(data);
+}
+
 void fnGa(void *pParam)
 {
     cout << "fnGa starting..." << endl;
@@ -49,14 +64,13 @@ void fnGa(void *pParam)
 
     CCronometro crInfo, crGa;
     crInfo.Start();
+    crGa.Start();
 
     // Medição da velocidade gerações por segundo:
     float gps = -1;
     size_t nCount = 0;
     constexpr size_t N = 10;
-    size_t nLastGeneration = 0;
 
-    crGa.Start();
 
     cout << "Evolving..." << endl;
     while (!tp->m_bStopGa.load())
@@ -65,28 +79,11 @@ void fnGa(void *pParam)
         if (crInfo.Get() > .250 && !tp->m_bStopGa.load())
         {
             crInfo.Start();
-
-            if (ga.getGeracao() > nLastGeneration)
-            {
-                nLastGeneration = ga.getGeracao();
-
-                // Create status update and broadcast to GUI
-                ipc::GaStatus status(
-                    ga.getGeracao(),
-                    gps,
-                    ga.getBest()->getFitness(),
-                    ga.getBest()->getGenes(),
-                    ga.getPopulacao(),
-                    ga.getMelhores()
-                );
-                auto data = ipc::GaStatusSerializer::serializeGaStatus(status);
-                gaServer.broadcastStatus(data);
-            }
+            update_ga_status(gaServer, ga, gps);
         }
+        ga.Step();
 
         if (tp->m_bStopGa.load()) break;
-
-        ga.Step();
 
         nCount++;
         if (nCount == N)

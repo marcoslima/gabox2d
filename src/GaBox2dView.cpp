@@ -15,6 +15,9 @@
 
 #include "CRandom.h"
 
+#include <msgpack/helpers.h>
+#include <msgpack/msgpack.hpp>
+
 
 namespace GUI
 {
@@ -567,6 +570,37 @@ namespace GUI
         m_bShowParams = !m_bShowParams;
     }
 
+    class Data
+    {
+    public:
+        float valor = 0.0f;
+        template<class T>
+        void pack(T &pack)
+        {
+            pack(valor);
+        }
+    };
+
+    void CGaBox2dView::OnGenericLabs()
+    {
+#if 0
+        Data data;
+        data.valor = 0.278892f; // 0xca 0x3e 0x8e 0xca 0xef
+
+        auto packed_data = msgpack::pack(data);
+        for (const auto byte: packed_data)
+        {
+            cout << "0x" << std::hex << static_cast<int>(byte) << " ";
+        }
+#else
+        vector<uint8_t> packed_data{0xca, 0x3e, 0x8e, 0xca, 0xef};
+        // vector<uint8_t> packed_data{0xca, 0x40, 0xb2, 0xa6, 0xf3};
+
+        auto data = msgpack::unpack<Data>(packed_data.data(), packed_data.size());
+        cout << "Unpacked data: " << data.valor << " ?->5.58288<-?" << endl;
+#endif
+    }
+
     void CGaBox2dView::OnInformaGagenes()
     {
         m_bShowInfoGaGenes = !m_bShowInfoGaGenes;
@@ -815,6 +849,9 @@ namespace GUI
                 break;
             case sf::Keyboard::P:
                 OnToggleShowParams();
+                break;
+            case sf::Keyboard::L:
+                OnGenericLabs();
                 break;
             default:
                 break;

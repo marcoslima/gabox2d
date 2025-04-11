@@ -46,6 +46,7 @@ namespace GUI
         void OnMostrarMelhor() override;
         void OnMostrarQualquer() override;
         void OnToggleShowParams() override;
+        void OnGenericLabs() override;
 
         void startGa(ga_params_t params) override;
         void SetDocument(IGaBox2dDocPtr doc) override;
