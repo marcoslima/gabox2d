@@ -1,0 +1,5 @@
+2025-04-12:
+Com 90 indivíduos atualmente o algoritmo converge para mais ou menos 0.3 gerações por segundo (~3 segundos p/ geração).
+A transformação que será feita nesta branch tornará possível a execução do algoritmo em paralelo, o que deve aumentar a performance.
+Primeiro passo é mudar o m_populacao de list<icar_ptr_t> para map<individuo_id_t, genes_t>,
+    com individuo_id_t sendo um size_t (id randômico) e genes_t um simples std::string.
