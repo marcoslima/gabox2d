@@ -112,6 +112,9 @@ namespace PHYS
         void _register_contact_times();
         void _process_no_contact_time();
         void _test_peso(b2BodyId pesoId, const string &name);
+
+        void _test_rodas();
+
         void _test_contacts();
         void _process_contacts();
         void _remove_joints_if_dead();

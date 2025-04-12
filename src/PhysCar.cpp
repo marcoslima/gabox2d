@@ -64,20 +64,6 @@ namespace PHYS
         return RodaId;
     }
 
-    bool is_body_contacting(const b2BodyId bodyId)
-    {
-        const int count = b2Body_GetShapeCount(bodyId);
-        vector<b2ShapeId> shapes(count);
-        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
-        if (shape_count == 0) return false;
-
-        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
-        vector<b2ContactData> contactData(contact_capacity);
-        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
-
-        return contact_count > 0;
-    }
-
     void destroyJoint(b2JointId &targetJoint)
     {
         b2DestroyJoint(targetJoint);
@@ -297,6 +283,20 @@ namespace PHYS
         }
     }
 
+    bool is_body_contacting(const b2BodyId bodyId)
+    {
+        const int count = b2Body_GetShapeCount(bodyId);
+        vector<b2ShapeId> shapes(count);
+        const int shape_count = b2Body_GetShapes(bodyId, shapes.data(), count);
+        if (shape_count == 0) return false;
+
+        const int contact_capacity = b2Shape_GetContactCapacity(shapes[0]);
+        vector<b2ContactData> contactData(contact_capacity);
+        const int contact_count = b2Shape_GetContactData(shapes[0], contactData.data(), contact_capacity);
+
+        return contact_count > 0;
+    }
+
     void CPhysCar::_test_peso(const b2BodyId pesoId, const string &name)
     {
         if (is_body_contacting(pesoId))
@@ -306,10 +306,40 @@ namespace PHYS
         }
     }
 
+    b2ShapeId getShapeId(const b2BodyId bodyId)
+    {
+        const int count = b2Body_GetShapeCount(bodyId);
+        vector<b2ShapeId> shapes(count);
+        b2Body_GetShapes(bodyId, shapes.data(), count);
+        return shapes[0];
+    }
+
+    void CPhysCar::_test_rodas()
+    {
+        const auto shapeRoda1 = getShapeId(m_Roda1Id);
+        const auto shapeRoda2 = getShapeId(m_Roda2Id);
+
+        const int contact_capacity = b2Shape_GetContactCapacity(shapeRoda1);
+        if (contact_capacity == 0) return;
+
+        const vector<b2ContactData> contactData(contact_capacity);
+        for (const auto & contact : contactData)
+        {
+            if (B2_ID_EQUALS(contact.shapeIdA, shapeRoda1) && B2_ID_EQUALS(contact.shapeIdB, shapeRoda2) ||
+                B2_ID_EQUALS(contact.shapeIdA, shapeRoda2) && B2_ID_EQUALS(contact.shapeIdB, shapeRoda1) )
+            {
+                m_bDead = true;
+                m_dead_reason = "Rodas";
+                break;
+            }
+        }
+    }
+
     void CPhysCar::_test_contacts()
     {
         _test_peso(m_Peso1Id, "Peso 1");
         _test_peso(m_Peso2Id, "Peso 2");
+        _test_rodas();
         m_bContactR1 = is_body_contacting(m_Roda1Id);
         m_bContactR2 = is_body_contacting(m_Roda2Id);
     }
