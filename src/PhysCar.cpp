@@ -318,15 +318,13 @@ namespace PHYS
     {
         const auto shapeRoda1 = getShapeId(m_Roda1Id);
         const auto shapeRoda2 = getShapeId(m_Roda2Id);
-
-        const int contact_capacity = b2Shape_GetContactCapacity(shapeRoda1);
-        if (contact_capacity == 0) return;
-
-        const vector<b2ContactData> contactData(contact_capacity);
-        for (const auto & contact : contactData)
+        const auto clen = b2Body_GetContactCapacity(m_Roda1Id);
+        vector<b2ContactData> contactData(clen);
+        b2Body_GetContactData(m_Roda1Id, contactData.data(), clen);
+        for (int i = 0; i < clen; i++)
         {
-            if (B2_ID_EQUALS(contact.shapeIdA, shapeRoda1) && B2_ID_EQUALS(contact.shapeIdB, shapeRoda2) ||
-                B2_ID_EQUALS(contact.shapeIdA, shapeRoda2) && B2_ID_EQUALS(contact.shapeIdB, shapeRoda1) )
+            if (B2_ID_EQUALS(contactData[i].shapeIdA, shapeRoda1) && B2_ID_EQUALS(contactData[i].shapeIdB, shapeRoda2) ||
+                B2_ID_EQUALS(contactData[i].shapeIdA, shapeRoda2) && B2_ID_EQUALS(contactData[i].shapeIdB, shapeRoda1) )
             {
                 m_bDead = true;
                 m_dead_reason = "Rodas";
