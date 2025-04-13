@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
-#include <ga_car_helpers.h>
 #include <random_genes_generator.h>
 
 
@@ -33,17 +32,11 @@ namespace GA
         return _pontos;
     }
 
-    CCarDef CGaCar::getCarro() const
-    {
-        return _carro;
-    }
-
     ga_car_ptr_t CGaCar::clone()
     {
         auto car = make_shared<CGaCar>();
         car->_genes = _genes;
         car->_pontos = _pontos;
-        car->_carro = _carro;
         return car;
     }
 
@@ -101,61 +94,5 @@ namespace GA
         _pontos = pts;
     }
 
-    CCarDef::CRodaParams CGaCar::decodeBinaryWheel(const string& genes, size_t& pos)
-    {
-        constexpr CCarDef::circle_params_bits circle_bits;
-        constexpr CCarDef::body_params_bits body_bits;
-        return {
-            decodeBinaryValue(genes, pos, circle_bits.x, -8.0, 8.0),    // x
-            decodeBinaryValue(genes, pos, circle_bits.y, 2.0, 8.0),     // y
-            decodeBinaryValue(genes, pos, circle_bits.raio, 0.2, 3.0),   // radius
-            decodeBinaryValue(genes, pos, body_bits.densidade, 0.1, 10.0),  // densidade
-            decodeBinaryValue(genes, pos, body_bits.friccao, 0.1, 5.0),   // friccao
-            decodeBinaryValue(genes, pos, body_bits.elasticidade, 0.0, 1.0)      // elasticidade
-        };
-    }
 
-    float CGaCar::decodeBinaryValue(const string& genes, size_t& pos, const size_t bits, const float min, const float max)
-    {
-        // Extract the binary substring
-        unsigned int value = 0;
-        const auto genes_size = genes.size();
-        for (size_t i = 0; i < bits && pos < genes_size; i++, pos++)
-        {
-            value = value << 1 | (genes[pos] == '1' ? 1 : 0);
-        }
-
-        // Map binary value to float range
-        const unsigned int maxValue = (1 << bits) - 1;
-        return min + (max - min) * static_cast<float>(value) / static_cast<float>(maxValue);
-    }
-    void CGaCar::decode()
-    {
-        size_t pos = 0;
-
-        // Decode wheels and weights
-        _carro._roda1 = decodeBinaryWheel(_genes, pos);
-        _carro._roda2 = decodeBinaryWheel(_genes, pos);
-        _carro._peso1 = decodeBinaryWheel(_genes, pos);
-        _carro._peso2 = decodeBinaryWheel(_genes, pos);
-
-        // Decode joint parameters (torque, frequency, damping)
-        constexpr int nMaxTorqueIndex = 3;
-        constexpr float dMaxDamp = 2.0f;
-        constexpr float dMinDamp = 0.0f;
-        constexpr float dMaxFreq = 30.0f;
-        constexpr float dMinFreq = 0.1f;
-        constexpr float dFp = 50.0f;
-        const CCarDefBits bits;
-        for (int i = 0; i < 6; i++)
-        {
-            // Only decode torque for the first 4 indices
-            if (i <= nMaxTorqueIndex) {
-                _carro._torque[i] = decodeBinaryValue(_genes, pos, bits._torque, -dFp, dFp);
-            }
-
-            _carro._freq[i] = decodeBinaryValue(_genes, pos, bits._freq, dMinFreq, dMaxFreq);
-            _carro._damp[i] = decodeBinaryValue(_genes, pos, bits._damp, dMinDamp, dMaxDamp);
-        }
-    }
 }

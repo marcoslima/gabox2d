@@ -50,8 +50,8 @@ void CCar::setShowRodaParams(const bool show)
 
 void CCar::Medir(const PHYS::IWorldPtr world, const float max_t)
 {
-    m_ga_car_ptr->decode();
-    m_phys_car_ptr->measure(world, m_ga_car_ptr->getCarro(), max_t);
+    const CCarDef car(m_ga_car_ptr->getGenes());
+    m_phys_car_ptr->measure(world, car, max_t);
 }
 
 string CCar::getGenes() const
@@ -112,8 +112,8 @@ void CCar::draw(void *pParams) const
 
 void CCar::beginSimulate(const PHYS::IWorldPtr world)
 {
-    m_ga_car_ptr->decode();
-    m_phys_car_ptr->create(world, m_ga_car_ptr->getCarro());
+    const CCarDef car(m_ga_car_ptr->getGenes());
+    m_phys_car_ptr->create(world, car);
 }
 
 CCar::~CCar() = default;

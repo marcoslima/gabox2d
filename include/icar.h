@@ -6,6 +6,8 @@
 #include <vec2f_t.h>
 #include <list>
 
+#include "CarDef.h"
+
 
 class ICar;
 using icar_ptr_t = std::unique_ptr<ICar>;
