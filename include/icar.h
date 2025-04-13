@@ -1,12 +1,10 @@
 #pragma once
 
+#include <fitness_params.h>
 #include <memory>
 #include <string>
 #include <IWorld.h>
 #include <vec2f_t.h>
-#include <list>
-
-#include "CarDef.h"
 
 
 class ICar;
@@ -18,7 +16,7 @@ class ICar
 public:
     virtual ~ICar() = default;
 
-    virtual void calc_fitness(float max_t) = 0;
+    virtual void calc_fitness(const GA::fitness_params_t&, float max_t) = 0;
     virtual void Medir(PHYS::IWorldPtr world, float max_t) = 0;
     virtual void resetPhysCar() = 0;
     virtual void createGaRandomCar() = 0;
@@ -48,5 +46,4 @@ public:
 };
 
 using vec_car_t = vector<icar_ptr_t>;
-using lst_car_t = list<icar_ptr_t>;
 using car_factory_ptr_t = std::unique_ptr<ICarFactory>;

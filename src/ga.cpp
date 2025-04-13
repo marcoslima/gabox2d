@@ -84,39 +84,61 @@ namespace GA
         return !m_melhores_set.contains(current_best);
     }
 
-    void CGa::_do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const
+    map_measures_results_t CGa::_do_measures(
+        const CEnv &env,
+        const map_individuals_t &individuals,
+        atomic<bool> &stop_ga) const
     {
-        for (auto &car: m_populacao)
+        const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
+        world->create(env);
+
+        map_measures_results_t measures_results;
+
+        for (auto &car: individuals)
         {
+            CCarDef car_def(car.second);
+            const auto phys_car = PHYS::createPhysCar();
             try
             {
-                car->Medir(world, _max_t);
+                phys_car->measure(world, car_def, _max_t);
             } catch (const std::exception &e)
             {
                 std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
             }
-
+            measures_results[car.first] = phys_car->get_ga_fitness_params();
             if (stop_ga.load()) break;
         }
+        world->destroy();
+        return measures_results;
     }
 
-    void CGa::_do_calc_points()
+    void CGa::_do_calc_points(const map_measures_results_t& measures_results)
     {
-        for (const auto &it: m_populacao) it->calc_fitness(_max_t);
+        for (size_t i=0; i < m_populacao.size(); ++i)
+            m_populacao[i]->calc_fitness(measures_results.at(i), _max_t);
+
+        // for (const auto &it: m_populacao)
+        //     it->calc_fitness(TODO, _max_t);
     }
 
     void CGa::_do_sort()
     {
-        m_populacao.sort([](const auto &lhs, const auto &rhs)
-        {
-            return lhs->getFitness() < rhs->getFitness();
-        });
+        ranges::sort(m_populacao.begin(), m_populacao.end(),
+            [](const auto &lhs, const auto &rhs)
+            {
+                return lhs->getFitness() < rhs->getFitness();
+            });
     }
 
-    void CGa::Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga)
+    void CGa::Ordena(const CEnv& env, atomic<bool> &stop_ga)
     {
-        _do_measures(world, stop_ga);
-        _do_calc_points();
+        map_individuals_t individuals;
+        for (size_t i = 0; i < m_populacao.size(); ++i)
+        {
+            individuals[i] = m_populacao[i]->getGenes();
+        }
+        const auto measure_results = _do_measures(env, individuals, stop_ga);
+        _do_calc_points(measure_results);
         _do_sort();
 
         _carWinner = m_populacao.front()->getGenes();
@@ -381,7 +403,7 @@ namespace GA
         return m_populacao.front()->clone();
     }
 
-    const lst_car_t &CGa::getPopulacao() const
+    const vec_car_t &CGa::getPopulacao() const
     {
         return m_populacao;
     }

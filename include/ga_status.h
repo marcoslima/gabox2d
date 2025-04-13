@@ -27,7 +27,7 @@ namespace ipc
                  const float gps,
                  const float bestFitness,
                  const std::string &bestGenes, // NOLINT(*-pass-by-value)
-                 const lst_car_t &population_,
+                 const vec_car_t &population_,
                  const GA::vec_melhores_t &best_history_)
             : generation(generation),
               gps(gps),

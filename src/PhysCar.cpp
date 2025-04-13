@@ -510,6 +510,11 @@ namespace PHYS
         };
     }
 
+    phys_car_ptr_t createPhysCar()
+    {
+        return make_shared<CPhysCar>();
+    }
+
     void CPhysCar::init()
     {
         m_Roda1Id = b2_nullBodyId;

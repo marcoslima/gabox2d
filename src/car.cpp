@@ -65,9 +65,9 @@ vec2f_t CCar::getCenter() const
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void CCar::calc_fitness(const float max_t)
+void CCar::calc_fitness(const GA::fitness_params_t& params, const float max_t)
 {
-    m_ga_car_ptr->calc_fitness(m_phys_car_ptr->get_ga_fitness_params(), max_t);
+    m_ga_car_ptr->calc_fitness(params, max_t);
 }
 
 float CCar::getFitness() const

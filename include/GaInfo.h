@@ -10,7 +10,7 @@ namespace GUI
     {
         // CRITICAL_SECTION _cs;
     public:
-        lst_car_t	m_populacao;
+        vec_car_t	m_populacao;
         unsigned	m_geracao;
         double		m_gps;		// Gerações por segundo
         double		m_maxD;

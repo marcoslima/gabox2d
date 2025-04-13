@@ -139,4 +139,6 @@ namespace PHYS
         void fill_gr_car(GUI::IGrCar &car) override;
         GA::fitness_params_t get_ga_fitness_params() override;
     };
+
+    phys_car_ptr_t createPhysCar();
 }

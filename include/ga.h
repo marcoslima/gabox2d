@@ -11,7 +11,7 @@ using namespace std;
 using namespace LmFisica;
 
 #include <icar.h>
-#include <IWorld.h>
+#include <map>
 
 using vec_double_t = vector<double>;
 
@@ -23,6 +23,11 @@ namespace GA
     using vec_melhores_t = vector<melhor_t>;
     using vec_genes_t = vector<fitness_genes_t>;
     using genes_pair_t = pair<string, string>;
+    using individual_id_t = size_t;
+    using genes_t = string;
+    using map_individuals_t = map<individual_id_t, genes_t>;
+    using map_measures_results_t = map<individual_id_t, fitness_params_t>;
+    using map_fitnesses_t = map<individual_id_t, float>;
 
     class CGa
     {
@@ -52,15 +57,11 @@ namespace GA
 
         // Armazenamento dos indivíduos
         // População (objetos CCar)
-        lst_car_t m_populacao;
+        vec_car_t m_populacao;
 
         // Nova população
         vec_string_t m_nova;
 
-        vec_double_t _vec_select,
-                     _vec_crossover,
-                     _vec_mutate,
-                     _vec_advance;
         // CFile _fileLog1;
         size_t _nCount;
         bool _bLogOpenned;
@@ -79,8 +80,10 @@ namespace GA
         static string _generate_random_genes();
         void _do_alienism();
         void _do_manual_include();
-        void _do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const;
-        void _do_calc_points();
+
+        map_measures_results_t _do_measures(const CEnv &env, const map_individuals_t &individuals,
+                                            atomic<bool> &stop_ga) const;
+        void _do_calc_points(const map_measures_results_t &measures_results);
         void _do_sort();
         void _cria_populacao();
         void _1Select();
@@ -117,7 +120,7 @@ namespace GA
         bool _not_in_melhores(const string &current_best);
 
         // Testa e ordena os indivíduos
-        void Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga);
+        void Ordena(const CEnv &env, atomic<bool> &stop_ga);
 
         // Seleciona, cruza, muta e passa para geração seguinte
         void Step();
@@ -137,7 +140,7 @@ namespace GA
         [[nodiscard]] size_t getPopulacaoLen() const;
         [[nodiscard]] size_t getGeracao() const;
         [[nodiscard]] icar_ptr_t getBest() const;
-        [[nodiscard]] const lst_car_t &getPopulacao() const;
+        [[nodiscard]] const vec_car_t &getPopulacao() const;
         [[nodiscard]] const vec_melhores_t &getMelhores() const;
 
         // bool OpenLogFile();
