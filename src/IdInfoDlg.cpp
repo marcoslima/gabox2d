@@ -37,4 +37,4 @@ namespace GUI
         ImGui::Text("Genes: %s", m_strGenes.c_str());
         ImGui::End();
     }
-}; //namespace GUI
+}

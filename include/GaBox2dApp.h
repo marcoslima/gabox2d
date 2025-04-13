@@ -19,4 +19,4 @@ namespace GUI
 
         int run();
     };
-};
+}

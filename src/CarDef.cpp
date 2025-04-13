@@ -4,8 +4,6 @@ namespace MODEL
 {
     CCarDef::CCarDef(): _torque{}, _freq{}, _damp{} {}
 
-    CCarDef::~CCarDef() = default;
-
     bool operator==(const CCarDef::circle_params_t &left, const CCarDef::circle_params_t &right);
 
     bool operator==(const CCarDef::body_params_t &left, const CCarDef::body_params_t &right);
@@ -124,4 +122,4 @@ namespace MODEL
         return left.circle == right.circle
                && left.body == right.body;
     }
-};
+}

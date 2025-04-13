@@ -7,8 +7,8 @@
 
 #include <SFML/Graphics.hpp>
 
-class CSolidBrush {
-private:
+class CSolidBrush
+{
     sf::Color m_color;
 public:
     explicit CSolidBrush(const sf::Color color) : m_color(color) {}

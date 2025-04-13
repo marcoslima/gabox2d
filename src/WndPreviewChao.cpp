@@ -193,7 +193,7 @@ namespace GUI
 
         while (window.isOpen())
         {
-            sf::Event event;
+            // sf::Event event;
 
             window.clear();
 
@@ -203,4 +203,4 @@ namespace GUI
             window.display();
         }
     }
-}; //namespace GUI
+}

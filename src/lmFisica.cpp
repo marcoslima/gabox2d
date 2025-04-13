@@ -1,8 +1,10 @@
 #include <lmfisica.h>
 #include <doublex.h>
-#include <math.h>
+#include <cmath>
 #include <limits>
 #include <cstdint>
+#include <ranges>
+#include <bits/ranges_algo.h>
 
 using namespace LmFisica;
 
@@ -172,16 +174,15 @@ double SigniS(const double& aS)
 void Inclinacao(vec_pair_dbl_t vecValores, double& a,  double& b)
 {
 	double sx(0), sy(0), sxy(0), sx2(0);
-	const double n = vecValores.size();
-	for(vec_pair_dbl_t::const_iterator it = vecValores.begin();
-	    it!= vecValores.end();
-	    ++it)
+	const auto n = static_cast<double>(vecValores.size());
+	// for(auto it = vecValores.begin(); it!= vecValores.end(); ++it)
+	ranges::for_each(vecValores, [&](const auto& it)
 	{
-		sx  += it->first;
-		sy  += it->second;
-		sxy += it->first*it->second;
-		sx2 += it->first*it->first;
-	}
+		sx  += it.first;
+		sy  += it.second;
+		sxy += it.first*it.second;
+		sx2 += it.first*it.first;
+	});
 
 	const double xm = sx / n;
 	const double ym = sy / n;

@@ -179,28 +179,28 @@ doublex doublex::operator -()
 
 ////////////////
 // Atribuições:
-doublex doublex::operator =(const doublex &other)
+doublex& doublex::operator =(const doublex &other)
 {
 	dV = other.dV;
 	dS = other.dS;
 	return *this;
 }
 
-doublex doublex::operator =(const double other)
+doublex& doublex::operator =(const double other)
 {
 	dV = other;
 	dS = DBL_EPSILON;
 	return *this;
 }
 
-doublex doublex::operator =(const long   other)
+doublex& doublex::operator =(const long   other)
 {
 	dV = static_cast<double>(other);
 	dS = DBL_EPSILON;
 	return *this;
 }
 
-doublex doublex::operator =(const int    other)
+doublex& doublex::operator =(const int    other)
 {
 	dV = static_cast<double>(other);
 	dS = DBL_EPSILON;
@@ -208,27 +208,27 @@ doublex doublex::operator =(const int    other)
 }
 
 // Comparações:
-bool doublex::operator <(const doublex &other)
+bool doublex::operator <(const doublex &other) const
 {
 	return dV < other.dV;
 }
-bool doublex::operator >(const doublex& other)
+bool doublex::operator >(const doublex& other) const
 {
 	return dV > other.dV;
 }
-bool doublex::operator <=(const doublex& other)
+bool doublex::operator <=(const doublex& other) const
 {
 	return dV < other.dV || *this == other;
 }
-bool doublex::operator >=(const doublex& other)
+bool doublex::operator >=(const doublex& other) const
 {
 	return dV > other.dV || *this == other;
 }
-bool doublex::operator ==(const doublex& other)
+bool doublex::operator ==(const doublex& other) const
 {
 	return fabs(dV-other.dV)/::sqrt(pow(dS,2.0)+pow(other.dS,2.0)) <= 3.0;
 }
-bool doublex::operator !=(const doublex& other)
+bool doublex::operator !=(const doublex& other) const
 {
 	return fabs(dV-other.dV)/::sqrt(pow(dS,2.0)+pow(other.dS,2.0)) > 3.0;
 }
@@ -321,11 +321,11 @@ doublex log(const doublex& numero, const double base)
 		fabs( numero.S() / (numero.V() * ::log(base)) )	 );
 }
 
-string doublex::str()
+string doublex::str() const
 {
 	static char szFmt[64];
 	sprintf(szFmt,"%f ± %f", dV, dS);
-	return string(szFmt);
+	return {szFmt};
 }
 
 // Funções de estatística, copiados de lmfisica.h, adaptados do template para o doublex

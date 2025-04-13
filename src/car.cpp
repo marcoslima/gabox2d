@@ -24,7 +24,7 @@ icar_ptr_t CCar::clone()
     return car;
 }
 
-void _updateGraphicsData(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car_ptr_t &gr_car)
+void updateGraphicsData_(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car_ptr_t &gr_car)
 {
     phys_car->fill_gr_car(*gr_car);
 }
@@ -32,7 +32,7 @@ void _updateGraphicsData(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car
 bool CCar::doStepGetContinue()
 {
     const bool bRet = m_phys_car_ptr->simulation_step_get_dead();
-    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
+    updateGraphicsData_(m_phys_car_ptr, m_gr_car_ptr);
 
     return bRet;
 }
@@ -40,7 +40,7 @@ bool CCar::doStepGetContinue()
 void CCar::doStep()
 {
     m_phys_car_ptr->simulation_step();
-    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
+    updateGraphicsData_(m_phys_car_ptr, m_gr_car_ptr);
 }
 
 void CCar::setShowRodaParams(const bool show)

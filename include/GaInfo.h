@@ -33,7 +33,7 @@ namespace GUI
         CGaInfo();
         ~CGaInfo();
 
-        void Lock(void);
-        void Release(void);
+        void Lock();
+        void Release();
     };
 }

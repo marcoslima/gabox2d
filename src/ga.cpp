@@ -8,7 +8,6 @@ using namespace std;
 #include "ga.h"
 #include <iostream>
 
-#define VERIFY(x, msg) if(!(x)) {cout << "FAIL: " << msg << endl;}
 
 namespace GA
 {
@@ -42,7 +41,7 @@ namespace GA
     {
         m_populacao.clear();
         generate_n(back_inserter(m_populacao), _populacao,
-                   [&]()
+                   [&]
                    {
                        return _carFactory->createRandomCar();
                    });
@@ -170,7 +169,7 @@ namespace GA
     void CGa::_do_alienism()
     {
         generate_n(back_inserter(m_nova), _alienismo,
-                   [&]()
+                   [&]
                    {
                        return _generate_random_genes();
                    });

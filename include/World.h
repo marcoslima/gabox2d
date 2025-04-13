@@ -12,17 +12,18 @@ namespace PHYS {
 
     class CWorld final : public IWorld
     {
+        static constexpr auto tick = 5.0f;
         bool noconst = false;
         b2WorldId m_WorldId = b2_nullWorldId;
         b2BodyId m_GroundId = b2_nullBodyId;
         b2ChainId m_ChainId = b2_nullChainId;
 
         void _create_world();
-        void _create_ground(const MODEL::CEnv &env);
-        void _create_walls_and_ceilings(const MODEL::CEnv &env, float tick);
-        void _create_left_wall(const MODEL::CEnv &env, float tick);
-        void _create_right_wall(const MODEL::CEnv &env, float tick);
-        void _create_ceiling(const MODEL::CEnv &env, float tick);
+        void _create_ground(const CEnv &env);
+        void _create_walls_and_ceilings(const CEnv &env);
+        void _create_left_wall(const CEnv &env);
+        void _create_right_wall(const CEnv &env);
+        void _create_ceiling(const CEnv &env);
         void _make_wall(b2Vec2 pos, b2Vec2 size);
 
 

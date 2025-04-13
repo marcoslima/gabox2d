@@ -55,18 +55,18 @@ public:
 	doublex operator -();
 
 // Atribuições:
-	doublex operator =(const doublex &other);
-	doublex operator =(double other);
-	doublex operator =(long   other);
-	doublex operator =(int    other);
+	doublex& operator =(const doublex &other);
+	doublex& operator =(double other);
+	doublex& operator =(long   other);
+	doublex& operator =(int    other);
 
 // Comparações:
-	bool operator < (const doublex &other);
-	bool operator > (const doublex& other);
-	bool operator <=(const doublex& other);
-	bool operator >=(const doublex& other);
-	bool operator ==(const doublex& other);
-	bool operator !=(const doublex& other);
+	bool operator < (const doublex &other) const;
+	bool operator > (const doublex& other) const;
+	bool operator <=(const doublex& other) const;
+	bool operator >=(const doublex& other) const;
+	bool operator ==(const doublex& other) const;
+	bool operator !=(const doublex& other) const;
 
 // Conversão para double:
 //	operator double(){return dV;} // Melhor deixar explicito.
@@ -75,7 +75,7 @@ public:
 
 // Perfumaria:
 	// String
-	std::string str();
+	std::string str() const;
 
 	double S() const {return dS;}
 	double V() const {return dV;}

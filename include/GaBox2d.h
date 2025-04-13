@@ -6,4 +6,4 @@ namespace GUI
 
 	extern CGaBox2dApp theApp;
 
-};
+}

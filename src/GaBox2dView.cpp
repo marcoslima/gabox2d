@@ -8,7 +8,6 @@
 #include <SolidBrush.h>
 #include <assets.h>
 #include <GaParamsDlg.h>
-#include <phys.h>
 #include <fn_ga.h>
 #include <network/ga_server.h>
 #include <triangulation.h>
@@ -16,7 +15,6 @@
 #include "CRandom.h"
 
 #include <msgpack/helpers.h>
-#include <msgpack11.hpp>
 
 
 namespace GUI

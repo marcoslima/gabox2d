@@ -20,7 +20,7 @@ namespace PHYS
     {
         _create_world();
         _create_ground(env);
-        _create_walls_and_ceilings(env, 5.0f);
+        _create_walls_and_ceilings(env);
     }
 
     bool CWorld::isValid()
@@ -66,9 +66,9 @@ namespace PHYS
                       static_cast<float>(a.y));
     }
 
-    vector<b2Vec2> _get_b2vecs_from_ground(const MODEL::CEnv &env)
+    vector<b2Vec2> _get_b2vecs_from_ground(const CEnv &env)
     {
-        const MODEL::vec_vecs_t GroundPoly = env.get_vecs();
+        const vec_vecs_t GroundPoly = env.get_vecs();
         const int32_t nSize = GroundPoly.size(); // NOLINT(*-narrowing-conversions)
         vector<b2Vec2> vecVertices(nSize);
         for (size_t k = 0; k < nSize; k++)
@@ -96,28 +96,28 @@ namespace PHYS
         b2Body_SetUserData(wallId, &ID_GROUND);
     }
 
-    void CWorld::_create_left_wall(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_left_wall(const CEnv &env)
     {
         const auto pos = b2Vec2(env._tlx - tick, (env._bry + env._tly) / 2);
         const auto size = b2Vec2(tick, fabs(env._bry - env._tly));
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_right_wall(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_right_wall(const CEnv &env)
     {
         const auto pos = b2Vec2(env._brx + tick, (env._bry + env._tly) / 2);
         const auto size = b2Vec2(tick, fabs(env._bry - env._tly));
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_ceiling(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_ceiling(const CEnv &env)
     {
         const auto pos = b2Vec2((env._brx + env._tlx) / 2, env._tly + tick);
         const auto size = b2Vec2(fabs(env._brx - env._tlx), tick);
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_ground(const MODEL::CEnv &env)
+    void CWorld::_create_ground(const CEnv &env)
     {
         const auto vecVertices = _get_b2vecs_from_ground(env);
         auto groundDef = b2DefaultBodyDef();
@@ -134,10 +134,10 @@ namespace PHYS
         b2CreateChain(m_GroundId, &shapeDef);
     }
 
-    void CWorld::_create_walls_and_ceilings(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_walls_and_ceilings(const CEnv &env)
     {
-        _create_left_wall(env, tick);
-        _create_right_wall(env, tick);
-        _create_ceiling(env, tick);
+        _create_left_wall(env);
+        _create_right_wall(env);
+        _create_ceiling(env);
     }
 } // PHYS

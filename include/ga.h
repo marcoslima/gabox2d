@@ -75,7 +75,6 @@ namespace GA
         std::discrete_distribution<size_t> _roulette_distribution;
 
         // Funções internas
-    private:
         void _do_elitism();
         static string _generate_random_genes();
         void _do_alienism();

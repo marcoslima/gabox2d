@@ -1,6 +1,5 @@
-#ifndef __LMFISICA_H__
-#define __LMFISICA_H__
-// M�dulo de f�sica da LibMarcos: LmFisica
+#pragma once
+// Módulo de física da LibMarcos: LmFisica
 ////////////////////////////////////////////
 
 #include "lmmath.h"
@@ -217,4 +216,3 @@ namespace LmFisica
         doublex GetTan();
     };
 } // namespace LmFisica
-#endif //__LMFISICA_H__

@@ -2,8 +2,6 @@
 
 #include <iostream>
 #include <mutex>
-#include "EditorChaoDlg.h"
-#include <phys.h>
 #include <ga.h>
 
 

@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <sfml_primitives.h>
 
 
@@ -10,14 +10,12 @@ void DrawDashedCircle(sf::RenderWindow& window, const sf::Vector2f& center,
 
     // Calculate the circumference and the number of segments
     const float circumference = doublepi * radius;
-    constexpr int numSegments = 60; // Adjust for smoother circle
 
-    constexpr float angleStep = doublepi / numSegments;
     float currentAngle = 0.0f;
 
     // Calculate how much angle each dash/gap covers
-    const float dashAngle = (dashLength / circumference) * doublepi;
-    const float gapAngle = (gapLength / circumference) * doublepi;
+    const float dashAngle = dashLength / circumference * doublepi;
+    const float gapAngle = gapLength / circumference * doublepi;
 
     // Draw the dashed circle
     bool isDash = true;
@@ -36,7 +34,6 @@ void DrawDashedCircle(sf::RenderWindow& window, const sf::Vector2f& center,
 
         if (isDash)
         {
-            sf::Vertex line[2];
             const auto p1 = center + sf::Vector2f(radius * cos(currentAngle), radius * sin(currentAngle));
             const auto p2 = center + sf::Vector2f(radius * cos(nextAngle), radius * sin(nextAngle));
 

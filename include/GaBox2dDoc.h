@@ -46,4 +46,4 @@ public:
 	void OnEditEditarch() override;
 };
 
-};//namespace GUI
+}

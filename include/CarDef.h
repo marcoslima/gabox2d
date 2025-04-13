@@ -43,7 +43,7 @@ namespace MODEL
 
             [[nodiscard]] size_t bits() const
             {
-                return (densidade + friccao + elasticidade);
+                return densidade + friccao + elasticidade;
             }
         };
 
@@ -76,7 +76,7 @@ namespace MODEL
 
         explicit CCarDef(const std::string& genes);
 
-        ~CCarDef();
+        ~CCarDef() = default;
 
         bool operator==(const CCarDef &other) const;
     };
