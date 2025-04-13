@@ -19,9 +19,9 @@ namespace GA
 {
     using vec_string_t = vector<string>;
     using melhor_t = pair<size_t, string>;
-    using genes_t = pair<float, string>;
+    using fitness_genes_t = pair<float, string>;
     using vec_melhores_t = vector<melhor_t>;
-    using vec_genes_t = vector<genes_t>;
+    using vec_genes_t = vector<fitness_genes_t>;
     using genes_pair_t = pair<string, string>;
 
     class CGa
