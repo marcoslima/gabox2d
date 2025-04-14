@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <future>
 #include <random_genes_generator.h>
+#include <thread>
 
 #include "car.h"
 using namespace std;
@@ -84,12 +86,12 @@ namespace GA
     }
 
     map_measures_results_t CGa::_do_measures(
-        const CEnv &env,
+        const env_data_t &env_data,
         const map_individuals_t &individuals,
         atomic<bool> &stop_ga) const
     {
         const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
-        world->create(env);
+        world->create(env_data);
 
         map_measures_results_t measures_results;
 
@@ -111,9 +113,71 @@ namespace GA
         return measures_results;
     }
 
-    void CGa::_do_calc_points(const map_measures_results_t& measures_results)
+    map_measures_results_t CGa::_do_measures_parallel(
+        const env_data_t &env_data,
+        const map_individuals_t &individuals,
+        atomic<bool> &stop_ga) const
     {
-        for (size_t i=0; i < m_populacao.size(); ++i)
+        // Determine thread count (number of cores - 2)
+        const unsigned int num_threads = std::max(1u, std::thread::hardware_concurrency() - 2);
+
+        // Calculate partition size
+        const size_t total_individuals = individuals.size();
+        const size_t partition_size = total_individuals / num_threads;
+
+        // Create partitions
+        vector<map_individuals_t> partitions(num_threads);
+
+        size_t individual_idx = 0;
+        for (const auto &[id, genes]: individuals)
+        {
+            const size_t partition_idx = individual_idx / partition_size;
+            if (partition_idx < num_threads)
+            {
+                partitions[partition_idx][id] = genes;
+            } else
+            {
+                // Put remaining individuals in the last partition
+                partitions[num_threads - 1][id] = genes;
+            }
+            individual_idx++;
+        }
+
+        // Create threads and futures for results
+        vector<future<map_measures_results_t> > futures;
+
+        // Launch threads
+        cout << "Launching " << num_threads << " threads for parallel processing... ";
+        for (const auto &partition: partitions)
+        {
+            if (!partition.empty())
+            {
+                futures.push_back(
+                    async(std::launch::async, [this, &env_data, &partition, &stop_ga]()
+                    {
+                        return _do_measures(env_data, partition, stop_ga);
+                    })
+                );
+            }
+        }
+
+        // Collect results
+        map_measures_results_t combined_results;
+        for (auto &future: futures)
+        {
+            if (stop_ga.load()) break;
+
+            auto results = future.get();
+            combined_results.insert(results.begin(), results.end());
+        }
+        cout << "All threads completed.\n";
+
+        return combined_results;
+    }
+
+    void CGa::_do_calc_points(const map_measures_results_t &measures_results)
+    {
+        for (size_t i = 0; i < m_populacao.size(); ++i)
             m_populacao[i]->calc_fitness(measures_results.at(i), _max_t);
 
         // for (const auto &it: m_populacao)
@@ -123,20 +187,22 @@ namespace GA
     void CGa::_do_sort()
     {
         ranges::sort(m_populacao.begin(), m_populacao.end(),
-            [](const auto &lhs, const auto &rhs)
-            {
-                return lhs->getFitness() < rhs->getFitness();
-            });
+                     [](const auto &lhs, const auto &rhs)
+                     {
+                         return lhs->getFitness() < rhs->getFitness();
+                     });
     }
 
-    void CGa::Ordena(const CEnv& env, atomic<bool> &stop_ga)
+    void CGa::Ordena(const env_data_t &env_data, atomic<bool> &stop_ga)
     {
         map_individuals_t individuals;
         for (size_t i = 0; i < m_populacao.size(); ++i)
         {
             individuals[i] = m_populacao[i]->getGenes();
         }
-        const auto measure_results = _do_measures(env, individuals, stop_ga);
+
+        const auto measure_results = _do_measures_parallel(env_data, individuals, stop_ga);
+
         _do_calc_points(measure_results);
         _do_sort();
 
@@ -282,8 +348,7 @@ namespace GA
                 in_population.insert(childs.second);
                 m_nova.push_back(childs.first);
                 m_nova.push_back(childs.second);
-            }
-            else
+            } else
             {
                 m_nova.push_back(parents.first);
                 m_nova.push_back(parents.second);
@@ -338,10 +403,10 @@ namespace GA
         } else
         {
             ranges::transform(m_nova, back_inserter(m_populacao),
-                [&](const auto &genes)
-                {
-                  return _carFactory->createCarFromGenes(genes);
-                });
+                              [&](const auto &genes)
+                              {
+                                  return _carFactory->createCarFromGenes(genes);
+                              });
             _geracao++;
         }
 

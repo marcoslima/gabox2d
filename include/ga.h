@@ -34,13 +34,13 @@ namespace GA
         car_factory_ptr_t _carFactory;
 
         // Parâmetros para o algoritmo genético
-        float  _max_t; // Tempo máximo de simulação
+        float _max_t; // Tempo máximo de simulação
         size_t _populacao; // Número de indivíduos por geração
         size_t _elitismo; // Quantos indivíduos vão para geração seguinte inalterados
         size_t _alienismo; // Número de indivíduos randômicos inseridos a cada geração
         size_t _mut_int; // A mutação será +/- _mut_int numa letra
-        float  _crossover; // Percentual de probabilidade de ocorrer crossover
-        float  _mutacao; // Percentual de probabilidade de ocorrer mutação
+        float _crossover; // Percentual de probabilidade de ocorrer crossover
+        float _mutacao; // Percentual de probabilidade de ocorrer mutação
         string _carWinner; // Indivíduo mais adaptado da geração atual (genes)
 
         // Acumuladores do algoritmo
@@ -76,25 +76,47 @@ namespace GA
 
         // Funções internas
         void _do_elitism();
+
         static string _generate_random_genes();
+
         void _do_alienism();
+
         void _do_manual_include();
 
-        map_measures_results_t _do_measures(const CEnv &env, const map_individuals_t &individuals,
-                                            atomic<bool> &stop_ga) const;
+        map_measures_results_t _do_measures(
+            const env_data_t &env_data,
+            const map_individuals_t &individuals, atomic<bool> &stop_ga) const;
+
+        map_measures_results_t _do_measures_parallel(
+            const env_data_t &env_data,
+            const map_individuals_t &individuals, atomic<bool> &stop_ga) const;
+
         void _do_calc_points(const map_measures_results_t &measures_results);
+
         void _do_sort();
+
         void _cria_populacao();
+
         void _1Select();
+
         pair<string, string> _get_parents();
+
         bool _random_do_crossover_or_not() const;
-        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint) ;
-        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint1, size_t crosspoint2) ;
+
+        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint);
+
+        static genes_pair_t crossover(const genes_pair_t &genes_pair, size_t crosspoint1, size_t crosspoint2);
+
         void _2Crossover();
+
         static void _mutate_genes(string &genes);
+
         void _3Mutate();
+
         void _4AdvanceGeneration();
+
         void _populate_weights();
+
         size_t _roulette_select();
 
         // Interface
@@ -119,7 +141,7 @@ namespace GA
         bool _not_in_melhores(const string &current_best);
 
         // Testa e ordena os indivíduos
-        void Ordena(const CEnv &env, atomic<bool> &stop_ga);
+        void Ordena(const env_data_t &env_data, atomic<bool> &stop_ga);
 
         // Seleciona, cruza, muta e passa para geração seguinte
         void Step();
@@ -137,9 +159,13 @@ namespace GA
         // }
 
         [[nodiscard]] size_t getPopulacaoLen() const;
+
         [[nodiscard]] size_t getGeracao() const;
+
         [[nodiscard]] icar_ptr_t getBest() const;
+
         [[nodiscard]] const vec_car_t &getPopulacao() const;
+
         [[nodiscard]] const vec_melhores_t &getMelhores() const;
 
         // bool OpenLogFile();

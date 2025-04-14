@@ -13,8 +13,13 @@ namespace MODEL
           , _dxm(0), _dxs(1.0f), _dxo(5.0f)
           , _dym(0), _dys(0.3f), _dyo(0)
           , _phi(0), _omega(0), _a(0)
-          , _tlx(-100), _tly(500)
-          , _brx(500), _bry(-50) {}
+    {
+	    env_data.tlx = -100;
+	    env_data.tly = 500;
+    	env_data.brx = 500;
+    	env_data.bry = -50;
+    	_update_env_data();
+    }
 
     void CEnv::set(const unsigned seed,
                    const float dxm, const float dxs, const float dxo,
@@ -33,60 +38,24 @@ namespace MODEL
         _phi = phi;
         _omega = omega;
         _a = a;
-        _tlx = tlx;
-        _tly = tly;
-        _brx = brx;
-        _bry = bry;
+        env_data.tlx = tlx;
+        env_data.tly = tly;
+        env_data.brx = brx;
+        env_data.bry = bry;
+    	_update_env_data();
     }
 
     string CEnv::get() const
     {
-        stringstream ss;
-        ss << "environment_definition_" << ENV_HEADER << "{";
-
-        ss << _seed << ",";
-        ss << _dxm << ",";
-        ss << _dxs << ",";
-        ss << _dxo << ",";
-        ss << _dym << ",";
-        ss << _dys << ",";
-        ss << _dyo << ",";
-        ss << _phi << ",";
-        ss << _omega << ",";
-        ss << _a << ",";
-        ss << _tlx << ",";
-        ss << _tly << ",";
-        ss << _brx << ",";
-        ss << _bry << "}";
-        return ss.str();
+        return {"Not implemented yet"};
     }
 
     void CEnv::set(const string& sParams)
     {
-#if 0
-        RE re("environment_definition_(?P<ver>\\d+\\.\\d+){\\s*(?P<seed>\\d+),\\s*(?P<dxm>-*\\d*\\.*\\d*),\\s*(?P<dxs>-*\\d*\\.*\\d*),\\s*(?P<dxo>-*\\d*\\.*\\d*),\\s*(?P<dym>-*\\d*\\.*\\d*),\\s*(?P<dys>-*\\d*\\.*\\d*),\\s*(?P<dyo>-*\\d*\\.*\\d*),\\s*(?P<phi>-*\\d*\\.*\\d*),\\s*(?P<omega>-*\\d*\\.*\\d*),\\s*(?P<a>-*\\d*\\.*\\d*),\\s*(?P<tlx>-*\\d*\\.*\\d*),\\s*(?P<tly>-*\\d*\\.*\\d*),\\s*(?P<brx>-*\\d*\\.*\\d*),\\s*(?P<bry>-*\\d*\\.*\\d*)\\s*}");
-
-        double dVer;
-        re.FullMatch(StringPiece(sParams),
-        	&dVer,
-        	&_seed,
-        	&_dxm,
-        	&_dxs,
-        	&_dxo,
-        	&_dym	,
-        	&_dys	,
-        	&_dyo	,
-        	&_phi	,
-        	&_omega,
-        	&_a	,
-        	&_tlx,
-        	&_tly,
-        	&_brx,
-        	&_bry);
-#endif
+    	// Not implemented yet
     }
 
-    vec_vecs_t CEnv::get_vecs() const
+    void CEnv::_update_env_data()
     {
         const CRandom random(_seed);
 
@@ -94,17 +63,17 @@ namespace MODEL
 
         cwvecs.clear();
 
-        cwvecs.emplace_back(_brx, _bry);
-        cwvecs.emplace_back(_tlx, _bry);
+        cwvecs.emplace_back(env_data.brx, env_data.bry);
+        cwvecs.emplace_back(env_data.tlx, env_data.bry);
 
-        cwvecs.emplace_back(_tlx, 1);
+        cwvecs.emplace_back(env_data.tlx, 1);
         cwvecs.emplace_back(4, 1);
 
         float ldy = 0;
         float lm = 0;
         float x = 10.0f;
     	float y;
-        while (x < _brx)
+        while (x < env_data.brx)
         {
             const float dx = random.normal_random(_dxm, _dxs) + _dxo;
             const float m = random.normal_random(_dym, _dys) + _dyo;
@@ -117,17 +86,13 @@ namespace MODEL
             ldy = dy;
             lm = m;
         }
-    	cwvecs.emplace_back(_brx, y);
+    	cwvecs.emplace_back(env_data.brx, y);
 
     	// reverse copy
-		ccwvecs.clear();
+		env_data.ground.clear();
 		for (auto & cwvec : std::ranges::reverse_view(cwvecs))
 		{
-			ccwvecs.push_back(cwvec);
+			env_data.ground.push_back(cwvec);
 		}
-
-		cwvecs.insert(cwvecs.end(), ccwvecs.begin(), ccwvecs.end());
-
-    	return ccwvecs;
     }
 }

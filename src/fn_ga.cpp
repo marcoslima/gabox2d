@@ -71,7 +71,7 @@ void fnGa(void *pParam)
     cout << "Evolving..." << endl;
     while (!tp->m_bStopGa.load())
     {
-        ga.Ordena(tp->m_env, tp->m_bStopGa);
+        ga.Ordena(tp->m_env_data, tp->m_bStopGa);
         if (crInfo.Get() > .250 && !tp->m_bStopGa.load())
         {
             crInfo.Start();

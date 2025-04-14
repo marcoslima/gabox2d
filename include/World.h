@@ -19,11 +19,11 @@ namespace PHYS {
         b2ChainId m_ChainId = b2_nullChainId;
 
         void _create_world();
-        void _create_ground(const CEnv &env);
-        void _create_walls_and_ceilings(const CEnv &env);
-        void _create_left_wall(const CEnv &env);
-        void _create_right_wall(const CEnv &env);
-        void _create_ceiling(const CEnv &env);
+        void _create_ground(const env_data_t &env_data);
+        void _create_walls_and_ceilings(const env_data_t &env_data);
+        void _create_left_wall(const env_data_t &env_data);
+        void _create_right_wall(const env_data_t &env_data);
+        void _create_ceiling(const env_data_t &env_data);
         void _make_wall(b2Vec2 pos, b2Vec2 size);
 
 
@@ -33,7 +33,7 @@ namespace PHYS {
         [[nodiscard]] void* getGround() override;
         [[nodiscard]] void* getChain() override;
 
-        void create(const CEnv &env) override;
+        void create(const env_data_t& env_data) override;
 
         bool isValid() override;
 

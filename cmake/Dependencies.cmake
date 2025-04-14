@@ -278,7 +278,10 @@ IF (NOT EXISTS "${REEDSOLOMON_PATH}")
     message(STATUS ">>>>> Cloning ReedSolomon library into ${REEDSOLOMON_PATH}")
     execute_process(
             COMMAND git clone ${REEDSOLOMON_GIT_PATH} ${REEDSOLOMON_PATH}
+    )
+    execute_process(
             COMMAND git checkout ${REEDSOLOMON_CHECKOUT}
+            WORKING_DIRECTORY ${REEDSOLOMON_PATH}
     )
 ELSE ()
     message(STATUS ">>>>> Pulling ReedSolomon library at ${REEDSOLOMON_PATH}")
