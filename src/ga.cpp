@@ -94,14 +94,12 @@ namespace GA
         const map_individuals_t &individuals,
         atomic<bool> &stop_ga) const
     {
-        // Determine thread count (number of cores - 2)
-        const unsigned int num_threads = std::max(1u, std::thread::hardware_concurrency() - 2);
+        const auto num_threads = static_cast<unsigned int>(std::thread::hardware_concurrency() * 1.5);
 
         // Calculate partition size
         const size_t total_individuals = individuals.size();
         const size_t partition_size = total_individuals / num_threads;
 
-        // Create partitions
         vector<map_individuals_t> partitions(num_threads);
 
         size_t individual_idx = 0;
@@ -123,7 +121,6 @@ namespace GA
         vector<future<map_measures_results_t> > futures;
 
         // Launch threads
-        // cout << "Launching " << num_threads << " threads for parallel processing... ";
         for (const auto &partition: partitions)
         {
             if (!partition.empty())
@@ -146,7 +143,6 @@ namespace GA
             auto results = future.get();
             combined_results.insert(results.begin(), results.end());
         }
-        // cout << "All threads completed.\n";
 
         return combined_results;
     }
@@ -231,7 +227,7 @@ namespace GA
         MsgPack::array ground;
         for (const auto &vec: env_data.ground)
         {
-            ground.push_back(MsgPack::array{vec.x, vec.y});
+            ground.emplace_back(MsgPack::array{vec.x, vec.y});
         }
         return MsgPack::object{
             {"tlx", env_data.tlx},
