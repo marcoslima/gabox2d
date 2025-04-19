@@ -120,7 +120,6 @@ namespace PHYS
 
     void CWorld::_create_ground(const env_data_t &env_data)
     {
-        cout << "Creating ground..." << endl;
         const auto vecVertices = _get_b2vecs_from_ground(env_data);
         auto groundDef = b2DefaultBodyDef();
         groundDef.type = b2_staticBody;

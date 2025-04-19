@@ -308,3 +308,5 @@ execute_process(
         WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
         COMMAND cmake --build . -j20
 )
+####################33
+find_package(Boost REQUIRED COMPONENTS iostreams system)

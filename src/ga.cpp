@@ -1,15 +1,19 @@
 #include <algorithm>
 #include <future>
+#include <msgpack11.hpp>
 #include <random_genes_generator.h>
 #include <thread>
-
 #include "car.h"
-using namespace std;
 #include "CCronometro.h"
 #include "CRandom.h"
 #include "ga.h"
 #include <iostream>
+#include <base64.h>
+#include <boost/process.hpp>
 
+
+using namespace std;
+using namespace msgpack11;
 
 namespace GA
 {
@@ -85,34 +89,6 @@ namespace GA
         return !m_melhores_set.contains(current_best);
     }
 
-    map_measures_results_t CGa::_do_measures(
-        const env_data_t &env_data,
-        const map_individuals_t &individuals,
-        atomic<bool> &stop_ga) const
-    {
-        const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
-        world->create(env_data);
-
-        map_measures_results_t measures_results;
-
-        for (auto &car: individuals)
-        {
-            CCarDef car_def(car.second);
-            const auto phys_car = PHYS::createPhysCar();
-            try
-            {
-                phys_car->measure(world, car_def, _max_t);
-            } catch (const std::exception &e)
-            {
-                std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
-            }
-            measures_results[car.first] = phys_car->get_ga_fitness_params();
-            if (stop_ga.load()) break;
-        }
-        world->destroy();
-        return measures_results;
-    }
-
     map_measures_results_t CGa::_do_measures_parallel(
         const env_data_t &env_data,
         const map_individuals_t &individuals,
@@ -147,7 +123,7 @@ namespace GA
         vector<future<map_measures_results_t> > futures;
 
         // Launch threads
-        cout << "Launching " << num_threads << " threads for parallel processing... ";
+        // cout << "Launching " << num_threads << " threads for parallel processing... ";
         for (const auto &partition: partitions)
         {
             if (!partition.empty())
@@ -155,7 +131,7 @@ namespace GA
                 futures.push_back(
                     async(std::launch::async, [this, &env_data, &partition, &stop_ga]()
                     {
-                        return _do_measures(env_data, partition, stop_ga);
+                        return _do_measures(env_data, partition);
                     })
                 );
             }
@@ -170,7 +146,7 @@ namespace GA
             auto results = future.get();
             combined_results.insert(results.begin(), results.end());
         }
-        cout << "All threads completed.\n";
+        // cout << "All threads completed.\n";
 
         return combined_results;
     }
@@ -248,6 +224,89 @@ namespace GA
             m_nova.push_back(_strId2Include);
             _strId2Include.clear();
         }
+    }
+
+    MsgPack::object pack_env_data(const env_data_t &env_data)
+    {
+        MsgPack::array ground;
+        for (const auto &vec: env_data.ground)
+        {
+            ground.push_back(MsgPack::array{vec.x, vec.y});
+        }
+        return MsgPack::object{
+            {"tlx", env_data.tlx},
+            {"tly", env_data.tly},
+            {"brx", env_data.brx},
+            {"bry", env_data.bry},
+            {"ground", ground}
+            };
+    }
+
+    string CGa::serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const
+    {
+        MsgPack packed_env_data = pack_env_data(env_data);
+        MsgPack::array packed_individuals;
+        for (const auto &[id, genes]: individuals)
+        {
+            packed_individuals.emplace_back(MsgPack::object{
+                {"id", id},
+                {"genes", genes}
+            });
+        }
+        const MsgPack packed_data = MsgPack::object{
+            {"env_data", packed_env_data},
+            {"individuals", packed_individuals}
+        };
+        return packed_data.dump();
+    }
+
+    map_measures_results_t CGa::_do_measures(const env_data_t &env_data, const map_individuals_t &individuals) const
+    {
+        const string serialized_data = serialize_work_payload(env_data, individuals);
+        const string b64_encoded = binary_to_base64(serialized_data);
+
+        // cout << "serialized len: " << serialized_data.size() << endl;
+        // cout << "compressed len: " << compressed.size() << endl;
+        // cout << "b64_encoded len: " << b64_encoded.size() << endl;
+        // cout << serialized_data << endl;
+
+        boost::process::ipstream pipe_stdout;
+        boost::process::ipstream pipe_stderr;
+        stringstream ss;
+        ss << "GaBox2d " << b64_encoded;
+        boost::process::child c(ss.str().c_str(),
+                                 boost::process::std_out > pipe_stdout,
+                                 boost::process::std_err > pipe_stderr);
+
+        string output, line;
+        while (pipe_stdout && std::getline(pipe_stdout, line))
+        {
+            output += line + "\n";
+        }
+
+        c.wait();
+
+        // decode results from base64:
+        const auto pack_result = base64_to_binary(output);
+
+        MsgPack::object obj;
+        string err;
+        const auto result = MsgPack::parse(pack_result, err);
+        if (!err.empty())
+        {
+            cout << "Error parsing result: " << err << endl;
+            return {};
+        }
+        const auto results_array = result["results"].array_items();
+        map_measures_results_t results;
+        for (const auto &item: results_array)
+        {
+            const auto id = item["id"].uint64_value();
+            const auto fitness_params = GA::fitness_params_t::from_object(item["fitness_params"]);
+            results[id] = fitness_params;
+        }
+
+        return results;
     }
 
     void CGa::_1Select()

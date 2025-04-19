@@ -83,9 +83,11 @@ namespace GA
 
         void _do_manual_include();
 
+        string serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const;
+
         map_measures_results_t _do_measures(
             const env_data_t &env_data,
-            const map_individuals_t &individuals, atomic<bool> &stop_ga) const;
+            const map_individuals_t &individuals) const;
 
         map_measures_results_t _do_measures_parallel(
             const env_data_t &env_data,

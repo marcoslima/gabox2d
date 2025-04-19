@@ -33,6 +33,9 @@ add_library(GaBox2dLib
         src/triangulation.cpp
         src/random_genes_generator.cpp
         src/network/rs_codec.cpp
+        src/zipstring.cpp
+        src/base64.cpp
+        src/worker/worker.cpp
 
         include/assets.h
         include/car.h
@@ -73,7 +76,7 @@ target_include_directories("GaBox2dLib" PUBLIC ${MSGPACK_PATH})
 target_include_directories("GaBox2dLib" PUBLIC ${REEDSOLOMON_PATH}/include)
 target_link_directories("GaBox2dLib" PUBLIC ${REEDSOLOMON_PATH}/build)
 target_link_directories("GaBox2dLib" PUBLIC ${MSGPACK_PATH}/build)
-target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2d ReedSolomon msgpack11 ${UUID_LIBRARIES})
+target_link_libraries("GaBox2dLib" imgui imgui-sfml sfml-graphics sfml-audio GL box2d ReedSolomon msgpack11 ${UUID_LIBRARIES} Boost::iostreams)
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 

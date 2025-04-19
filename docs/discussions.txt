@@ -7,3 +7,11 @@ Primeiro passo é mudar o m_populacao de list<icar_ptr_t> para map<individuo_id_
 Os dois maps criados foram map<individuo_id_t, icar_ptr_t> e map<individuo_id_t, measures_results_t>.
 O método CGa::_do_measures agora é thread-safe e é capaz de fazer as mensurações do map que receber. Assim podemos
     dividir a população e fazer mensurações paralelas.
+
+2025-04-19:
+Agora, ao invés de usar multiplas threads para medir, cada thread chama o gabox2d
+    com um msgpack comprimido e encodado para base64 como argumento. O GaBox2d então,
+    vendo que há um parâmetro de entrada, chama o worker que, estando agora num processo separado,
+    faz as medições e retorna o resultado no stdout.
+A velocidade, com 90 indivíduos, está em torno de 2.5 gerações por segundo. Mais ou menos 8 vezes mais rápido,
+    usando 18 threads (e processos) para medir.
