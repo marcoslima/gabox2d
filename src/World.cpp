@@ -1,3 +1,5 @@
+#include <iostream>
+#include <thread>
 #include <World.h>
 #include <box2d/box2d.h>
 #include <box2d/types.h>
@@ -16,11 +18,11 @@ namespace PHYS
         m_ChainId = b2_nullChainId;
     }
 
-    void CWorld::create(const CEnv &env)
+    void CWorld::create(const env_data_t &env_data)
     {
         _create_world();
-        _create_ground(env);
-        _create_walls_and_ceilings(env, 5.0f);
+        _create_ground(env_data);
+        _create_walls_and_ceilings(env_data);
     }
 
     bool CWorld::isValid()
@@ -66,14 +68,13 @@ namespace PHYS
                       static_cast<float>(a.y));
     }
 
-    vector<b2Vec2> _get_b2vecs_from_ground(const MODEL::CEnv &env)
+    vector<b2Vec2> _get_b2vecs_from_ground(const env_data_t &env_data)
     {
-        const MODEL::vec_vecs_t GroundPoly = env.get_vecs();
-        const int32_t nSize = GroundPoly.size(); // NOLINT(*-narrowing-conversions)
+        const int32_t nSize = env_data.ground.size(); // NOLINT(*-narrowing-conversions)
         vector<b2Vec2> vecVertices(nSize);
         for (size_t k = 0; k < nSize; k++)
         {
-            vecVertices[k] = b2Vec2_from_vec2_t(GroundPoly[k]);
+            vecVertices[k] = b2Vec2_from_vec2_t(env_data.ground[k]);
         }
         return vecVertices;
     }
@@ -96,30 +97,30 @@ namespace PHYS
         b2Body_SetUserData(wallId, &ID_GROUND);
     }
 
-    void CWorld::_create_left_wall(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_left_wall(const env_data_t &env_data)
     {
-        const auto pos = b2Vec2(env._tlx - tick, (env._bry + env._tly) / 2);
-        const auto size = b2Vec2(tick, fabs(env._bry - env._tly));
+        const auto pos = b2Vec2(env_data.tlx - tick, (env_data.bry + env_data.tly) / 2);
+        const auto size = b2Vec2(tick, fabs(env_data.bry - env_data.tly));
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_right_wall(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_right_wall(const env_data_t &env_data)
     {
-        const auto pos = b2Vec2(env._brx + tick, (env._bry + env._tly) / 2);
-        const auto size = b2Vec2(tick, fabs(env._bry - env._tly));
+        const auto pos = b2Vec2(env_data.brx + tick, (env_data.bry + env_data.tly) / 2);
+        const auto size = b2Vec2(tick, fabs(env_data.bry - env_data.tly));
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_ceiling(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_ceiling(const env_data_t &env_data)
     {
-        const auto pos = b2Vec2((env._brx + env._tlx) / 2, env._tly + tick);
-        const auto size = b2Vec2(fabs(env._brx - env._tlx), tick);
+        const auto pos = b2Vec2((env_data.brx + env_data.tlx) / 2, env_data.tly + tick);
+        const auto size = b2Vec2(fabs(env_data.brx - env_data.tlx), tick);
         _make_wall(pos, size);
     }
 
-    void CWorld::_create_ground(const MODEL::CEnv &env)
+    void CWorld::_create_ground(const env_data_t &env_data)
     {
-        const auto vecVertices = _get_b2vecs_from_ground(env);
+        const auto vecVertices = _get_b2vecs_from_ground(env_data);
         auto groundDef = b2DefaultBodyDef();
         groundDef.type = b2_staticBody;
         m_GroundId = b2CreateBody(m_WorldId, &groundDef);
@@ -128,16 +129,17 @@ namespace PHYS
         auto shapeDef = b2DefaultChainDef();
         // shapeDef.friction = 1.0f;
         // shapeDef.restitution = 0.0f;
+
         shapeDef.points = vecVertices.data();
         shapeDef.count = static_cast<int32_t>(vecVertices.size());
         shapeDef.isLoop = true;
         b2CreateChain(m_GroundId, &shapeDef);
     }
 
-    void CWorld::_create_walls_and_ceilings(const MODEL::CEnv &env, const float tick)
+    void CWorld::_create_walls_and_ceilings(const env_data_t &env_data)
     {
-        _create_left_wall(env, tick);
-        _create_right_wall(env, tick);
-        _create_ceiling(env, tick);
+        _create_left_wall(env_data);
+        _create_right_wall(env_data);
+        _create_ceiling(env_data);
     }
 } // PHYS

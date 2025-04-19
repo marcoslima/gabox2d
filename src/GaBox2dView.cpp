@@ -8,7 +8,6 @@
 #include <SolidBrush.h>
 #include <assets.h>
 #include <GaParamsDlg.h>
-#include <phys.h>
 #include <fn_ga.h>
 #include <network/ga_server.h>
 #include <triangulation.h>
@@ -16,7 +15,6 @@
 #include "CRandom.h"
 
 #include <msgpack/helpers.h>
-#include <msgpack11.hpp>
 
 
 namespace GUI
@@ -101,9 +99,9 @@ namespace GUI
     void CGaBox2dView::_draw_sky(sf::RenderWindow &window, const CEnv &env)
     {
         // World na cor de céu
-        sf::RectangleShape sky(sf::Vector2f(env._brx - env._tlx, env._tly - env._bry));
+        sf::RectangleShape sky(sf::Vector2f(env.env_data.brx - env.env_data.tlx, env.env_data.tly - env.env_data.bry));
         sky.setFillColor(sf::Color(100, 100, 255));
-        sky.setPosition(env._tlx, env._bry);
+        sky.setPosition(env.env_data.tlx, env.env_data.bry);
         window.draw(sky);
     }
 
@@ -192,8 +190,8 @@ namespace GUI
         // gr.DrawRectangle(&penBorder, rcWorld);
         const CPen penBorder(sf::Color(255, 0, 0), 5);
         const CSolidBrush bshBorder(sf::Color::Transparent);
-        sf::RectangleShape border(sf::Vector2f(env._brx - env._tlx, env._tly - env._bry));
-        border.setPosition(env._tlx, env._bry);
+        sf::RectangleShape border(sf::Vector2f(env.env_data.brx - env.env_data.tlx, env.env_data.tly - env.env_data.bry));
+        border.setPosition(env.env_data.tlx, env.env_data.bry);
         penBorder.apply(border);
         bshBorder.apply(border);
 
@@ -392,7 +390,7 @@ namespace GUI
         _thread_params.m_bStopGa = false;
         // _thread_params.m_wndNotify = m_hWnd;
         // _thread_params.m_pGaInfo = &m_GaInfo;
-        _thread_params.m_env = GetDocument()->GetEnv();
+        _thread_params.m_env_data = GetDocument()->GetEnv().env_data;
 
         m_bGaRunning = true;
         cout << "Iniciando thread do GA..." << endl;

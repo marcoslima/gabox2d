@@ -8,10 +8,7 @@ using namespace std;
 class CThreadParams
 {
 public:
-    atomic<bool>	m_bStopGa	;
-    ga_params_t		m_Params	;
-    MODEL::CEnv			m_env		;
-
-    // ga_params_t		m_Params	;
-    // CGaInfo*		m_pGaInfo	;
+    atomic<bool> m_bStopGa;
+    ga_params_t m_Params;
+    MODEL::env_data_t m_env_data;
 };

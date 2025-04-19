@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <numeric>
-#include <ostream>
 
 #include "phys.h"
 
@@ -508,6 +507,11 @@ namespace PHYS
             _t,
             m_bDead
         };
+    }
+
+    phys_car_ptr_t createPhysCar()
+    {
+        return make_shared<CPhysCar>();
     }
 
     void CPhysCar::init()

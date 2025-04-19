@@ -20,7 +20,7 @@ public:
 
 namespace GUI
 {
-    class CWndPreviewChao
+    class CWndPreviewChao final
     {
         sf::RenderWindow m_window;
 
@@ -43,8 +43,7 @@ namespace GUI
         CPoint      m_ptCenter;
         int         m_zoom    ;
 
-    public:
         void OnPaint();
     };
-}; //namespace GUI
+}
 #endif //__WNDPREVIEWCHAO_H__

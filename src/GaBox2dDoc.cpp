@@ -2,8 +2,6 @@
 
 #include <iostream>
 #include <mutex>
-#include "EditorChaoDlg.h"
-#include <phys.h>
 #include <ga.h>
 
 
@@ -76,8 +74,8 @@ namespace GUI
 
     void CGaBox2dDoc::_start_world()
     {
-        _world->create(m_env);
-        m_vecGround = m_env.get_vecs();
+        _world->create(m_env.env_data);
+        m_vecGround = m_env.env_data.ground;
         m_car->beginSimulate(_world);
     }
 

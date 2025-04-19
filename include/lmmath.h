@@ -1,6 +1,6 @@
-#ifndef __LMMATH_H__
-#define __LMMATH_H__
-// M�dulo matem�tico da LibMarcos: LmMath
+
+#pragma once
+// Módulo matemático da LibMarcos: LmMath
 //////////////////////////////////////////
 
 #include <vector>
@@ -11,7 +11,7 @@ namespace lmmath
 typedef vector< pair<unsigned long,unsigned long> > TFatorado;
 TFatorado FatoraNumero(unsigned long nNumero);
 
-// Transforma n�mero de ponto flutuante em fra��o:
+// Transforma número de ponto flutuante em fração:
 typedef struct tagFracao
 {
 	bool		  negative;
@@ -39,8 +39,9 @@ public:
 	double x;
 	double y;
 	double cores[3];
-	CBilinearAmostras(){};
-	CBilinearAmostras(double ax,double ay,double r,double g,double b)
+	CBilinearAmostras(): x(0), y(0), cores{} {}
+
+	CBilinearAmostras(const double ax, const double ay, const double r, const double g, const double b)
 	{x = ax; y = ay; cores[0] = r; cores[1] = g; cores[2] = b;}
 };
 
@@ -53,7 +54,6 @@ void Bilinear(double x, double y, double k[12], double cores[3]);
 //						[ox oy 1]
 class CLinearMap
 {
-private:
 	double	_a;
 	double	_b;
 	double	_c;
@@ -72,7 +72,7 @@ public:
 		_oy = 0.0;
 	}
 
-	CLinearMap(double a, double b, double c, double d, double ox, double oy)
+	CLinearMap(const double a, const double b, const double c, const double d, const double ox, const double oy)
 	{
 		_a = a;
 		_b = b;
@@ -104,9 +104,9 @@ a x3 + b y3 + ox = x3'
 |x3 y3 x3l|    D
 
 */
-	CLinearMap(	double x1, double y1, double x1l, double y1l,
-				double x2, double y2, double x2l, double y2l,
-				double x3, double y3, double x3l, double y3l)
+	CLinearMap(const double x1, const double y1, const double x1l, const double y1l,
+				const double x2, const double y2, const double x2l, const double y2l,
+				const double x3, const double y3, const double x3l, const double y3l)
 	{
 		set(x1,y1,x1l,y1l,
 			x2,y2,x2l,y2l,
@@ -117,14 +117,14 @@ a x3 + b y3 + ox = x3'
 	// nem de x em y.
 	// Tamb�m acontece de, nesta situa��o, termos pontos que produzem delta zerado.
 	// Neste caso, fa�amos uma transforma��o mais direta (menos gen�rica) considerando isso:
-	CLinearMap(	double cx , // Largura no espa�o de entrada
-				double cy , // Altura no espa�o de entrada
-				double cxl, // Largura no espa�o resultante
-				double cyl, // Altura no espa�o resultante
-				double x  , // Este ponto no espa�o de entrada �...
-				double y  ,
-				double xl , // Este ponto no espa�o resultante.
-				double yl )
+	CLinearMap(const double cx , // Largura no espa�o de entrada
+				const double cy , // Altura no espa�o de entrada
+				const double cxl, // Largura no espa�o resultante
+				const double cyl, // Altura no espa�o resultante
+				const double x  , // Este ponto no espa�o de entrada �...
+				const double y  ,
+				const double xl , // Este ponto no espa�o resultante.
+				const double yl )
 	{
 		// cxl = a cx
 		// a = cxl / cx
@@ -139,9 +139,9 @@ a x3 + b y3 + ox = x3'
 		_oy = yl - _d * y;
 	}
 
-	void set(	double x1, double y1, double x1l, double y1l,
-				double x2, double y2, double x2l, double y2l,
-				double x3, double y3, double x3l, double y3l)
+	void set(const double x1, const double y1, const double x1l, const double y1l,
+				const double x2, const double y2, const double x2l, const double y2l,
+				const double x3, const double y3, const double x3l, const double y3l)
 	{
 		_a = 1.0;
 		_b = 0.0;
@@ -150,7 +150,7 @@ a x3 + b y3 + ox = x3'
 		_ox = 0.0;
 		_oy = 0.0;
 
-		double delta = x1 * y2 + y1 * x3 + x2 * y3 - x1*y3 - y1*x2 - y2*x3;
+		const double delta = x1 * y2 + y1 * x3 + x2 * y3 - x1*y3 - y1*x2 - y2*x3;
 		if(delta != 0)
 		{
 			_a = (x1l * y2 + y1*x3l + x2l*y3 - x1l*y3 - y1*x2l - y2*x3l)/delta;
@@ -171,22 +171,23 @@ a x3 + b y3 + ox = x3'
 	// [x' y' 1] = [x y 1]	[ a c  0]
 	//						[ b d  0]
 	//						[ox oy 1]
-	double mapX(double x, double y)
+	double mapX(const double x, const double y) const
 	{
 		return _a * x + _b * y + _ox;
 	}
-	double mapY(double x, double y)
+	double mapY(const double x, const double y) const
 	{
 		return _c * x + _d * y + _oy;
 	}
-	void map(double x, double y, double& xl, double& yl)
+	void map(const double x, const double y, double& xl, double& yl) const
 	{
 		xl = _a * x + _b * y + _ox;
 		yl = _c * x + _d * y + _oy;
 	}
-	void map(double& x, double& y)
+	void map(double& x, double& y) const
 	{
-		double tx = x,ty = y;
+		const double tx = x;
+		const double ty = y;
 		x = _a * tx + _b * ty + _ox;
 		y = _c * tx + _d * ty + _oy;
 	}
@@ -209,30 +210,17 @@ a x3 + b y3 + ox = x3'
 	|c yl-oy|. 1/delta = y
 
 	*/
-	void unmap(double& x, double& y)
+	void unmap(double& x, double& y) const
 	{
-		double delta = _a*_d - _b*_c;
+		const double delta = _a*_d - _b*_c;
 		if(delta != 0)
 		{
-			double xl = x, yl = y;
+			const double xl = x;
+			const double yl = y;
 			x = ((xl-_ox)*_d - (yl-_oy)*_b)/delta;
 			y = ((yl-_oy)*_a - (xl-_ox)*_c)/delta;
 		}
-		return;
 	}
 };
 
 }// namespace lmmath
-#endif //__LMMATH_H__
-
-
-
-
-
-
-
-
-
-
-
-

@@ -20,7 +20,7 @@ public:
 	~CCar() override;
 
 	// Overriden methods
-	void calc_fitness(float max_t) override;
+	void calc_fitness(const GA::fitness_params_t&, float max_t) override;
 	void Medir(PHYS::IWorldPtr world, float max_t) override;
 	void resetPhysCar() override;
 	void createGaFromGenes(const string &genes) override;

@@ -9,22 +9,21 @@ namespace GUI
 {
     // CEditorChaoDlg dialog
     CEditorChaoDlg::CEditorChaoDlg()
-        : m_World()
-          , m_fDxMedia(0)
-          , m_fDxStdev(10)
-          , m_fDxOffset(50)
-          , m_fDyMedia(0)
-          , m_fDyStdev(3)
-          , m_fDyOffset(0)
-          , m_fSinPhi(0)
-          , m_fSinOmega(0)
-          , m_fSinA(0)
-          , m_nTlx(-100)
-          , m_nTly(500)
-          , m_nBrx(500)
-          , m_nBry(-50)
-          , m_nSeed(0)
-          , m_bAutoUpdate(false) {}
+        : m_fDxMedia(0)
+        , m_fDxStdev(10)
+        , m_fDxOffset(50)
+        , m_fDyMedia(0)
+        , m_fDyStdev(3)
+        , m_fDyOffset(0)
+        , m_fSinPhi(0)
+        , m_fSinOmega(0)
+        , m_fSinA(0)
+        , m_nTlx(-100)
+        , m_nTly(500)
+        , m_nBrx(500)
+        , m_nBry(-50)
+        , m_nSeed(0)
+        , m_bAutoUpdate(false) {}
 
     // BEGIN_MESSAGE_MAP(CEditorChaoDlg, CDialog)
     // 	ON_BN_CLICKED(IDC_CRIAR, OnBnClickedCriar)
@@ -454,4 +453,4 @@ namespace GUI
     {
         // OnOK();
     }
-}; //namespace GUI
+}

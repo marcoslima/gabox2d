@@ -1,9 +1,6 @@
 #ifndef PHYS_H
 #define PHYS_H
-#include <box2d/math_functions.h>
 
-#include "env.h"
-#include "World.h"
 
 namespace PHYS
 {

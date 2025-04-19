@@ -1,14 +1,19 @@
 #include <algorithm>
+#include <future>
+#include <msgpack11.hpp>
 #include <random_genes_generator.h>
-
+#include <thread>
 #include "car.h"
-using namespace std;
 #include "CCronometro.h"
 #include "CRandom.h"
 #include "ga.h"
 #include <iostream>
+#include <base64.h>
+#include <boost/process.hpp>
 
-#define VERIFY(x, msg) if(!(x)) {cout << "FAIL: " << msg << endl;}
+
+using namespace std;
+using namespace msgpack11;
 
 namespace GA
 {
@@ -42,7 +47,7 @@ namespace GA
     {
         m_populacao.clear();
         generate_n(back_inserter(m_populacao), _populacao,
-                   [&]()
+                   [&]
                    {
                        return _carFactory->createRandomCar();
                    });
@@ -84,39 +89,97 @@ namespace GA
         return !m_melhores_set.contains(current_best);
     }
 
-    void CGa::_do_measures(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga) const
+    map_measures_results_t CGa::_do_measures_parallel(
+        const env_data_t &env_data,
+        const map_individuals_t &individuals,
+        atomic<bool> &stop_ga) const
     {
-        for (auto &car: m_populacao)
-        {
-            try
-            {
-                car->Medir(world, _max_t);
-            } catch (const std::exception &e)
-            {
-                std::cerr << "CGa::Ordena:Medir: " << e.what() << '\n';
-            }
+        // Determine thread count (number of cores - 2)
+        const unsigned int num_threads = std::max(1u, std::thread::hardware_concurrency() - 2);
 
-            if (stop_ga.load()) break;
+        // Calculate partition size
+        const size_t total_individuals = individuals.size();
+        const size_t partition_size = total_individuals / num_threads;
+
+        // Create partitions
+        vector<map_individuals_t> partitions(num_threads);
+
+        size_t individual_idx = 0;
+        for (const auto &[id, genes]: individuals)
+        {
+            const size_t partition_idx = individual_idx / partition_size;
+            if (partition_idx < num_threads)
+            {
+                partitions[partition_idx][id] = genes;
+            } else
+            {
+                // Put remaining individuals in the last partition
+                partitions[num_threads - 1][id] = genes;
+            }
+            individual_idx++;
         }
+
+        // Create threads and futures for results
+        vector<future<map_measures_results_t> > futures;
+
+        // Launch threads
+        // cout << "Launching " << num_threads << " threads for parallel processing... ";
+        for (const auto &partition: partitions)
+        {
+            if (!partition.empty())
+            {
+                futures.push_back(
+                    async(std::launch::async, [this, &env_data, &partition, &stop_ga]()
+                    {
+                        return _do_measures(env_data, partition);
+                    })
+                );
+            }
+        }
+
+        // Collect results
+        map_measures_results_t combined_results;
+        for (auto &future: futures)
+        {
+            if (stop_ga.load()) break;
+
+            auto results = future.get();
+            combined_results.insert(results.begin(), results.end());
+        }
+        // cout << "All threads completed.\n";
+
+        return combined_results;
     }
 
-    void CGa::_do_calc_points()
+    void CGa::_do_calc_points(const map_measures_results_t &measures_results)
     {
-        for (const auto &it: m_populacao) it->calc_fitness(_max_t);
+        for (size_t i = 0; i < m_populacao.size(); ++i)
+            m_populacao[i]->calc_fitness(measures_results.at(i), _max_t);
+
+        // for (const auto &it: m_populacao)
+        //     it->calc_fitness(TODO, _max_t);
     }
 
     void CGa::_do_sort()
     {
-        m_populacao.sort([](const auto &lhs, const auto &rhs)
-        {
-            return lhs->getFitness() < rhs->getFitness();
-        });
+        ranges::sort(m_populacao.begin(), m_populacao.end(),
+                     [](const auto &lhs, const auto &rhs)
+                     {
+                         return lhs->getFitness() < rhs->getFitness();
+                     });
     }
 
-    void CGa::Ordena(const PHYS::IWorldPtr &world, atomic<bool> &stop_ga)
+    void CGa::Ordena(const env_data_t &env_data, atomic<bool> &stop_ga)
     {
-        _do_measures(world, stop_ga);
-        _do_calc_points();
+        map_individuals_t individuals;
+        for (size_t i = 0; i < m_populacao.size(); ++i)
+        {
+            individuals[i] = m_populacao[i]->getGenes();
+        }
+
+        const auto measure_results = _do_measures_parallel(env_data, individuals, stop_ga);
+
+        _do_calc_points(measure_results);
         _do_sort();
 
         _carWinner = m_populacao.front()->getGenes();
@@ -148,7 +211,7 @@ namespace GA
     void CGa::_do_alienism()
     {
         generate_n(back_inserter(m_nova), _alienismo,
-                   [&]()
+                   [&]
                    {
                        return _generate_random_genes();
                    });
@@ -161,6 +224,89 @@ namespace GA
             m_nova.push_back(_strId2Include);
             _strId2Include.clear();
         }
+    }
+
+    MsgPack::object pack_env_data(const env_data_t &env_data)
+    {
+        MsgPack::array ground;
+        for (const auto &vec: env_data.ground)
+        {
+            ground.push_back(MsgPack::array{vec.x, vec.y});
+        }
+        return MsgPack::object{
+            {"tlx", env_data.tlx},
+            {"tly", env_data.tly},
+            {"brx", env_data.brx},
+            {"bry", env_data.bry},
+            {"ground", ground}
+            };
+    }
+
+    string CGa::serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const
+    {
+        MsgPack packed_env_data = pack_env_data(env_data);
+        MsgPack::array packed_individuals;
+        for (const auto &[id, genes]: individuals)
+        {
+            packed_individuals.emplace_back(MsgPack::object{
+                {"id", id},
+                {"genes", genes}
+            });
+        }
+        const MsgPack packed_data = MsgPack::object{
+            {"env_data", packed_env_data},
+            {"individuals", packed_individuals}
+        };
+        return packed_data.dump();
+    }
+
+    map_measures_results_t CGa::_do_measures(const env_data_t &env_data, const map_individuals_t &individuals) const
+    {
+        const string serialized_data = serialize_work_payload(env_data, individuals);
+        const string b64_encoded = binary_to_base64(serialized_data);
+
+        // cout << "serialized len: " << serialized_data.size() << endl;
+        // cout << "compressed len: " << compressed.size() << endl;
+        // cout << "b64_encoded len: " << b64_encoded.size() << endl;
+        // cout << serialized_data << endl;
+
+        boost::process::ipstream pipe_stdout;
+        boost::process::ipstream pipe_stderr;
+        stringstream ss;
+        ss << "GaBox2d " << b64_encoded;
+        boost::process::child c(ss.str().c_str(),
+                                 boost::process::std_out > pipe_stdout,
+                                 boost::process::std_err > pipe_stderr);
+
+        string output, line;
+        while (pipe_stdout && std::getline(pipe_stdout, line))
+        {
+            output += line + "\n";
+        }
+
+        c.wait();
+
+        // decode results from base64:
+        const auto pack_result = base64_to_binary(output);
+
+        MsgPack::object obj;
+        string err;
+        const auto result = MsgPack::parse(pack_result, err);
+        if (!err.empty())
+        {
+            cout << "Error parsing result: " << err << endl;
+            return {};
+        }
+        const auto results_array = result["results"].array_items();
+        map_measures_results_t results;
+        for (const auto &item: results_array)
+        {
+            const auto id = item["id"].uint64_value();
+            const auto fitness_params = GA::fitness_params_t::from_object(item["fitness_params"]);
+            results[id] = fitness_params;
+        }
+
+        return results;
     }
 
     void CGa::_1Select()
@@ -261,8 +407,7 @@ namespace GA
                 in_population.insert(childs.second);
                 m_nova.push_back(childs.first);
                 m_nova.push_back(childs.second);
-            }
-            else
+            } else
             {
                 m_nova.push_back(parents.first);
                 m_nova.push_back(parents.second);
@@ -317,10 +462,10 @@ namespace GA
         } else
         {
             ranges::transform(m_nova, back_inserter(m_populacao),
-                [&](const auto &genes)
-                {
-                  return _carFactory->createCarFromGenes(genes);
-                });
+                              [&](const auto &genes)
+                              {
+                                  return _carFactory->createCarFromGenes(genes);
+                              });
             _geracao++;
         }
 
@@ -381,7 +526,7 @@ namespace GA
         return m_populacao.front()->clone();
     }
 
-    const lst_car_t &CGa::getPopulacao() const
+    const vec_car_t &CGa::getPopulacao() const
     {
         return m_populacao;
     }

@@ -4,7 +4,6 @@
 #include "car.h"
 #include "CCronometro.h"
 #include "ga.h"
-#include "World.h"
 #include <ga_status.h>
 #include <network/ga_server.h>
 
@@ -42,9 +41,6 @@ void fnGa(void *pParam)
     // HWND hWndNotify = tp->m_wndNotify;
     const ga_params_t gaParams = tp->m_Params;
     // CGaInfo *pGaInfo = tp->m_pGaInfo;
-    const PHYS::IWorldPtr world = make_shared<PHYS::CWorld>();
-    world->create(tp->m_env);
-
     GaServer gaServer;
 
     GA::CGa ga(make_unique<CCarFactory>());
@@ -75,7 +71,7 @@ void fnGa(void *pParam)
     cout << "Evolving..." << endl;
     while (!tp->m_bStopGa.load())
     {
-        ga.Ordena(world, tp->m_bStopGa);
+        ga.Ordena(tp->m_env_data, tp->m_bStopGa);
         if (crInfo.Get() > .250 && !tp->m_bStopGa.load())
         {
             crInfo.Start();

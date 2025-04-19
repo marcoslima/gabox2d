@@ -24,7 +24,7 @@ icar_ptr_t CCar::clone()
     return car;
 }
 
-void _updateGraphicsData(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car_ptr_t &gr_car)
+void updateGraphicsData_(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car_ptr_t &gr_car)
 {
     phys_car->fill_gr_car(*gr_car);
 }
@@ -32,7 +32,7 @@ void _updateGraphicsData(const PHYS::phys_car_ptr_t &phys_car, const GUI::gr_car
 bool CCar::doStepGetContinue()
 {
     const bool bRet = m_phys_car_ptr->simulation_step_get_dead();
-    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
+    updateGraphicsData_(m_phys_car_ptr, m_gr_car_ptr);
 
     return bRet;
 }
@@ -40,7 +40,7 @@ bool CCar::doStepGetContinue()
 void CCar::doStep()
 {
     m_phys_car_ptr->simulation_step();
-    _updateGraphicsData(m_phys_car_ptr, m_gr_car_ptr);
+    updateGraphicsData_(m_phys_car_ptr, m_gr_car_ptr);
 }
 
 void CCar::setShowRodaParams(const bool show)
@@ -50,8 +50,8 @@ void CCar::setShowRodaParams(const bool show)
 
 void CCar::Medir(const PHYS::IWorldPtr world, const float max_t)
 {
-    m_ga_car_ptr->decode();
-    m_phys_car_ptr->measure(world, m_ga_car_ptr->getCarro(), max_t);
+    const CCarDef car(m_ga_car_ptr->getGenes());
+    m_phys_car_ptr->measure(world, car, max_t);
 }
 
 string CCar::getGenes() const
@@ -65,9 +65,9 @@ vec2f_t CCar::getCenter() const
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void CCar::calc_fitness(const float max_t)
+void CCar::calc_fitness(const GA::fitness_params_t& params, const float max_t)
 {
-    m_ga_car_ptr->calc_fitness(m_phys_car_ptr->get_ga_fitness_params(), max_t);
+    m_ga_car_ptr->calc_fitness(params, max_t);
 }
 
 float CCar::getFitness() const
@@ -112,8 +112,8 @@ void CCar::draw(void *pParams) const
 
 void CCar::beginSimulate(const PHYS::IWorldPtr world)
 {
-    m_ga_car_ptr->decode();
-    m_phys_car_ptr->create(world, m_ga_car_ptr->getCarro());
+    const CCarDef car(m_ga_car_ptr->getGenes());
+    m_phys_car_ptr->create(world, car);
 }
 
 CCar::~CCar() = default;

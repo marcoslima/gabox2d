@@ -11,6 +11,14 @@ using namespace std;
 namespace MODEL
 {
     typedef vector<vec2f_t> vec_vecs_t;
+    struct env_data_t
+    {
+        float tlx;
+        float tly;
+        float brx;
+        float bry;
+        vec_vecs_t ground;
+    };
 
     // Classe que guarda as características do ambiente
     class CEnv
@@ -29,10 +37,8 @@ namespace MODEL
         float _omega;
         float _a;
 
-        float _tlx;
-        float _tly;
-        float _brx;
-        float _bry;
+        // Dados do ambiente (inclusive ground, já calculado)
+        env_data_t env_data;
 
         CEnv();
 
@@ -45,6 +51,6 @@ namespace MODEL
 
         [[nodiscard]] string get() const;
         static void set(const string &sParams);
-        [[nodiscard]] vec_vecs_t get_vecs() const;
+        void _update_env_data();
     };
-}; //namespace MODEL
+}

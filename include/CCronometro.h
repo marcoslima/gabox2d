@@ -13,8 +13,8 @@ class CCronometro
 
 public:
     void Start();
-    double Get() const;
-    double End() const;
+    [[nodiscard]] double Get() const;
+    [[nodiscard]] double End() const;
 };
 
 
