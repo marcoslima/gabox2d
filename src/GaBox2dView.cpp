@@ -14,8 +14,6 @@
 
 #include "CRandom.h"
 
-#include <msgpack/helpers.h>
-
 
 namespace GUI
 {

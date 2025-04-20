@@ -8,7 +8,6 @@ using namespace boost::asio::ip;
 
 GaServer::GaServer()
     : acceptor_(io_context_, tcp::endpoint(tcp::v4(), 9876))
-    , rs_codec_(RS_CHUNK_SIZE, RS_REDUNDANCY)
 {
     startAccept();
     server_thread_ = std::thread([this]
@@ -49,8 +48,7 @@ void GaServer::startAccept()
 
 string GaServer::compose_message_(const string& data)
 {
-    auto rs_encoded = rs_codec_.encode(data);
-    auto message = string(rs_encoded.begin(), rs_encoded.end());
+    auto message = string(data.begin(), data.end());
     message.insert(0, START_OF_MESSAGE);
     message.append(END_OF_MESSAGE);
 

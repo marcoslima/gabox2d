@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <future>
-#include <msgpack11.hpp>
 #include <random_genes_generator.h>
 #include <thread>
 #include "car.h"
@@ -9,11 +8,13 @@
 #include "ga.h"
 #include <iostream>
 #include <base64.h>
+#include <sstream>
 #include <boost/process.hpp>
+#include <worker_comms/individuals_batch.pb.h>
+#include <worker_comms/results_batch.pb.h>
 
 
 using namespace std;
-using namespace msgpack11;
 
 namespace GA
 {
@@ -126,7 +127,7 @@ namespace GA
             if (!partition.empty())
             {
                 futures.push_back(
-                    async(std::launch::async, [this, &env_data, &partition, &stop_ga]()
+                    async(std::launch::async, [this, &env_data, &partition]
                     {
                         return _do_measures(env_data, partition);
                     })
@@ -151,9 +152,6 @@ namespace GA
     {
         for (size_t i = 0; i < m_populacao.size(); ++i)
             m_populacao[i]->calc_fitness(measures_results.at(i), _max_t);
-
-        // for (const auto &it: m_populacao)
-        //     it->calc_fitness(TODO, _max_t);
     }
 
     void CGa::_do_sort()
@@ -222,49 +220,64 @@ namespace GA
         }
     }
 
-    MsgPack::object pack_env_data(const env_data_t &env_data)
+    string CGa::serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const // NOLINT(*-convert-member-functions-to-static)
     {
-        MsgPack::array ground;
-        for (const auto &vec: env_data.ground)
+        individualsBatch batch;
+        auto* environment = new envData();
+        environment->set_tlx(env_data.tlx);
+        environment->set_tly(env_data.tly);
+        environment->set_brx(env_data.brx);
+        environment->set_bry(env_data.bry);
+        for (const auto &ground: env_data.ground)
         {
-            ground.emplace_back(MsgPack::array{vec.x, vec.y});
+            auto* vec2f = environment->add_ground();
+            vec2f->set_x(ground.x);
+            vec2f->set_y(ground.y);
         }
-        return MsgPack::object{
-            {"tlx", env_data.tlx},
-            {"tly", env_data.tly},
-            {"brx", env_data.brx},
-            {"bry", env_data.bry},
-            {"ground", ground}
-            };
+        batch.set_allocated_environment(environment);
+        for (const auto &[individual_id, genes]: individuals)
+        {
+            auto* individual = batch.add_batch();
+            individual->set_individual_id(individual_id);
+            individual->set_genome(genes);
+        }
+
+        string serialized_data;
+        batch.SerializeToString(&serialized_data);
+
+        return serialized_data;
     }
 
-    string CGa::serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const
+    map_measures_results_t CGa::desserialize_results(const std::string &serialized_result) const // NOLINT(*-convert-member-functions-to-static)
     {
-        MsgPack packed_env_data = pack_env_data(env_data);
-        MsgPack::array packed_individuals;
-        for (const auto &[id, genes]: individuals)
+        map_measures_results_t results;
+
+        batchResults batch_results;
+        if (!batch_results.ParseFromString(serialized_result))
         {
-            packed_individuals.emplace_back(MsgPack::object{
-                {"id", id},
-                {"genes", genes}
-            });
+            std::cerr << "Failed to parse deserialized results" << std::endl;
+            return results;
         }
-        const MsgPack packed_data = MsgPack::object{
-            {"env_data", packed_env_data},
-            {"individuals", packed_individuals}
-        };
-        return packed_data.dump();
+        for (const auto &individual: batch_results.results())
+        {
+            const auto& result_fitness = individual.fitness_params();
+            const fitness_params_t fitness_params(
+                result_fitness.contact1(),
+                result_fitness.contact2(),
+                result_fitness.velocity(),
+                result_fitness.distance(),
+                result_fitness.time(),
+                result_fitness.is_dead());
+            auto individual_id = individual.individual_id();
+            results[individual_id] = fitness_params;
+        }
+        return results;
     }
 
     map_measures_results_t CGa::_do_measures(const env_data_t &env_data, const map_individuals_t &individuals) const
     {
         const string serialized_data = serialize_work_payload(env_data, individuals);
         const string b64_encoded = binary_to_base64(serialized_data);
-
-        // cout << "serialized len: " << serialized_data.size() << endl;
-        // cout << "compressed len: " << compressed.size() << endl;
-        // cout << "b64_encoded len: " << b64_encoded.size() << endl;
-        // cout << serialized_data << endl;
 
         boost::process::ipstream pipe_stdout;
         boost::process::ipstream pipe_stderr;
@@ -285,24 +298,7 @@ namespace GA
         // decode results from base64:
         const auto pack_result = base64_to_binary(output);
 
-        MsgPack::object obj;
-        string err;
-        const auto result = MsgPack::parse(pack_result, err);
-        if (!err.empty())
-        {
-            cout << "Error parsing result: " << err << endl;
-            return {};
-        }
-        const auto results_array = result["results"].array_items();
-        map_measures_results_t results;
-        for (const auto &item: results_array)
-        {
-            const auto id = item["id"].uint64_value();
-            const auto fitness_params = GA::fitness_params_t::from_object(item["fitness_params"]);
-            results[id] = fitness_params;
-        }
-
-        return results;
+        return desserialize_results(pack_result);
     }
 
     void CGa::_1Select()

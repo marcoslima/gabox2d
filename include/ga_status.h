@@ -3,16 +3,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <msgpack/helpers.h>
-#include <msgpack11.hpp>
-using namespace msgpack11;
-
-#include "ga.h"
+#include <ga.h>
 
 namespace ipc
 {
+    using pair_float_string_t = std::pair<float, std::string>;
+    using pair_size_string_t = std::pair<size_t, std::string>;
+
     class GaStatus
     {
     public:
@@ -70,15 +68,8 @@ namespace ipc
     public:
         static std::string serializeGaStatus(GaStatus &status)
         {
-            const MsgPack data = MsgPack::object{
-                {"gps", status.gps},
-                {"generation", status.generation},
-                {"bestFitness", status.bestFitness},
-                {"bestGenes", status.bestGenes},
-                {"population", to_object(status.population)},
-                {"best_history", to_object(status.best_history)}
-            };
-            return data.dump();
+            // TODO: Implement serialization of GaStatus
+            return {};
         }
 
         GaStatus getStatus()
@@ -88,22 +79,8 @@ namespace ipc
 
         bool deserializeGaStatus(const std::string &data)
         {
-            try
-            {
-                std::string err;
-                const auto obj = MsgPack::parse(data, err);
-                _status.generation = obj["generation"].uint32_value();
-                _status.gps = obj["gps"].float32_value();
-                _status.bestFitness = obj["bestFitness"].float32_value();
-                _status.bestGenes = obj["bestGenes"].string_value();
-                _status.population = from_object<pair_float_string_t>(obj["population"]);
-                _status.best_history = from_object<pair_size_string_t>(obj["best_history"]);
-                return true;
-            } catch (const std::exception &e)
-            {
-                cout << "Error deserializing data: " << e.what() << endl;
-                return false;
-            }
+            // TODO: Implement deserialization of GaStatus
+            return false;
         }
     };
 }

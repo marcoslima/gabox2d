@@ -33,7 +33,6 @@ add_library(${LIBRARY_NAME}
         src/network/ipc_client.cpp
         src/triangulation.cpp
         src/random_genes_generator.cpp
-        src/network/rs_codec.cpp
         src/zipstring.cpp
         src/base64.cpp
         src/worker/worker.cpp

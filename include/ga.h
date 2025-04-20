@@ -85,6 +85,8 @@ namespace GA
 
         string serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const;
 
+        map_measures_results_t desserialize_results(const std::string &serialized_result) const;
+
         map_measures_results_t _do_measures(
             const env_data_t &env_data,
             const map_individuals_t &individuals) const;

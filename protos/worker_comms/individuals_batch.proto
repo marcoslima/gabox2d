@@ -1,0 +1,24 @@
+syntax="proto3";
+
+message Vec2f {
+  float x = 1;
+  float y = 2;
+}
+
+message envData {
+  float tlx = 1;
+  float tly = 2;
+  float brx = 3;
+  float bry = 4;
+  repeated Vec2f ground = 5;
+}
+
+message individual {
+  uint64 individual_id = 1;
+  string genome = 2;
+}
+
+message individualsBatch {
+  envData environment = 1;
+  repeated individual batch = 2;
+}
