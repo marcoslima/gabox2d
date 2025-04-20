@@ -18,6 +18,9 @@ find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 # Define the path where the ImGui library will be cloned
 set(IMGUI_PATH ${CMAKE_CURRENT_BINARY_DIR}/imgui)
 set(IMGUI_SFML_PATH ${IMGUI_PATH}/imgui-sfml)
+
+target_include_directories(${LIBRARY_NAME} PUBLIC ${SFML_INCLUDE_DIRS})
+target_link_libraries(${LIBRARY_NAME} sfml-graphics sfml-audio)
 ##########################################
 
 
@@ -67,6 +70,7 @@ execute_process(
         COMMAND git checkout 2.6.x
         WORKING_DIRECTORY "${IMGUI_SFML_PATH}"
 )
+target_link_libraries(${LIBRARY_NAME} imgui-sfml)
 #####################################################################################
 
 
@@ -97,6 +101,8 @@ add_library(imgui-sfml STATIC
 target_include_directories(imgui PUBLIC ${IMGUI_PATH})
 target_include_directories(imgui-sfml PUBLIC ${IMGUI_PATH}/imgui-sfml)
 target_include_directories(imgui-sfml PUBLIC ${IMGUI_PATH})
+target_link_libraries(${LIBRARY_NAME} imgui)
+
 #########################################################
 
 
@@ -159,6 +165,7 @@ target_include_directories(imgui PUBLIC ${BOX2D_PATH}/include)
 # Add library directory for the Box2D library
 message(STATUS ">>>>> Adding Box2D library directory (${BOX2D_PATH}/build/src)")
 link_directories(${BOX2D_PATH}/build/src)
+target_link_libraries(${LIBRARY_NAME} box2d)
 ###########################################################
 
 ###########################################################
@@ -214,6 +221,7 @@ pkg_check_modules(UUID REQUIRED uuid)
 
 include_directories(${UUID_INCLUDE_DIRS})
 link_directories(${UUID_LIBRARY_DIRS})
+target_link_libraries(${LIBRARY_NAME} ${UUID_LIBRARIES})
 ###########################################################
 
 
@@ -259,6 +267,10 @@ execute_process(
         WORKING_DIRECTORY ${MSGPACK_PATH}/build
         COMMAND cmake --build . -j20
 )
+target_include_directories(${LIBRARY_NAME} PUBLIC ${MSGPACK_PATH})
+link_directories(${MSGPACK_PATH}/build)
+target_link_libraries(${LIBRARY_NAME} msgpack11)
+
 
 #########################################################################################################################################################
 # ░▒▓███████▓▒░░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░ ░▒▓███████▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓██████▓▒░░▒▓██████████████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░
@@ -308,5 +320,20 @@ execute_process(
         WORKING_DIRECTORY ${REEDSOLOMON_PATH}/build
         COMMAND cmake --build . -j20
 )
-####################33
+target_include_directories(${LIBRARY_NAME} PUBLIC ${REEDSOLOMON_PATH}/include)
+target_link_directories(${LIBRARY_NAME} PUBLIC ${REEDSOLOMON_PATH}/build)
+target_link_libraries(${LIBRARY_NAME} ReedSolomon)
+
+##############################################################################
+# ░▒▓███████▓▒░ ░▒▓██████▓▒░ ░▒▓██████▓▒░ ░▒▓███████▓▒░▒▓████████▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░
+# ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░   ░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░
+# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░
+# ░▒▓███████▓▒░ ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░   ░▒▓█▓▒░
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
 find_package(Boost REQUIRED COMPONENTS iostreams system)
+target_link_libraries(${LIBRARY_NAME} Boost::iostreams)
