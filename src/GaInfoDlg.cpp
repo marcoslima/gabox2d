@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <GaInfoDlg.h>
 #include <GaBox2dView.h>
+#include <imgui-sfml/imgui-SFML.h>
 
 
 namespace GUI
@@ -12,29 +13,38 @@ namespace GUI
 
     void CGaInfoDlg::render()
     {
+        _bestGenoma.set(_status.bestGenes);
         ImGui::Begin("GA Info");
         ImGui::BeginGroup();
         ImGui::Text("Geração: %lu", _status.generation);
         ImGui::Text("População: %ld", _status.population.size());
         ImGui::Text("Gens p/s: %f", _status.gps);
         ImGui::Text("Melhor fitness: %f", _status.bestFitness);
-        ImGui::Text("Melhor genes: %s", _status.bestGenes.c_str());
+        // ImGui::Text("Melhor genoma: %s", _status.bestGenes.c_str());
+        ImGui::Text("Melhor genoma: "); ImGui::SameLine(); _bestGenoma.render();
         ImGui::Text("Histórico: %ld", _status.best_history.size());
 
         if (!_status.population.empty())
         {
+            _populationGenomas.clear();
+            _populationGenomas.reserve(_status.population.size());
+
             constexpr auto flags = ImGuiTableFlags_Resizable;
-            ImGui::BeginTable("Genes", 2, flags);
+            ImGui::BeginTable("Genomas", 2, flags);
             ImGui::TableSetupColumn("Pts");
-            ImGui::TableSetupColumn("Genes", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Genoma", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
-            for (const auto& gene : _status.population)
+            for (const auto& individual : _status.population)
             {
+                _populationGenomas.emplace_back(GENES);
+                _populationGenomas.back().set(individual.second);
+
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                ImGui::Text("%.01f", gene.first);
+                ImGui::Text("%.01f", individual.first);
                 ImGui::TableNextColumn();
-                ImGui::Text("%s", gene.second.c_str());
+                // ImGui::Text("%s", individual.second.c_str());
+                _populationGenomas.back().render();
             }
             ImGui::EndTable();
         }

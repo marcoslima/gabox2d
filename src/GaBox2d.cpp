@@ -1,13 +1,19 @@
 #include <GaBox2dApp.h>
 #include <worker/worker.h>
 
-int main(const int argc, char *argv[])
+int run_app()
 {
     GUI::CGaBox2dApp theApp;
+    return theApp.run();
+}
+
+int main(const int argc, char *argv[])
+{
     if (argc == 2)
     {
         do_work(argv[1]);
         return 0;
     }
-    return theApp.run();
+
+    return run_app();
 }

@@ -13,7 +13,7 @@
 #include <triangulation.h>
 
 #include "CRandom.h"
-
+#include <imgui-sfml/imgui-SFML.h>
 
 namespace GUI
 {
@@ -521,22 +521,38 @@ namespace GUI
 
     void CGaBox2dView::OnGenericLabs()
     {
-#if 0
-        Data data;
-        data.valor = 0.278892f; // 0xca 0x3e 0x8e 0xca 0xef
-
-        auto packed_data = msgpack::pack(data);
-        for (const auto byte: packed_data)
+        const string genes = "0101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+        const auto width = genes.size();
+        vector<sf::Uint8> pixels;
+        pixels.reserve(width * 4);
+        for (size_t i = 0; i < width; i++)
         {
-            cout << "0x" << std::hex << static_cast<int>(byte) << " ";
+            auto value = genes.at(i) == '1' ? 0xff : 0x0;
+            pixels.push_back(value);
+            pixels.push_back(value);
+            pixels.push_back(value);
+            pixels.push_back(0xff);
         }
-#else
-        vector<uint8_t> packed_data{0xca, 0x3e, 0x8e, 0xca, 0xef};
-        // vector<uint8_t> packed_data{0xca, 0x40, 0xb2, 0xa6, 0xf3};
 
-        // auto data = msgpack::unpack<Data>(packed_data.data(), packed_data.size());
-        // cout << "Unpacked data: " << data.valor << " ?->5.58288<-?" << endl;
-#endif
+        sf::Image img;
+        img.create(width, 1, pixels.data());
+        sf::Texture texture;
+        texture.loadFromImage(img);
+        sf::Sprite sprite(texture);
+        sprite.setScale(1.0f, 12.0f);
+        auto window = sf::RenderWindow(sf::VideoMode(800, 600), "Genetic Algorithm");
+        window.draw(sprite);
+        window.display();
+        while (window.isOpen())
+        {
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+            }
+        }
+
     }
 
     void CGaBox2dView::OnInformaGagenes()
