@@ -81,7 +81,7 @@ namespace GUI
         bool m_bShowInfoId;
         bool m_bShowInfoGaGenes = true;
 
-        CThreadParams _thread_params;
+        CThreadParams _thread_params{};
         bool m_bWaitingEvolucao;
         thread _ga_thread;
         CGaInfo _ga_info;

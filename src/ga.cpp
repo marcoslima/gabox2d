@@ -31,7 +31,6 @@ namespace GA
           , _populacao(0)
           , _elitismo(0)
           , _alienismo(0)
-          , _mut_int(0)
           , _crossover(0)
           , _mutacao(0)
           , _geracao(0)
@@ -67,7 +66,6 @@ namespace GA
         _crossover = crossover;
         _mutacao = mutacao;
         _alienismo = nAlienismo;
-        _mut_int = nMutInt;
         _max_t = dMax_t;
     }
 

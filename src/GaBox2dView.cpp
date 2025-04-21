@@ -399,10 +399,6 @@ namespace GUI
     void CGaBox2dView::_show_start_ga_params()
     {
         _dlgGaParams.Show();
-        // Obtemos os parâmetros do GA:
-        // CGaParamsDlg dlgParams(getPtr());
-        // dlgParams.OnInitDialog();
-        // dlgParams.show();
     }
 
     void CGaBox2dView::OnGaIniciar()
@@ -656,28 +652,6 @@ namespace GUI
     		pCmdUI->SetText("Evolu��o");
     		pCmdUI->Enable(TRUE);
     	}
-    }
-#endif
-
-
-#if 0
-      LRESULT CGaBox2dView::OnSimularGene(WPARAM wParam, LPARAM lParam)
-    {
-        //TODO: Reativar fun��o
-#if 0
-	if(m_nSimTimer != 0)
-		OnSimulaPlay();
-
-	GetDocument()->m_car.CreateCar((LPCSTR) lParam);
-	m_pdlgIdInfo->set(	m_GaInfo.m_geracao,
-						m_GaInfo.m_populacao[0]._pontos,
-						m_GaInfo.m_populacao[0]._t,
-						m_GaInfo.m_populacao[0].getGenes());
-
-	OnSimulaPlay();
-
-#endif
-        return 0L;
     }
 #endif
 

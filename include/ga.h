@@ -38,7 +38,6 @@ namespace GA
         size_t _populacao; // Número de indivíduos por geração
         size_t _elitismo; // Quantos indivíduos vão para geração seguinte inalterados
         size_t _alienismo; // Número de indivíduos randômicos inseridos a cada geração
-        size_t _mut_int; // A mutação será +/- _mut_int numa letra
         float _crossover; // Percentual de probabilidade de ocorrer crossover
         float _mutacao; // Percentual de probabilidade de ocorrer mutação
         string _carWinner; // Indivíduo mais adaptado da geração atual (genes)
