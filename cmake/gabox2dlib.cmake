@@ -36,4 +36,5 @@ add_library(${LIBRARY_NAME}
         src/zipstring.cpp
         src/base64.cpp
         src/worker/worker.cpp
+        src/genoma_image.cpp
 )

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <GaCar.h>
 #include <IPanel.h>
 #include <ga_status.h>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Texture.hpp>
+#include <genoma_image.h>
 
 
 namespace GUI
@@ -11,17 +11,14 @@ namespace GUI
     class CGaInfoDlg final : public IPanel
     {
         ipc::GaStatus _status;
-        sf::Texture _genesTexture;
-        vector<sf::Texture> _populationTextures;
+        CGenomaImage _bestGenoma{static_cast<unsigned int>(GENES)};
+        vector<CGenomaImage> _populationGenomas;
 
     public:
         CGaInfoDlg();
-
-        sf::Sprite _get_genes_sprite(const string &genes, sf::Texture &texture);
+        ~CGaInfoDlg() override = default;
 
         void render() override;
         void set(const ipc::GaStatus& status);
-
-        ~CGaInfoDlg() override = default;
     };
 }
