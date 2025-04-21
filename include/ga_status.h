@@ -5,6 +5,8 @@
 #include <vector>
 #include <boost/asio/ip/tcp.hpp>
 #include <ga.h>
+#include <ga_status/ga_status.pb.h>
+
 
 namespace ipc
 {
@@ -68,8 +70,26 @@ namespace ipc
     public:
         static std::string serializeGaStatus(GaStatus &status)
         {
-            // TODO: Implement serialization of GaStatus
-            return {};
+            const auto gaStatus = make_unique<ga_status::v1::GaStatus>();
+            gaStatus->set_generation(status.generation);
+            gaStatus->set_gps(status.gps);
+            gaStatus->set_bestfitness(status.bestFitness);
+            gaStatus->set_bestgenes(status.bestGenes);
+            for (const auto &ind : status.population)
+            {
+                auto *individual = gaStatus->add_population();
+                individual->set_fitness(ind.first);
+                individual->set_genome(ind.second);
+            }
+            for (const auto &best : status.best_history)
+            {
+                auto *history = gaStatus->add_history();
+                history->set_generation(best.first);
+                history->set_genome(best.second);
+            }
+            std::string serialized_data;
+            gaStatus->SerializeToString(&serialized_data);
+            return serialized_data;
         }
 
         GaStatus getStatus()
@@ -79,8 +99,27 @@ namespace ipc
 
         bool deserializeGaStatus(const std::string &data)
         {
-            // TODO: Implement deserialization of GaStatus
-            return false;
+            ga_status::v1::GaStatus gaStatus;
+            if (!gaStatus.ParseFromString(data))
+            {
+                return false;
+            }
+
+            _status.generation = gaStatus.generation();
+            _status.gps = gaStatus.gps();
+            _status.bestFitness = gaStatus.bestfitness();
+            _status.bestGenes = gaStatus.bestgenes();
+            _status.population.clear();
+            _status.best_history.clear();
+            for (const auto &ind : gaStatus.population())
+            {
+                _status.population.emplace_back(ind.fitness(), ind.genome());
+            }
+            for (const auto &best : gaStatus.history())
+            {
+                _status.best_history.emplace_back(best.generation(), best.genome());
+            }
+            return true;
         }
     };
 }
