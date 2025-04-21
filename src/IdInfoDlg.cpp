@@ -24,6 +24,10 @@ namespace GUI
         }
 
         m_strTempo = std::to_string(dTempo);
+        if (strGenes != m_strGenes)
+        {
+            _currentGenoma.set(strGenes);
+        }
         m_strGenes = strGenes;
         m_strDeathReason = strDeathReason;
     }
@@ -32,9 +36,13 @@ namespace GUI
     {
         ImGui::Begin("Informações do atual");
         ImGui::Text("Dead reason: %s", m_strDeathReason.c_str());
-        ImGui::Text("Time: %s", m_strTempo.c_str());
-        ImGui::Text("Generation: %s", m_strGeracao.c_str());
-        ImGui::Text("Genes: %s", m_strGenes.c_str());
+        ImGui::SameLine();
+        ImGui::Text("| Time: %s", m_strTempo.c_str());
+        ImGui::SameLine();
+        ImGui::Text("| Generation: %s", m_strGeracao.c_str());
+        ImGui::SameLine();
+        // ImGui::Text("Genes: %s", m_strGenes.c_str());
+        ImGui::Text("| Genes: "); ImGui::SameLine(); _currentGenoma.render();
         ImGui::End();
     }
 }
