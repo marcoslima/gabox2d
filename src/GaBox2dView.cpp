@@ -486,34 +486,6 @@ namespace GUI
 
         doc->GetCar()->createGaFromGenes(current_status_.bestGenes);
         OnSimulaRepetir();
-#if 0
-          CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
-        if (!pDoc)
-            return;
-
-        if (m_nSimTimer != 0)
-            OnSimulaPlay();
-
-        m_GaInfo.Lock(); {
-            if (m_GaInfo.m_populacao.size() == 0)
-            {
-                m_GaInfo.Release();
-                AfxMessageBox("N�o h� ningu�m para mostrar ainda.");
-                return;
-            }
-            pDoc->GetCar().CreateCar(m_GaInfo.m_populacao.begin()->getGenesCString());
-            m_pdlgIdInfo->set(m_GaInfo.m_geracao,
-                              m_GaInfo.m_populacao.begin()->_pontos,
-                              m_GaInfo.m_populacao.begin()->getT(),
-                              m_GaInfo.m_populacao.begin()->getGenes());
-        }
-        m_GaInfo.Release();
-
-
-        if (m_nSimTimer == 0)
-            OnSimulaPlay();
-#endif
     }
 
     void CGaBox2dView::OnMostrarQualquer()
@@ -526,39 +498,13 @@ namespace GUI
             return;
         }
 
-        auto it = std::next(
+        const auto it = std::next(
             current_status_.population.begin(),
-            CRandom().discrete_random<long>(0, static_cast<long>(current_status_.population.size()) - 1)
+            _random.discrete_random<long>(0, static_cast<long>(current_status_.population.size()) - 1)
         );
 
         doc->GetCar()->createGaFromGenes(it->second);
         OnSimulaRepetir();
-#if 0
-          CGaBox2dDoc *pDoc = GetDocument();
-        ASSERT_VALID(pDoc);
-        if (!pDoc)
-            return;
-
-        if (m_nSimTimer != 0)
-            OnSimulaPlay();
-
-        m_GaInfo.Lock(); {
-            size_t nQq = rand() % m_GaInfo.m_populacao.size();
-            lst_car_t::iterator it;
-            for (int i = 0; i < nQq; i++) it++;
-
-            pDoc->GetCar().CreateCar(it->getGenesCString());
-
-            m_pdlgIdInfo->set(m_GaInfo.m_geracao,
-                              it->_pontos,
-                              it->getT(),
-                              it->getGenes());
-        }
-        m_GaInfo.Release();
-
-        if (m_nSimTimer == 0)
-            OnSimulaPlay();
-#endif
     }
 
     void CGaBox2dView::OnToggleShowParams()

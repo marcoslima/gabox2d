@@ -5,7 +5,7 @@
 
 void generate_random_genes(const size_t genes_len, std::string &genes)
 {
-    const CRandom random(static_cast<unsigned>(time(nullptr)));
+    static const CRandom random(static_cast<unsigned>(time(nullptr)));
 
     genes.clear();
     genes.reserve(genes_len);
