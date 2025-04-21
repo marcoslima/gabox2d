@@ -1,9 +1,5 @@
-//
-// Created by marcos on 12/19/24.
-//
+#pragma once
 
-#ifndef CCRONOMETRO_H
-#define CCRONOMETRO_H
 #include <chrono>
 
 
@@ -16,7 +12,3 @@ public:
     [[nodiscard]] double Get() const;
     [[nodiscard]] double End() const;
 };
-
-
-
-#endif //CCRONOMETRO_H

@@ -1,8 +1,6 @@
-//
-// Created by marcos on 12/19/24.
-//
+#include "util/cronometro.h"
 
-#include "CCronometro.h"
+
 void CCronometro::Start()
 {
     m_start = std::chrono::high_resolution_clock::now();

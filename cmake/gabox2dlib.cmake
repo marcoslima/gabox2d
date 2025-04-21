@@ -1,40 +1,7 @@
 set(LIBRARY_NAME GaBox2dLib)
-add_library(${LIBRARY_NAME}
-        src/car.cpp
-        src/CarDef.cpp
-        src/CCronometro.cpp
-        src/doublex.cpp
-        src/EditorChaoDlg.cpp
-        src/env.cpp
-        src/EvolucaoDlg.cpp
-        src/ga.cpp
-        src/GaBox2dApp.cpp
-        src/GaBox2dDoc.cpp
-        src/GaBox2dView.cpp
-        src/GaCar.cpp
-        src/ga_car_helpers.cpp
-        src/GaInfoDlg.cpp
-        src/GaParamsDlg.cpp
-        src/GrCar.cpp
-        src/IdInfoDlg.cpp
-        src/imgui_input_uint8.cpp
-        src/lmFisica.cpp
-        src/lmmath.cpp
-        src/phys.cpp
-        src/PhysCar.cpp
-        src/WndPreviewChao.cpp
-        src/WndShowCarro.cpp
-        src/GaInfo.cpp
-        src/World.cpp
-        src/fn_ga.cpp
-        src/main_menu.cpp
-        src/sfml_primitives.cpp
-        src/network/ga_server.cpp
-        src/network/ipc_client.cpp
-        src/triangulation.cpp
-        src/random_genes_generator.cpp
-        src/zipstring.cpp
-        src/base64.cpp
-        src/worker/worker.cpp
-        src/genoma_image.cpp
+
+file(GLOB_RECURSE GABOX2DLIB_SOURCES CONFIGURE_DEPENDS
+        "src/*.cpp"
 )
+message(STATUS "GaBox2dLib sources: ${GABOX2DLIB_SOURCES}")
+add_library(${LIBRARY_NAME} ${GABOX2DLIB_SOURCES})

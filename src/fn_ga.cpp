@@ -2,7 +2,7 @@
 #include <thread_params.h>
 
 #include "car.h"
-#include "CCronometro.h"
+#include "util/cronometro.h"
 #include "ga.h"
 #include <ga_status.h>
 #include <network/ga_server.h>

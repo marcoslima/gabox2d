@@ -3,11 +3,11 @@
 #include <random_genes_generator.h>
 #include <thread>
 #include "car.h"
-#include "CCronometro.h"
+#include "util/cronometro.h"
 #include "CRandom.h"
 #include "ga.h"
 #include <iostream>
-#include <base64.h>
+#include <util/base64.h>
 #include <sstream>
 #include <boost/process.hpp>
 #include <worker_comms/individuals_batch.pb.h>

@@ -5,6 +5,7 @@
 #include "lmmath.h"
 #include <stdexcept>
 #include <list>
+#include <cmath>
 
 // Tipo doublex: double com incerteza
 #include "doublex.h"

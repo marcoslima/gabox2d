@@ -3,7 +3,7 @@
 #include <CarDef.h>
 #include <PhysCar.h>
 #include <iostream>
-#include <base64.h>
+#include <util/base64.h>
 #include <worker_comms/individuals_batch.pb.h>
 #include <worker_comms/results_batch.pb.h>
 
