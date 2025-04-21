@@ -52,7 +52,6 @@ void fnGa(void *pParam)
                  cross, // Probabilidade de crossover
                  mut, // Probabilidade de mutação
                  gaParams.m_nAlienismo, // Tamanho do alienismo
-                 gaParams.m_nMutInt, // Intensidade da mutação
                  gaParams.m_fMaxT); // Tempo máximo a ser simulado
 
     cout << "Iniciando evolução..." << endl;

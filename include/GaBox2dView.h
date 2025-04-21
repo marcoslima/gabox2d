@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CRandom.h>
 #include <thread>
 
 #include <IGaBox2dView.h>
@@ -27,6 +28,7 @@ namespace GUI
         bool m_bShowParams = false;
         ipc::GaStatusSerializer status_serializer;
         Net::IpcClient ipc_client;
+        CRandom _random;
         void updateIdInfo();
         void updateGaInfo();
     public:
@@ -79,7 +81,7 @@ namespace GUI
         bool m_bShowInfoId;
         bool m_bShowInfoGaGenes = true;
 
-        CThreadParams _thread_params;
+        CThreadParams _thread_params{};
         bool m_bWaitingEvolucao;
         thread _ga_thread;
         CGaInfo _ga_info;

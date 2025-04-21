@@ -4,12 +4,8 @@
 #include <PhysCar.h>
 #include <iostream>
 #include <base64.h>
-#include <fstream>
-#include <zipstring.h>
-#include <msgpack11.hpp>
-
-using namespace msgpack11;
-
+#include <worker_comms/individuals_batch.pb.h>
+#include <worker_comms/results_batch.pb.h>
 
 map_measures_results_t _do_measures(
 const env_data_t &env_data,
@@ -44,55 +40,66 @@ void send_result_out(const string& result)
     std::cout << b64_encoded_result << std::endl;
 }
 
-string serialize_results(const map_measures_results_t &results) {
-    MsgPack::array results_array;
-    for (const auto &[id, fitness_params]: results)
+string serialize_results(const map_measures_results_t &results)
+{
+    batchResults batch_results;
+
+    for (const auto &result: results)
     {
-        MsgPack::object obj = fitness_params.to_object();
-        results_array.emplace_back(MsgPack::object{
-            {"id", id},
-            {"fitness_params", obj}
-        });
+        auto* fitness_params = new fitnessParams();
+        fitness_params->set_contact1(result.second.contact1);
+        fitness_params->set_contact2(result.second.contact2);
+        fitness_params->set_velocity(result.second.velocity);
+        fitness_params->set_distance(result.second.distance);
+        fitness_params->set_time(result.second.time);
+        fitness_params->set_is_dead(result.second.is_dead);
+
+        auto* individual_result = batch_results.add_results();
+        individual_result->set_individual_id(result.first);
+        individual_result->set_allocated_fitness_params(fitness_params);
     }
-    const MsgPack result_object = MsgPack::object{
-        {"results", results_array}
-    };
-    return result_object.dump();
+    string serialized_data;
+    batch_results.SerializeToString(&serialized_data);
+    return serialized_data;
+}
+
+pair<env_data_t, map_individuals_t> deserialize_work_payload(const string& result)
+{
+    individualsBatch individuals_batch;
+    if (!individuals_batch.ParseFromString(result))
+    {
+        std::cerr << "Failed to parse deserialized results" << std::endl;
+        return {};
+    }
+    env_data_t env_data;
+    env_data.tlx = individuals_batch.environment().tlx();
+    env_data.tly = individuals_batch.environment().tly();
+    env_data.brx = individuals_batch.environment().brx();
+    env_data.bry = individuals_batch.environment().bry();
+    for (const auto &point: individuals_batch.environment().ground())
+    {
+        vec2f_t thisPoint(point.x(), point.y());
+        env_data.ground.emplace_back(thisPoint);
+    }
+    map_individuals_t individuals;
+    for (const auto &individual: individuals_batch.batch())
+    {
+        individuals[individual.individual_id()] = individual.genome();
+    }
+    return {env_data, individuals};
 }
 
 void do_work(const string& encoded_data)
 {
     // Decode the base64-encoded string
     const auto data = base64_to_binary(encoded_data);
-
-    // Deserialize the data
-    string err;
-    const MsgPack packed_data = MsgPack::parse(data, err);
-    env_data_t env_data;
-    env_data.tlx = packed_data["env_data"]["tlx"].float32_value();
-    env_data.tly = packed_data["env_data"]["tly"].float32_value();
-    env_data.brx = packed_data["env_data"]["brx"].float32_value();
-    env_data.bry = packed_data["env_data"]["bry"].float32_value();
-    const auto ground_array = packed_data["env_data"]["ground"].array_items();
-    for (const auto &vec: ground_array)
-    {
-        vec2f_t vec2f(vec[0].float32_value(),
-                      vec[1].float32_value());
-        env_data.ground.push_back(vec2f);
-    }
-
-    // Decode individuals
-    const auto individuals_array = packed_data["individuals"].array_items();
-    map_individuals_t individuals;
-    for (const auto &item: individuals_array)
-    {
-        const auto id = item["id"].uint64_value();
-        const auto genes = item["genes"].string_value();
-        individuals[id] = genes;
-    }
+    const auto payload = deserialize_work_payload(data);
+    const auto& env_data = payload.first;
+    const auto& individuals = payload.second;
 
     // Call the _do_measures function with the decoded data
     const auto results = _do_measures(env_data, individuals, 60.0f);
+
     const string serialized_result = serialize_results(results);
 
     send_result_out(serialized_result);

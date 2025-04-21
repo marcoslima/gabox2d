@@ -13,7 +13,6 @@ namespace GUI
     class CGaParamsDlg final : public BasicModalDlg, public ga_params_t
     {
         void RenderLeftGroup();
-        void RenderRightGroup();
         void RenderButtons();
 
     protected:

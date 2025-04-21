@@ -38,7 +38,6 @@ namespace GA
         size_t _populacao; // Número de indivíduos por geração
         size_t _elitismo; // Quantos indivíduos vão para geração seguinte inalterados
         size_t _alienismo; // Número de indivíduos randômicos inseridos a cada geração
-        size_t _mut_int; // A mutação será +/- _mut_int numa letra
         float _crossover; // Percentual de probabilidade de ocorrer crossover
         float _mutacao; // Percentual de probabilidade de ocorrer mutação
         string _carWinner; // Indivíduo mais adaptado da geração atual (genes)
@@ -84,6 +83,8 @@ namespace GA
         void _do_manual_include();
 
         string serialize_work_payload(const env_data_t &env_data, const map_individuals_t &individuals) const;
+
+        map_measures_results_t desserialize_results(const std::string &serialized_result) const;
 
         map_measures_results_t _do_measures(
             const env_data_t &env_data,

@@ -17,14 +17,7 @@ namespace GUI
         ImGui::SliderFloat("Crossover (%)", &m_fCrossover, 0.0f, 100.0f);
         InputUint8("Elitism", &m_nElitismo);
         ImGui::SliderFloat("Mutation (%)", &m_fMutacao, 0.0f, 100.0f);
-        ImGui::EndGroup();
-    }
-
-    void CGaParamsDlg::RenderRightGroup()
-    {
-        ImGui::BeginGroup();
         InputUint8("Alienism", &m_nAlienismo);
-        InputUint8("Mutation Interval", &m_nMutInt);
         ImGui::InputFloat("Max Time", &m_fMaxT);
         ImGui::EndGroup();
     }
@@ -48,8 +41,6 @@ namespace GUI
     void CGaParamsDlg::RenderContent()
     {
         RenderLeftGroup();
-        ImGui::SameLine();
-        RenderRightGroup();
         RenderButtons();
     }
 }

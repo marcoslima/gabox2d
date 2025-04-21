@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package ga_status.v1;
+
+message Individual {
+  float fitness = 1;
+  string genome = 2;
+}
+
+message HistoryIndividual {
+  uint64 generation = 1;
+  float fitness = 2;
+  string genome = 3;
+}
+
+message GaStatus {
+  uint64 generation = 1;
+  float gps = 2;
+  float bestFitness = 3;
+  string bestGenes = 4;
+  repeated Individual population = 5;
+  repeated HistoryIndividual history = 6;
+}

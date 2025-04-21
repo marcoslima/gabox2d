@@ -1,0 +1,19 @@
+syntax="proto3";
+
+message fitnessParams {
+  float contact1 = 1;
+  float contact2 = 2;
+  float velocity = 3;
+  float distance = 4;
+  float time = 5;
+  bool is_dead = 6;
+}
+
+message resultItem {
+  uint64 individual_id = 1;
+  fitnessParams fitness_params = 2;
+}
+
+message batchResults {
+  repeated resultItem results = 1;
+}

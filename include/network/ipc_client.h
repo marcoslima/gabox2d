@@ -5,7 +5,6 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
-#include "rs_codec.h"
 
 namespace Net
 {
@@ -21,7 +20,6 @@ namespace Net
         std::string _server_ip = "127.0.0.1";
         int _server_port = 9876;
         std::string _message_buffer;
-        RsCodec rs_codec_;
 
         void attemptConnect(const std::shared_ptr<boost::asio::steady_timer> &timer);
         void handleRead(const boost::system::error_code &error, size_t bytes_transferred);
