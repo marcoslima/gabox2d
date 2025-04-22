@@ -1,5 +1,6 @@
 # Define C++ standard to use
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add this near the top of your CMakeLists.txt if not already present
 if(NOT CMAKE_BUILD_TYPE)

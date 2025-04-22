@@ -253,12 +253,7 @@ namespace GUI
 
     void CGaBox2dView::OnSimulaReset() const
     {
-        const auto doc = GetDocument();
-        if (doc.get() == nullptr)
-            return;
-
-        doc->GetCar()->createGaRandomCar();
-        doc->GetCar()->beginSimulate(doc->GetWorld());
+        GetDocument()->createRandomCar();
     }
 
     void CGaBox2dView::setVelocidade(const unsigned nVelocidade)
@@ -480,7 +475,7 @@ namespace GUI
             return;
         }
 
-        doc->GetCar()->createGaFromGenes(current_status_.bestGenes);
+        doc->simulateGaCar(current_status_.bestGenes, current_status_.bestFitness, current_status_.generation);
         OnSimulaRepetir();
     }
 
@@ -499,7 +494,7 @@ namespace GUI
             _random.discrete_random<long>(0, static_cast<long>(current_status_.population.size()) - 1)
         );
 
-        doc->GetCar()->createGaFromGenes(it->second);
+        doc->simulateGaCar(it->second, it->first, current_status_.generation);
         OnSimulaRepetir();
     }
 
@@ -810,10 +805,8 @@ namespace GUI
     {
         const auto doc = GetDocument();
 
-        constexpr int generation = -1;
-
-        _panelIdInfo.set(generation,
-                         doc->GetCar()->getFitness(),
+        _panelIdInfo.set(doc->getGeneration(),
+                         doc->getFitness(),
                          doc->GetCar()->getT(),
                          doc->GetCar()->getGenes(),
                          doc->GetCar()->deadReason());

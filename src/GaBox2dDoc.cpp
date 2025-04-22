@@ -15,6 +15,20 @@ namespace GUI
         _world = std::make_shared<PHYS::CWorld>();
     }
 
+    void CGaBox2dDoc::createRandomCar()
+    {
+        _generation = -1;
+        m_car->createGaRandomCar();// = CCarFactory().createRandomCar();
+        m_car->beginSimulate(_world);
+    }
+
+    void CGaBox2dDoc::simulateGaCar(const std::string &genes, const float fitness, const size_t generation)
+    {
+        m_car->createGaFromGenes(genes);
+        _generation = generation;
+        _fitness = fitness;
+    }
+
     bool CGaBox2dDoc::isSimulating() const
     {
         return _isSimulating;
@@ -38,6 +52,16 @@ namespace GUI
     CEnv CGaBox2dDoc::GetEnv() const
     {
         return m_env;
+    }
+
+    size_t CGaBox2dDoc::getGeneration() const
+    {
+        return _generation;
+    }
+
+    float CGaBox2dDoc::getFitness() const
+    {
+        return _fitness;
     }
 
     CGaBox2dDoc::~CGaBox2dDoc()
