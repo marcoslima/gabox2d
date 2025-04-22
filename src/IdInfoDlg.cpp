@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <IdInfoDlg.h>
+#include <string>
 
 namespace GUI
 {
@@ -41,7 +42,8 @@ namespace GUI
         ImGui::SameLine();
         ImGui::Text("| Generation: %s", m_strGeracao.c_str());
         ImGui::SameLine();
-        // ImGui::Text("Genes: %s", m_strGenes.c_str());
+        ImGui::Text("| Fitness: %s", m_strPontuacao.c_str());
+        ImGui::SameLine();
         ImGui::Text("| Genes: "); ImGui::SameLine(); _currentGenoma.render();
         ImGui::End();
     }
