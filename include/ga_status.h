@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/asio/ip/tcp.hpp>
 #include <ga.h>
 #include <ga_status/ga_status.pb.h>
 
@@ -50,17 +49,6 @@ namespace ipc
             : generation(0)
               , gps(0.0f)
               , bestFitness(0.0) {}
-
-        template<class T>
-        void pack(T &pack)
-        {
-            pack(gps);
-            pack(generation);
-            pack(bestFitness);
-            pack(bestGenes);
-            pack(population);
-            pack(best_history);
-        }
     };
 
     class GaStatusSerializer
