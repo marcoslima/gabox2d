@@ -7,7 +7,7 @@
 #include <worker_comms/individuals_batch.pb.h>
 #include <worker_comms/results_batch.pb.h>
 
-map_measures_results_t _do_measures(
+map_measures_results_t do_measures_(
 const env_data_t &env_data,
 const map_individuals_t &individuals,
 const float max_t)
@@ -98,7 +98,7 @@ void do_work(const string& encoded_data)
     const auto& individuals = payload.second;
 
     // Call the _do_measures function with the decoded data
-    const auto results = _do_measures(env_data, individuals, 60.0f);
+    const auto results = do_measures_(env_data, individuals, 60.0f);
 
     const string serialized_result = serialize_results(results);
 

@@ -50,7 +50,7 @@ namespace MODEL
                  float brx, float bry);
 
         [[nodiscard]] string get() const;
-        static void set(const string &sParams);
+        void set(const string &sParams);
         void _update_env_data();
     };
 }
