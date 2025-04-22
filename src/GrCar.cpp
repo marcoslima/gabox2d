@@ -115,8 +115,9 @@ namespace GUI
                   const CSolidBrush &brush,
                   const bool draw_angle = true)
     {
-        sf::CircleShape circle_shape(c.radius);
-        circle_shape.setPosition(c.center.x - c.radius, c.center.y - c.radius); // Position é canto superior esquerdo.
+        auto radius = c.radius - pen.getWidth();
+        sf::CircleShape circle_shape(radius);
+        circle_shape.setPosition(c.center.x - radius, c.center.y - radius); // Position é canto superior esquerdo.
         pen.apply(circle_shape);
         brush.apply(circle_shape);
         window.draw(circle_shape);
