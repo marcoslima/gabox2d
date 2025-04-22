@@ -94,6 +94,4 @@ namespace GUI
 
         return 0;
     }
-
-
 }
