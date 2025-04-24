@@ -71,6 +71,13 @@ namespace MODEL
         return limits.m_min + limits.delta() * static_cast<float>(value) / static_cast<float>(maxValue);
     }
 
+    CCarDef::circle_params_t::circle_params_t(const std::string &genes, size_t& pos)
+        : x{decodeBinaryValue(genes, pos, bits::x, car_value_limits::roda_x_min_max)}
+        , y{decodeBinaryValue(genes, pos, bits::y, car_value_limits::roda_y_min_max)}
+        , raio{decodeBinaryValue(genes, pos, bits::raio, car_value_limits::roda_r_min_max)} {}
+
+    CCarDef::circle_params_t::circle_params_t(const float x, const float y, const float r) : x{x}, y{y}, raio{r} {}
+
     CCarDef::CRodaParams::CRodaParams() : CRodaParams(0, 0, 1, 1, 1, 1) {}
 
     CCarDef::CRodaParams::CRodaParams(const float x,
@@ -112,16 +119,16 @@ namespace MODEL
     }
 
     CCarDef::CRodaParams::CRodaParams(const std::string &genes, size_t &pos)
-        : circle{
-              decodeBinaryValue(genes, pos, circle_params_t::bits::x, car_value_limits::roda_x_min_max), // x
-              decodeBinaryValue(genes, pos, circle_params_t::bits::y, car_value_limits::roda_y_min_max), // y
-              decodeBinaryValue(genes, pos, circle_params_t::bits::raio, car_value_limits::roda_r_min_max), // radius
-          },
-          body{
-              decodeBinaryValue(genes, pos, body_params_t::bits::densidade, car_value_limits::roda_densidade_min_max), // densidade
-              decodeBinaryValue(genes, pos, body_params_t::bits::friccao, car_value_limits::roda_friccao_min_max), // friccao
-              decodeBinaryValue(genes, pos, body_params_t::bits::elasticidade, car_value_limits::roda_elasticidade_min_max) // elasticidade
-          } {}
+        : circle{genes, pos}
+        , body{genes, pos} {}
+
+    CCarDef::body_params_t::body_params_t(const std::string &genes, size_t &pos)
+        : densidade{decodeBinaryValue(genes, pos, bits::densidade, car_value_limits::roda_densidade_min_max)},
+          friccao{decodeBinaryValue(genes, pos, bits::friccao, car_value_limits::roda_friccao_min_max)},
+          elasticidade{decodeBinaryValue(genes, pos, bits::elasticidade, car_value_limits::roda_elasticidade_min_max)} {}
+
+    CCarDef::body_params_t::body_params_t(const float dens, const float fric, const float elas)
+        : densidade{dens}, friccao{fric}, elasticidade{elas} {}
 
     bool operator==(const CCarDef::circle_params_t &left, const CCarDef::circle_params_t &right)
     {

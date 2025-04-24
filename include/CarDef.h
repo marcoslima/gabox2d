@@ -37,6 +37,10 @@ namespace MODEL
             float y;
             float raio;
 
+            explicit circle_params_t(const std::string& genes, size_t &pos);
+            circle_params_t(float x, float y, float r);
+
+            // Bit sizes for each parameter
             struct bits
             {
                 static size_t x;
@@ -56,6 +60,9 @@ namespace MODEL
             float densidade;
             float friccao;
             float elasticidade;
+
+            body_params_t(const std::string& genes, size_t &pos);
+            body_params_t(float dens, float fric, float elas);
 
             class bits
             {
