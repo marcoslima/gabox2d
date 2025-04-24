@@ -114,6 +114,10 @@ void CCarEditorDlg::RenderContent()
     ImGui::SameLine();
     ImGui::Checkbox("Auto-run", &_autoRun);
 
+    ImGui::SameLine();
+    _genomaImage.set(_carDef.genes());
+    _genomaImage.render();
+
     if (_autoRun && before != _carDef)
     {
         _callback(_carDef);

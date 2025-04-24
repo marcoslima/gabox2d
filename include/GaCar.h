@@ -31,7 +31,6 @@ namespace GA
 
         void CreateCarFromGenes(const string &genes) override;
         void CreateRandomCar() override;
-        void CreateFromCarDef(const CCarDef &carDef);
         void calc_fitness(fitness_params_t fitness_params, float max_t) override;
     };
 }

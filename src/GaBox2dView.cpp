@@ -820,6 +820,7 @@ namespace GUI
 
     void CGaBox2dView::OnCarEditor()
     {
+        _carEditorDlg.setFromGenes(_document->GetCar()->getGenes());
         _carEditorDlg.Show();
     }
 }
