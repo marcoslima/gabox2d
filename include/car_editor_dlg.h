@@ -12,6 +12,7 @@ public:
 private:
     MODEL::CCarDef _carDef;
     callback_t _callback;
+    bool _autoRun{false};
 
 
 public:

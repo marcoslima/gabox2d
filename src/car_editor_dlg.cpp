@@ -19,6 +19,7 @@ std::string makeLabel(const char *label, const int suffix)
 
 void CCarEditorDlg::RenderContent()
 {
+    auto before = _carDef;
     ImGui::BeginGroup();
     {
         ImGui::Text("Peso 1");
@@ -109,5 +110,12 @@ void CCarEditorDlg::RenderContent()
     if (ImGui::Button("Close"))
     {
         Hide();
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto-run", &_autoRun);
+
+    if (_autoRun && before != _carDef)
+    {
+        _callback(_carDef);
     }
 }
