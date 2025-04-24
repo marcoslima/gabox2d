@@ -95,7 +95,7 @@ void CCarEditorDlg::RenderContent()
         {
             ImGui::Text("Amortecimento");
             for( int i = 0; i < 6; i++)
-                floatSlider(makeLabel("Amortecimento", i+1).c_str(), &_carDef._damp[0], car_value_limits::damp_min_max);
+                floatSlider(makeLabel("Amortecimento", i+1).c_str(), &_carDef._damp[i], car_value_limits::damp_min_max);
         }
         ImGui::EndGroup();
     }

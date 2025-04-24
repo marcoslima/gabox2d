@@ -26,7 +26,11 @@ namespace GUI
           {
               onDataReceived(data);
           })
-          , _carEditorDlg([this](const MODEL::CCarDef& carDef) {/* this->_document->fromCarDef(carDef); */return;})
+          , _carEditorDlg([this](const MODEL::CCarDef& carDef)
+          {
+              this->_document->GetCar()->createGaFromGenes(carDef.genes());
+              this->OnSimulaRepetir();
+          })
           , m_nVelocidade(2)
           , m_bGaRunning(false)
           , m_bGaExited(false)

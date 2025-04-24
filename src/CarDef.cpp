@@ -1,5 +1,7 @@
 #include "CarDef.h"
 
+#include <bitset>
+
 namespace MODEL
 {
     min_max_values car_value_limits::roda_x_min_max{-8.0f, 8.0f};
@@ -71,12 +73,31 @@ namespace MODEL
         return limits.m_min + limits.delta() * static_cast<float>(value) / static_cast<float>(maxValue);
     }
 
+    void encodeBinaryValue(std::string& genes, float value, const size_t bit_len, min_max_values &limits)
+    {
+        const unsigned int maxValue = (1 << bit_len) - 1;
+        const auto mappedValue = static_cast<unsigned int>((value - limits.m_min) / limits.delta() * static_cast<float>(maxValue));
+        for (int i = static_cast<int>(bit_len) - 1; i >= 0; i--)
+        {
+            genes.push_back((mappedValue & (1 << i)) ? '1' : '0');
+        }
+    }
+
     CCarDef::circle_params_t::circle_params_t(const std::string &genes, size_t& pos)
         : x{decodeBinaryValue(genes, pos, bits::x, car_value_limits::roda_x_min_max)}
         , y{decodeBinaryValue(genes, pos, bits::y, car_value_limits::roda_y_min_max)}
         , raio{decodeBinaryValue(genes, pos, bits::raio, car_value_limits::roda_r_min_max)} {}
 
     CCarDef::circle_params_t::circle_params_t(const float x, const float y, const float r) : x{x}, y{y}, raio{r} {}
+    std::string CCarDef::circle_params_t::genes() const
+    {
+        std::string genes;
+        genes.reserve(bits::len());
+        encodeBinaryValue(genes, x, bits::x, car_value_limits::roda_x_min_max);
+        encodeBinaryValue(genes, y, bits::y, car_value_limits::roda_y_min_max);
+        encodeBinaryValue(genes, raio, bits::raio, car_value_limits::roda_r_min_max);
+        return genes;
+    }
 
     CCarDef::CRodaParams::CRodaParams() : CRodaParams(0, 0, 1, 1, 1, 1) {}
 
@@ -118,9 +139,30 @@ namespace MODEL
         }
     }
 
+    std::string CCarDef::genes() const
+    {
+        const std::string part1 = _roda1.genes() + _roda2.genes() + _peso1.genes() + _peso2.genes();
+        std::string part2;
+        for (int i = 0; i < 6; i++)
+        {
+            if (i < 4)
+            {
+                encodeBinaryValue(part2, _torque[i], bits::_torque, car_value_limits::torque_min_max);
+            }
+            encodeBinaryValue(part2, _freq[i], bits::_freq, car_value_limits::freq_min_max);
+            encodeBinaryValue(part2, _damp[i], bits::_damp, car_value_limits::damp_min_max);
+        }
+        return part1 + part2;
+    }
+
     CCarDef::CRodaParams::CRodaParams(const std::string &genes, size_t &pos)
         : circle{genes, pos}
         , body{genes, pos} {}
+
+    std::string CCarDef::CRodaParams::genes() const
+    {
+        return circle.genes() + body.genes();
+    }
 
     CCarDef::body_params_t::body_params_t(const std::string &genes, size_t &pos)
         : densidade{decodeBinaryValue(genes, pos, bits::densidade, car_value_limits::roda_densidade_min_max)},
@@ -129,6 +171,16 @@ namespace MODEL
 
     CCarDef::body_params_t::body_params_t(const float dens, const float fric, const float elas)
         : densidade{dens}, friccao{fric}, elasticidade{elas} {}
+
+    std::string CCarDef::body_params_t::genes() const
+    {
+        std::string genes;
+        genes.reserve(bits::len());
+        encodeBinaryValue(genes, densidade, bits::densidade, car_value_limits::roda_densidade_min_max);
+        encodeBinaryValue(genes, friccao, bits::friccao, car_value_limits::roda_friccao_min_max);
+        encodeBinaryValue(genes, elasticidade, bits::elasticidade, car_value_limits::roda_elasticidade_min_max);
+        return genes;
+    }
 
     bool operator==(const CCarDef::circle_params_t &left, const CCarDef::circle_params_t &right)
     {

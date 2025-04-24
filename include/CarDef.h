@@ -39,6 +39,7 @@ namespace MODEL
 
             explicit circle_params_t(const std::string& genes, size_t &pos);
             circle_params_t(float x, float y, float r);
+            [[nodiscard]] std::string genes() const;
 
             // Bit sizes for each parameter
             struct bits
@@ -54,7 +55,6 @@ namespace MODEL
             };
         };
 
-
         struct body_params_t
         {
             float densidade;
@@ -63,6 +63,7 @@ namespace MODEL
 
             body_params_t(const std::string& genes, size_t &pos);
             body_params_t(float dens, float fric, float elas);
+            [[nodiscard]] std::string genes() const;
 
             class bits
             {
@@ -89,6 +90,7 @@ namespace MODEL
 
             CRodaParams(float x, float y, float r, float dens, float fric, float elas);
             CRodaParams(const std::string &genes, size_t &pos);
+            [[nodiscard]] std::string genes() const;
 
             struct bits
             {
@@ -110,6 +112,7 @@ namespace MODEL
         CCarDef();
 
         explicit CCarDef(const std::string& genes);
+        [[nodiscard]] std::string genes() const;
 
         ~CCarDef() = default;
 
