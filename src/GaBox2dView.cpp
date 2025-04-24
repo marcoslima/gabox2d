@@ -26,13 +26,13 @@ namespace GUI
           {
               onDataReceived(data);
           })
+          , _carEditorDlg([this](const MODEL::CCarDef& carDef) {/* this->_document->fromCarDef(carDef); */return;})
           , m_nVelocidade(2)
           , m_bGaRunning(false)
           , m_bGaExited(false)
           , m_bShowInfoId(true)
           , m_bShowInfoGaGenes(false)
-          , m_bWaitingEvolucao(false)
-    {}
+          , m_bWaitingEvolucao(false) {}
 
     CGaBox2dView::~CGaBox2dView()
     {
@@ -188,7 +188,8 @@ namespace GUI
         // gr.DrawRectangle(&penBorder, rcWorld);
         const CPen penBorder(sf::Color(255, 0, 0), 5);
         const CSolidBrush bshBorder(sf::Color::Transparent);
-        sf::RectangleShape border(sf::Vector2f(env.env_data.brx - env.env_data.tlx, env.env_data.tly - env.env_data.bry));
+        sf::RectangleShape border(
+            sf::Vector2f(env.env_data.brx - env.env_data.tlx, env.env_data.tly - env.env_data.bry));
         border.setPosition(env.env_data.tlx, env.env_data.bry);
         penBorder.apply(border);
         bshBorder.apply(border);
@@ -503,17 +504,6 @@ namespace GUI
         m_bShowParams = !m_bShowParams;
     }
 
-    class Data
-    {
-    public:
-        float valor = 0.0f;
-        template<class T>
-        void pack(T &pack)
-        {
-            pack(valor);
-        }
-    };
-
     void CGaBox2dView::OnGenericLabs()
     {
         cout << "No generic labs at the moment." << endl;
@@ -706,7 +696,6 @@ namespace GUI
             case sf::Keyboard::Add:
                 m_bZoomIn = false;
                 break;
-
             case sf::Keyboard::C:
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                 {
@@ -749,6 +738,8 @@ namespace GUI
             case sf::Keyboard::L:
                 OnGenericLabs();
                 break;
+            case sf::Keyboard::E:
+                OnCarEditor();
             default:
                 break;
         }
@@ -765,6 +756,7 @@ namespace GUI
         _dlgGaParams.Render();
         _panelIdInfo.render();
         _panelGaInfo.render();
+        _carEditorDlg.Render();
 
         const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);
@@ -820,5 +812,10 @@ namespace GUI
     void CGaBox2dView::OnEditEnvironment()
     {
         // TODO: Code to show environment editor.
+    }
+
+    void CGaBox2dView::OnCarEditor()
+    {
+        _carEditorDlg.Show();
     }
 }

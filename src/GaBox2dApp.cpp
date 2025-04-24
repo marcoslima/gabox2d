@@ -1,4 +1,5 @@
 #include <GaBox2dApp.h>
+#include <GaBox2dDoc.h>
 #include "EditorChaoDlg.h"
 #include "GaBox2dView.h"
 #include <iostream>

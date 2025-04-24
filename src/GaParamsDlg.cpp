@@ -1,5 +1,8 @@
 #include <imgui.h>
 #include "GaParamsDlg.h"
+
+#include <CarDef.h>
+
 #include "imgui_input8.h"
 
 namespace GUI
