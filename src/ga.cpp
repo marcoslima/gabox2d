@@ -197,7 +197,7 @@ namespace GA
 
     string CGa::_generate_random_genes()
     {
-        return generate_random_genes(GENES);
+        return generate_random_genes(CCarDef::bits::len());
     }
 
     void CGa::_do_alienism()
@@ -366,14 +366,14 @@ namespace GA
 
     genes_pair_t _make_single_point_crossover(const string &car1, const string &car2)
     {
-        const auto cross_point = random.rand_int<size_t>(1, GENES - 2);
+        const auto cross_point = random.rand_int<size_t>(1, CCarDef::bits::len() - 2);
         return crossover(make_pair(car1, car2), cross_point);
     }
 
     genes_pair_t _make_double_point_crossover(const string &car1, const string &car2)
     {
-        const auto cross_point1 = random.rand_int<size_t>(1, GENES - 2);
-        const auto cross_point2 = random.rand_int(cross_point1 + 1, GENES - 1);
+        const auto cross_point1 = random.rand_int<size_t>(1, CCarDef::bits::len() - 2);
+        const auto cross_point2 = random.rand_int(cross_point1 + 1, CCarDef::bits::len() - 1);
 
         return crossover(make_pair(car1, car2), cross_point1, cross_point2);
     }
@@ -407,7 +407,7 @@ namespace GA
 
     void CGa::_mutate_genes(string &genes)
     {
-        const auto point_of_mutation = random.rand_int<size_t>(0, GENES - 1);
+        const auto point_of_mutation = random.rand_int<size_t>(0, CCarDef::bits::len() - 1);
 
         ///// O legível:
         // const auto intensidade = random.discrete_random<char>(1, 10);

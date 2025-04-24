@@ -2,50 +2,83 @@
 #include <cstddef>
 #include <string>
 
+
 namespace MODEL
 {
+    class min_max_values
+    {
+    public:
+        float m_min;
+        float m_max;
+        min_max_values(const float a_min, const float a_max): m_min(a_min), m_max(a_max){}
+        [[nodiscard]] float delta() const {return m_max - m_min;}
+    };
+
+    class car_value_limits
+    {
+    public:
+        static min_max_values roda_x_min_max;
+        static min_max_values roda_y_min_max;
+        static min_max_values roda_r_min_max;
+        static min_max_values roda_densidade_min_max;
+        static min_max_values roda_friccao_min_max;
+        static min_max_values roda_elasticidade_min_max;
+        static min_max_values torque_min_max;
+        static min_max_values freq_min_max;
+        static min_max_values damp_min_max;
+    };
+
     class CCarDef
     {
     public:
-        using circle_params_t = struct tagCircleParams
+        struct circle_params_t
         {
             float x;
             float y;
             float raio;
-        };
 
-        class circle_params_bits
-        {
-        public:
-            size_t x{8};
-            size_t y{8};
-            size_t raio{6};
+            explicit circle_params_t(const std::string& genes, size_t &pos);
+            circle_params_t(float x, float y, float r);
+            [[nodiscard]] std::string genes() const;
 
-            [[nodiscard]] size_t bits() const
+            // Bit sizes for each parameter
+            struct bits
             {
-                return x + y + raio;
-            }
+                static size_t x;
+                static size_t y;
+                static size_t raio;
+
+                [[nodiscard]] static size_t len()
+                {
+                    return x + y + raio;
+                }
+            };
         };
 
-        using body_params_t = struct tagBodyParams
+        struct body_params_t
         {
             float densidade;
             float friccao;
             float elasticidade;
-        };
 
-        class body_params_bits
-        {
-        public:
-            size_t densidade{6};
-            size_t friccao{6};
-            size_t elasticidade{6};
+            body_params_t(const std::string& genes, size_t &pos);
+            body_params_t(float dens, float fric, float elas);
+            [[nodiscard]] std::string genes() const;
 
-            [[nodiscard]] size_t bits() const
+            class bits
             {
-                return densidade + friccao + elasticidade;
-            }
+            public:
+                static size_t densidade;
+                static size_t friccao;
+                static size_t elasticidade;
+
+                [[nodiscard]] static size_t len()
+                {
+                    return densidade + friccao + elasticidade;
+                }
+            };
         };
+
 
         class CRodaParams
         {
@@ -57,11 +90,15 @@ namespace MODEL
 
             CRodaParams(float x, float y, float r, float dens, float fric, float elas);
             CRodaParams(const std::string &genes, size_t &pos);
+            [[nodiscard]] std::string genes() const;
 
-            [[nodiscard]] static size_t bits()
+            struct bits
             {
-                return circle_params_bits().bits() + body_params_bits().bits();
-            }
+                [[nodiscard]] static size_t len()
+                {
+                    return circle_params_t::bits::len() + body_params_t::bits::len();
+                }
+            };
         };
 
         CRodaParams _roda1;
@@ -75,27 +112,28 @@ namespace MODEL
         CCarDef();
 
         explicit CCarDef(const std::string& genes);
+        [[nodiscard]] std::string genes() const;
 
         ~CCarDef() = default;
 
         bool operator==(const CCarDef &other) const;
-    };
 
-    class CCarDefBits
-    {
-    public:
-        size_t _roda1{CCarDef::CRodaParams::bits()};
-        size_t _roda2{CCarDef::CRodaParams::bits()};
-        size_t _peso1{CCarDef::CRodaParams::bits()};
-        size_t _peso2{CCarDef::CRodaParams::bits()};
-        size_t _torque{8};
-        size_t _freq{8};
-        size_t _damp{8};
-
-        [[nodiscard]] size_t bits() const
+        struct bits
         {
-            return _roda1 + _roda2 + _peso1 + _peso2 + _torque * 4 + _freq * 6 + _damp * 6;
-        }
+            static size_t _roda1;
+            static size_t _roda2;
+            static size_t _peso1;
+            static size_t _peso2;
+            static size_t _torque;
+            static size_t _freq;
+            static size_t _damp;
+
+            [[nodiscard]] static size_t len()
+            {
+                return _roda1 + _roda2 + _peso1 + _peso2 + _torque * 4 + _freq * 6 + _damp * 6;
+            }
+        };
     };
-    float decodeBinaryValue(const std::string &genes, size_t &pos, size_t bits, float min, float max);
+
+    float decodeBinaryValue(const std::string &genes, size_t &pos, size_t bits, min_max_values &limits);
 }

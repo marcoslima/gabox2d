@@ -7,9 +7,6 @@
 using namespace std;
 using namespace MODEL;
 
-const auto GENES = CCarDefBits().bits();
-const auto GENES_LEN = GENES + 1;
-
 namespace GA
 {
     class CGaCar final : public IGaCar
@@ -34,6 +31,7 @@ namespace GA
 
         void CreateCarFromGenes(const string &genes) override;
         void CreateRandomCar() override;
+        void CreateFromCarDef(const CCarDef &carDef);
         void calc_fitness(fitness_params_t fitness_params, float max_t) override;
     };
 }

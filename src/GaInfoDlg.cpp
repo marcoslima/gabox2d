@@ -36,7 +36,7 @@ namespace GUI
             ImGui::TableHeadersRow();
             for (const auto& individual : _status.population)
             {
-                _populationGenomas.emplace_back(GENES);
+                _populationGenomas.emplace_back(CCarDef::bits::len());
                 _populationGenomas.back().set(individual.second);
 
                 ImGui::TableNextRow();

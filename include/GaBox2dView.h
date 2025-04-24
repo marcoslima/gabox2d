@@ -4,7 +4,6 @@
 #include <thread>
 
 #include <IGaBox2dView.h>
-#include "GaBox2dDoc.h"
 #include <GaInfo.h>
 #include <network/ipc_client.h>
 #include <thread_params.h>
@@ -12,9 +11,11 @@
 #include "GaInfoDlg.h"
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
+#include "car_editor_dlg.h"
 
 
 using namespace GA;
+
 
 namespace GUI
 {
@@ -25,6 +26,7 @@ namespace GUI
         CGaParamsDlg _dlgGaParams;
         CIdInfoDlg _panelIdInfo;
         CGaInfoDlg _panelGaInfo;
+        CCarEditorDlg _carEditorDlg;
         bool m_bShowParams = false;
         ipc::GaStatusSerializer status_serializer;
         Net::IpcClient ipc_client;
@@ -43,6 +45,7 @@ namespace GUI
         void OnSimulaRepetir() const override;
         void OnGaIniciar() override;
         void OnKeyPressed(void *pParam) override;
+        void OnCarEditor();
         void OnKeyReleased(void *pParam) override;
         void OnEditEnvironment() override;
         void OnMostrarMelhor() override;

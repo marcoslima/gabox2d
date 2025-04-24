@@ -18,7 +18,7 @@ namespace GUI
         string m_strTempo;
         string m_strGenes;
         string m_strDeathReason;
-        CGenomaImage _currentGenoma{static_cast<unsigned int>(GENES)};
+        CGenomaImage _currentGenoma{static_cast<unsigned int>(CCarDef::bits::len())};
 
     public:
         void render() override;
