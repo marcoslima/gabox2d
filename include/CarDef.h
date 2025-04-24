@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <string>
 
+
 namespace MODEL
 {
     class min_max_values
@@ -44,11 +45,11 @@ namespace MODEL
 
             struct bits
             {
-                size_t x{8};
-                size_t y{8};
-                size_t raio{6};
+                static size_t x;
+                static size_t y;
+                static size_t raio;
 
-                [[nodiscard]] size_t operator()() const
+                [[nodiscard]] static size_t len()
                 {
                     return x + y + raio;
                 }
@@ -65,11 +66,11 @@ namespace MODEL
             class bits
             {
             public:
-                size_t densidade{6};
-                size_t friccao{6};
-                size_t elasticidade{6};
+                static size_t densidade;
+                static size_t friccao;
+                static size_t elasticidade;
 
-                [[nodiscard]] size_t operator()() const
+                [[nodiscard]] static size_t len()
                 {
                     return densidade + friccao + elasticidade;
                 }
@@ -88,10 +89,13 @@ namespace MODEL
             CRodaParams(float x, float y, float r, float dens, float fric, float elas);
             CRodaParams(const std::string &genes, size_t &pos);
 
-            [[nodiscard]] static size_t bits()
+            struct bits
             {
-                return circle_params_t::bits()() + body_params_t::bits()();
-            }
+                [[nodiscard]] static size_t len()
+                {
+                    return circle_params_t::bits::len() + body_params_t::bits::len();
+                }
+            };
         };
 
         CRodaParams _roda1;
@@ -110,19 +114,17 @@ namespace MODEL
 
         bool operator==(const CCarDef &other) const;
 
-        [[nodiscard]] std::string toGenoma() const;
-
         struct bits
         {
-            size_t _roda1{CCarDef::CRodaParams::bits()};
-            size_t _roda2{CCarDef::CRodaParams::bits()};
-            size_t _peso1{CCarDef::CRodaParams::bits()};
-            size_t _peso2{CCarDef::CRodaParams::bits()};
-            size_t _torque{8};
-            size_t _freq{8};
-            size_t _damp{8};
+            static size_t _roda1;
+            static size_t _roda2;
+            static size_t _peso1;
+            static size_t _peso2;
+            static size_t _torque;
+            static size_t _freq;
+            static size_t _damp;
 
-            [[nodiscard]] size_t operator()() const
+            [[nodiscard]] static size_t len()
             {
                 return _roda1 + _roda2 + _peso1 + _peso2 + _torque * 4 + _freq * 6 + _damp * 6;
             }

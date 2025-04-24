@@ -19,7 +19,7 @@ namespace GA
 
     void CGaCar::_generate_random_genes()
     {
-        generate_random_genes(GENES, _genes);
+        generate_random_genes(CCarDef::bits::len(), _genes);
     }
 
     string CGaCar::getGenes() const
@@ -42,7 +42,7 @@ namespace GA
 
     void CGaCar::CreateCarFromGenes(const string &genes)
     {
-        if (genes.size() != GENES)
+        if (genes.size() != CCarDef::bits::len())
         {
             stringstream ss;
             ss << "Invalid genes size: " << genes.size();

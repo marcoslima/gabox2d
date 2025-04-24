@@ -18,6 +18,22 @@ namespace MODEL
     min_max_values car_value_limits::freq_min_max{0.1f, 30.0f};
     min_max_values car_value_limits::damp_min_max{0.0f, 2.0f};
 
+    size_t CCarDef::bits::_roda1{CCarDef::CRodaParams::bits::len()};
+    size_t CCarDef::bits::_roda2{CCarDef::CRodaParams::bits::len()};
+    size_t CCarDef::bits::_peso1{CCarDef::CRodaParams::bits::len()};
+    size_t CCarDef::bits::_peso2{CCarDef::CRodaParams::bits::len()};
+    size_t CCarDef::bits::_torque{8};
+    size_t CCarDef::bits::_freq{8};
+    size_t CCarDef::bits::_damp{8};
+
+    size_t CCarDef::circle_params_t::bits::x{8};
+    size_t CCarDef::circle_params_t::bits::y{8};
+    size_t CCarDef::circle_params_t::bits::raio{6};
+
+    size_t CCarDef::body_params_t::bits::densidade{6};
+    size_t CCarDef::body_params_t::bits::friccao{6};
+    size_t CCarDef::body_params_t::bits::elasticidade{6};
+
     CCarDef::CCarDef(): _torque{}, _freq{}, _damp{} {}
 
     bool operator==(const CCarDef::circle_params_t &left, const CCarDef::circle_params_t &right);

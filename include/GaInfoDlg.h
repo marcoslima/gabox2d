@@ -11,7 +11,7 @@ namespace GUI
     class CGaInfoDlg final : public IPanel
     {
         ipc::GaStatus _status;
-        CGenomaImage _bestGenoma{static_cast<unsigned int>(GENES)};
+        CGenomaImage _bestGenoma{static_cast<unsigned int>(CCarDef::bits::len())};
         vector<CGenomaImage> _populationGenomas;
 
     public:

@@ -7,9 +7,6 @@
 using namespace std;
 using namespace MODEL;
 
-const auto GENES = CCarDef::bits()();
-const auto GENES_LEN = GENES + 1;
-
 namespace GA
 {
     class CGaCar final : public IGaCar
