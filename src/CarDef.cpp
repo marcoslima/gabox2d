@@ -8,20 +8,14 @@ namespace MODEL
     min_max_values car_value_limits::roda_densidade_min_max{0.1f, 10.0f};
     min_max_values car_value_limits::roda_friccao_min_max{0.1f, 5.0f};
     min_max_values car_value_limits::roda_elasticidade_min_max{0.0f, 1.0f};
-    min_max_values car_value_limits::peso_x_min_max{-8.0f, 8.0f};
-    min_max_values car_value_limits::peso_y_min_max{2.0f, 8.0f};
-    min_max_values car_value_limits::peso_r_min_max{0.2f, 3.0f};
-    min_max_values car_value_limits::peso_densidade_min_max{0.1f, 10.0f};
-    min_max_values car_value_limits::peso_friccao_min_max{0.1f, 5.0f};
-    min_max_values car_value_limits::peso_elasticidade_min_max{0.0f, 1.0f};
     min_max_values car_value_limits::torque_min_max{-50.0f, 50.0f};
     min_max_values car_value_limits::freq_min_max{0.1f, 30.0f};
     min_max_values car_value_limits::damp_min_max{0.0f, 2.0f};
 
-    size_t CCarDef::bits::_roda1{CCarDef::CRodaParams::bits::len()};
-    size_t CCarDef::bits::_roda2{CCarDef::CRodaParams::bits::len()};
-    size_t CCarDef::bits::_peso1{CCarDef::CRodaParams::bits::len()};
-    size_t CCarDef::bits::_peso2{CCarDef::CRodaParams::bits::len()};
+    size_t CCarDef::bits::_roda1{CRodaParams::bits::len()};
+    size_t CCarDef::bits::_roda2{CRodaParams::bits::len()};
+    size_t CCarDef::bits::_peso1{CRodaParams::bits::len()};
+    size_t CCarDef::bits::_peso2{CRodaParams::bits::len()};
     size_t CCarDef::bits::_torque{8};
     size_t CCarDef::bits::_freq{8};
     size_t CCarDef::bits::_damp{8};
@@ -104,30 +98,29 @@ namespace MODEL
         // Decode joint parameters (torque, frequency, damping)
         constexpr int nMaxTorqueIndex = 3;
 
-        const bits bits;
         for (int i = 0; i < 6; i++)
         {
             // Only decode torque for the first 4 indices
             if (i <= nMaxTorqueIndex)
             {
-                _torque[i] = decodeBinaryValue(genes, pos, bits._torque, car_value_limits::torque_min_max);
+                _torque[i] = decodeBinaryValue(genes, pos, bits::_torque, car_value_limits::torque_min_max);
             }
 
-            _freq[i] = decodeBinaryValue(genes, pos, bits._freq, car_value_limits::freq_min_max);
-            _damp[i] = decodeBinaryValue(genes, pos, bits._damp, car_value_limits::damp_min_max);
+            _freq[i] = decodeBinaryValue(genes, pos, bits::_freq, car_value_limits::freq_min_max);
+            _damp[i] = decodeBinaryValue(genes, pos, bits::_damp, car_value_limits::damp_min_max);
         }
     }
 
     CCarDef::CRodaParams::CRodaParams(const std::string &genes, size_t &pos)
         : circle{
-              decodeBinaryValue(genes, pos, circle_params_t::bits().x, car_value_limits::roda_x_min_max), // x
-              decodeBinaryValue(genes, pos, circle_params_t::bits().y, car_value_limits::roda_y_min_max), // y
-              decodeBinaryValue(genes, pos, circle_params_t::bits().raio, car_value_limits::roda_r_min_max), // radius
+              decodeBinaryValue(genes, pos, circle_params_t::bits::x, car_value_limits::roda_x_min_max), // x
+              decodeBinaryValue(genes, pos, circle_params_t::bits::y, car_value_limits::roda_y_min_max), // y
+              decodeBinaryValue(genes, pos, circle_params_t::bits::raio, car_value_limits::roda_r_min_max), // radius
           },
           body{
-              decodeBinaryValue(genes, pos, body_params_t::bits().densidade, car_value_limits::roda_densidade_min_max), // densidade
-              decodeBinaryValue(genes, pos, body_params_t::bits().friccao, car_value_limits::roda_friccao_min_max), // friccao
-              decodeBinaryValue(genes, pos, body_params_t::bits().elasticidade, car_value_limits::roda_elasticidade_min_max) // elasticidade
+              decodeBinaryValue(genes, pos, body_params_t::bits::densidade, car_value_limits::roda_densidade_min_max), // densidade
+              decodeBinaryValue(genes, pos, body_params_t::bits::friccao, car_value_limits::roda_friccao_min_max), // friccao
+              decodeBinaryValue(genes, pos, body_params_t::bits::elasticidade, car_value_limits::roda_elasticidade_min_max) // elasticidade
           } {}
 
     bool operator==(const CCarDef::circle_params_t &left, const CCarDef::circle_params_t &right)

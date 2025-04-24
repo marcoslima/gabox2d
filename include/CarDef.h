@@ -23,12 +23,6 @@ namespace MODEL
         static min_max_values roda_densidade_min_max;
         static min_max_values roda_friccao_min_max;
         static min_max_values roda_elasticidade_min_max;
-        static min_max_values peso_x_min_max;
-        static min_max_values peso_y_min_max;
-        static min_max_values peso_r_min_max;
-        static min_max_values peso_densidade_min_max;
-        static min_max_values peso_friccao_min_max;
-        static min_max_values peso_elasticidade_min_max;
         static min_max_values torque_min_max;
         static min_max_values freq_min_max;
         static min_max_values damp_min_max;
