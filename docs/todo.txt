@@ -1,0 +1,8 @@
+- Aba com histórico de melhoramentos.
+    geração, fitness, genes.
+   - Gráfico de fitness. Fitness x geração.
+- gRPC
+- NVidia PhysX
+- GoLang
+- Inserir indivíduo no meio da população.
+- Implementar dezenho parcial do ground, restringindo à área visível.
