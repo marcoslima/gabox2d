@@ -44,15 +44,12 @@ void fnGa(void *pParam)
     GaServer gaServer;
 
     GA::CGa ga(make_unique<CCarFactory>());
-    const float cross = gaParams.m_fCrossover;
-    const float mut = gaParams.m_fMutacao;
-
     ga.setParams(gaParams.m_nPopulacao, // Número de indivíduos
-                 gaParams.m_nElitismo, // Tamanho do elitismo
-                 cross, // Probabilidade de crossover
-                 mut, // Probabilidade de mutação
-                 gaParams.m_nAlienismo, // Tamanho do alienismo
-                 gaParams.m_fMaxT); // Tempo máximo a ser simulado
+                 gaParams.m_nElitismo,  // Tamanho do elitismo
+                 gaParams.m_fCrossover, // Probabilidade de crossover
+                 gaParams.m_fMutacao,   // Probabilidade de mutação
+                 gaParams.m_nAlienismo, // Número de alienismos
+                 gaParams.m_fMaxT);     // Tempo máximo a ser simulado
 
     cout << "Iniciando evolução..." << endl;
     ga.BeginEvolve();
