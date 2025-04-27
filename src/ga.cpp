@@ -33,6 +33,7 @@ namespace GA
           , _alienismo(0)
           , _crossover(0)
           , _mutacao(0)
+          , _fitnessWinner(0)
           , _geracao(0)
           , _bMassExtintion(false)
           , _nCount(0)
@@ -58,7 +59,6 @@ namespace GA
                         const float crossover,
                         const float mutacao,
                         const size_t nAlienismo,
-                        const size_t nMutInt,
                         const float dMax_t)
     {
         _populacao = nPopulacao;
@@ -175,10 +175,11 @@ namespace GA
         _do_sort();
 
         _carWinner = m_populacao.front()->getGenes();
+        _fitnessWinner = m_populacao.front()->getFitness();
 
         if (m_melhores.empty() || _not_in_melhores(_carWinner))
         {
-            m_melhores.emplace_back(_geracao, _carWinner);
+            m_melhores.emplace_back(_geracao, _fitnessWinner, _carWinner);
             m_melhores_set.insert(_carWinner);
         }
     }
@@ -408,22 +409,6 @@ namespace GA
     void CGa::_mutate_genes(string &genes)
     {
         const auto point_of_mutation = random.rand_int<size_t>(0, CCarDef::bits::len() - 1);
-
-        ///// O legível:
-        // const auto intensidade = random.discrete_random<char>(1, 10);
-        // const auto direcao = random.discrete_random<char>(0, 1)?(1):(-1);
-        // const auto mutacao = static_cast<char>(intensidade * direcao);
-        // const auto new_gene = static_cast<char>(_genes[point_of_mutation] + mutacao);
-        // const auto g = std::clamp<char>(new_gene, 'A', 'Z');
-        // _genes[point_of_mutation] = g;
-
-        //// O performático: (nunca edite: faça acima e depois remonte o abaixo)
-        // genes[point_of_mutation] = std::clamp<char>(static_cast<char>(genes[point_of_mutation]
-        //                                                               + static_cast<char>(
-        //                                                                   random.discrete_random<char>(1, 10)
-        //                                                                   * random.discrete_random<char>(0, 1)
-        //                                                                       ? (1)
-        //                                                                       : (-1))), 'A', 'Z');
         genes[point_of_mutation] = genes[point_of_mutation] == '0' ? '1' : '0';
     }
 

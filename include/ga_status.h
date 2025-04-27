@@ -20,7 +20,7 @@ namespace ipc
         float bestFitness;
         std::string bestGenes;
         std::vector<pair_float_string_t> population;
-        std::vector<pair_size_string_t> best_history;
+        GA::vec_melhores_t best_history;
 
         GaStatus(const size_t generation,
                  const float gps,
@@ -38,11 +38,7 @@ namespace ipc
                                    {
                                        return pair_float_string_t(pair->getFitness(), pair->getGenes());
                                    });
-            std::ranges::transform(best_history_, std::back_inserter(best_history),
-                                   [](const auto &pair)
-                                   {
-                                       return pair_size_string_t(pair.first, pair.second);
-                                   });
+            std::ranges::copy(best_history_, std::back_inserter(best_history));
         }
 
         GaStatus()
@@ -72,8 +68,9 @@ namespace ipc
             for (const auto &best : status.best_history)
             {
                 auto *history = gaStatus->add_history();
-                history->set_generation(best.first);
-                history->set_genome(best.second);
+                history->set_generation(best.generation);
+                history->set_genome(best.genes);
+                history->set_fitness(best.fitness);
             }
             std::string serialized_data;
             gaStatus->SerializeToString(&serialized_data);
@@ -105,7 +102,7 @@ namespace ipc
             }
             for (const auto &best : gaStatus.history())
             {
-                _status.best_history.emplace_back(best.generation(), best.genome());
+                _status.best_history.emplace_back(best.generation(), best.fitness(), best.genome());
             }
             return true;
         }

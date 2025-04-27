@@ -64,14 +64,14 @@ TEST_CASE("CGa", "[GA]")
     SECTION("setParams")
     {
         const auto sut = make_sut();
-        sut->setParams(90, 1, 70, 65, 0, 5, 60);
+        sut->setParams(90, 1, 70, 65, 0, 60);
         REQUIRE(sut->getPopulacaoLen() == 90);
     }
 
     SECTION("BeginEvolve")
     {
         const auto sut = make_sut();
-        sut->setParams(90, 1, 70, 65, 0, 5, 60);
+        sut->setParams(90, 1, 70, 65, 0, 60);
         sut->BeginEvolve();
         REQUIRE(sut->getGeracao() == 1);
     }
@@ -114,7 +114,7 @@ TEST_CASE("CGa", "[GA]")
         const auto sut = make_sut(std::move(factory));
         const auto world = make_shared<MockWorld>(0U);
 
-        sut->setParams(90, 1, 70, 65, 0, 5, 60);
+        sut->setParams(90, 1, 70, 65, 0, 60);
         atomic<bool> stop_ga;
         sut->BeginEvolve();
         sut->Ordena(world, stop_ga);

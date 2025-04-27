@@ -4,21 +4,25 @@
 #include <string>
 #include <unordered_set>
 #include <random>
-#include "lmfisica.h"
-
+#include <lmfisica.h>
+#include <icar.h>
+#include <map>
 
 using namespace std;
 using namespace LmFisica;
-
-#include <icar.h>
-#include <map>
 
 using vec_double_t = vector<double>;
 
 namespace GA
 {
+    struct melhor_t
+    {
+        size_t generation;
+        float fitness;
+        string genes;
+    };
+
     using vec_string_t = vector<string>;
-    using melhor_t = pair<size_t, string>;
     using fitness_genes_t = pair<float, string>;
     using vec_melhores_t = vector<melhor_t>;
     using vec_genes_t = vector<fitness_genes_t>;
@@ -41,6 +45,7 @@ namespace GA
         float _crossover; // Percentual de probabilidade de ocorrer crossover
         float _mutacao; // Percentual de probabilidade de ocorrer mutação
         string _carWinner; // Indivíduo mais adaptado da geração atual (genes)
+        float _fitnessWinner; // Fitness do indivíduo mais adaptado da geração atual
 
         // Acumuladores do algoritmo
         size_t _geracao; // Geração atual
@@ -135,7 +140,6 @@ namespace GA
                        float crossover = 70,
                        float mutacao = 65,
                        size_t nAlienismo = 0,
-                       size_t nMutInt = 5,
                        float dMax_t = 60);
 
         // Inicia o algoritmo

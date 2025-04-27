@@ -70,13 +70,13 @@ namespace GUI
         for (const auto& individual : views::reverse(_status.best_history))
         {
             _historyGenomas.emplace_back(CCarDef::bits::len());
-            _historyGenomas.back().set(individual.second);
+            _historyGenomas.back().set(individual.genes);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ImGui::Text("%ld", individual.first);
+            ImGui::Text("%ld", individual.generation);
             ImGui::TableNextColumn();
-            ImGui::Text("%.1f", 1000000.0f);
+            ImGui::Text("%.1f", individual.fitness);
             ImGui::TableNextColumn();
             _historyGenomas.back().render();
         }
