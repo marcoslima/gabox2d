@@ -1,5 +1,4 @@
-- Aba com histórico de melhoramentos.
-    geração, fitness, genes.
+- [x] Aba com histórico de melhoramentos. (geração, fitness, genes).
    - Gráfico de fitness. Fitness x geração.
 - gRPC
 - NVidia PhysX
