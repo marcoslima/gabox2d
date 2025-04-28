@@ -3,5 +3,4 @@ set(LIBRARY_NAME GaBox2dLib)
 file(GLOB_RECURSE GABOX2DLIB_SOURCES CONFIGURE_DEPENDS
         "src/*.cpp"
 )
-message(STATUS "GaBox2dLib sources: ${GABOX2DLIB_SOURCES}")
 add_library(${LIBRARY_NAME} ${GABOX2DLIB_SOURCES})

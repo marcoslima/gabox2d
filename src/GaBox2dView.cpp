@@ -88,6 +88,16 @@ namespace GUI
         m_bFollowCar = !m_bFollowCar;
     }
 
+    void CGaBox2dView::updateFitnessGraph()
+    {
+        CFitnessGraph::data_set_t data;
+        ranges::transform(current_status_.best_history, back_inserter(data), [](const auto &status)
+        {
+            return make_pair(status.generation, status.fitness);
+        });
+        _fitnessGraph.set(data);
+    }
+
     bool CGaBox2dView::isDebugGround() const
     {
         return m_bDrawDebugGround;
@@ -753,6 +763,7 @@ namespace GUI
     {
         updateIdInfo();
         updateGaInfo();
+        if (_showPlot) updateFitnessGraph();
     }
 
     void CGaBox2dView::draw(void *pParam)
@@ -761,6 +772,7 @@ namespace GUI
         _panelIdInfo.render();
         _panelGaInfo.render();
         _carEditorDlg.Render();
+        if (_showPlot) _fitnessGraph.render();
 
         const auto pWindow = static_cast<sf::RenderWindow *>(pParam);
         Draw(*pWindow);

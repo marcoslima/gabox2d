@@ -108,6 +108,11 @@ namespace GUI
                 }
                 ImGui::EndMenu();
             }
+            if (ImGui::MenuItem("Show Fitness Plot", nullptr, _view->isShowPlot()))
+            {
+                _view->OnShowPlot();
+            }
+
             ImGui::EndMenu();
         }
     }
@@ -123,6 +128,14 @@ namespace GUI
             if (ImGui::MenuItem("Draw Ground Debug", nullptr, _view->isDebugGround()))
             {
                 _view->toggleDrawDebugGround();
+            }
+            if (ImGui::MenuItem("Show Demo Window", nullptr, _view->isShowDemo()))
+            {
+                _view->OnShowDemo();
+            }
+            if (ImGui::MenuItem("Show Plot Demo", nullptr, _view->isShowPlotDemo()))
+            {
+                _view->OnShowPlotDemo();
             }
             ImGui::EndMenu();
         }

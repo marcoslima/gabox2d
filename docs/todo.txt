@@ -1,9 +1,14 @@
 - [x] Aba com histórico de melhoramentos. (geração, fitness, genes).
-   - Gráfico de fitness. Fitness x geração.
+   [x] - Gráfico de fitness. Fitness x geração.
 - gRPC
 - NVidia PhysX
 - GoLang
 - Implementar dezenho parcial do ground, restringindo à área visível.
 - Comandos GUI -> Thread GA
+  - Graceful shutdown (stop ga)
   - Inserir indivíduo no meio da população.
   - Extinção em massa
+- Render textures
+- Editor de terreno
+- Save/auto-save session
+- Interromper medição ao alcançar o objetivo (parede direita) (linha de chegada)
