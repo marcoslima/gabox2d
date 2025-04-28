@@ -10,6 +10,8 @@
 #include <SFML/Window/Event.hpp>
 
 #include <main_menu.h>
+#include <implot.h>
+
 
 namespace GUI
 {
@@ -31,6 +33,8 @@ namespace GUI
             std::cout << "Error initializing ImGui-SFML!" << std::endl;
             return 1;
         }
+        ImPlot::CreateContext();
+
         // ImGuiIO& io = ImGui::GetIO();
 
         auto env = CEnv();
@@ -74,8 +78,9 @@ namespace GUI
             }
 
             ImGui::SFML::Update(window, deltaClock.restart());
-            ImGui::ShowDemoWindow();
 
+            if (_view->isShowDemo()) ImGui::ShowDemoWindow();
+            if (_view->isShowPlotDemo()) ImPlot::ShowDemoWindow();
             window.clear();
 
             // VIEW.DRAW
@@ -92,6 +97,7 @@ namespace GUI
         }
 
         ImGui::SFML::Shutdown();
+        ImPlot::DestroyContext();
 
         return 0;
     }

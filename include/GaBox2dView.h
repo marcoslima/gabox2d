@@ -12,6 +12,7 @@
 #include "GaParamsDlg.h"
 #include "IdInfoDlg.h"
 #include "car_editor_dlg.h"
+#include <fitness_graph.h>
 
 
 using namespace GA;
@@ -27,6 +28,7 @@ namespace GUI
         CIdInfoDlg _panelIdInfo;
         CGaInfoDlg _panelGaInfo;
         CCarEditorDlg _carEditorDlg;
+        CFitnessGraph _fitnessGraph;
         bool m_bShowParams = false;
         ipc::GaStatusSerializer status_serializer;
         Net::IpcClient ipc_client;
@@ -52,6 +54,9 @@ namespace GUI
         void OnMostrarQualquer() override;
         void OnToggleShowParams() override;
         void OnGenericLabs() override;
+        void OnShowDemo() override {_showDemo = !_showDemo;}
+        void OnShowPlot() override {_showPlot = !_showPlot;}
+        void OnShowPlotDemo() override {_showPlotDemo = !_showPlotDemo;}
 
         void startGa(ga_params_t params) override;
         void SetDocument(IGaBox2dDocPtr doc) override;
@@ -59,6 +64,7 @@ namespace GUI
         void toggleDrawDebugGround() override;
         void ShowHelp() override;
         void toggleFollowCar() override;
+        void updateFitnessGraph();
         void updateData() override;
         void draw(void *pParam) override;
 
@@ -70,6 +76,9 @@ namespace GUI
         [[nodiscard]] bool isShowHelp() const override;
         [[nodiscard]] string getDeadReason() const override;
         [[nodiscard]] const ipc::GaStatus& getCurrentStatus() const override;
+        [[nodiscard]] bool isShowDemo() const override { return _showDemo;}
+        [[nodiscard]] bool isShowPlot() const override { return _showPlot;}
+        [[nodiscard]] bool isShowPlotDemo() const override { return _showPlotDemo;}
 
         bool _confirm_stop_ga();
 
@@ -80,9 +89,11 @@ namespace GUI
         unsigned m_nVelocidade;
         bool m_bGaRunning;
         bool m_bGaExited;
-
         bool m_bShowInfoId;
         bool m_bShowInfoGaGenes = true;
+        bool _showDemo = false;
+        bool _showPlot = false;
+        bool _showPlotDemo = false;
 
         CThreadParams _thread_params{};
         bool m_bWaitingEvolucao;

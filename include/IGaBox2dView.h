@@ -27,6 +27,9 @@ namespace GUI
         virtual void OnMostrarQualquer() = 0;
         virtual void OnToggleShowParams() = 0;
         virtual void OnGenericLabs() = 0;
+        virtual void OnShowDemo() = 0;
+        virtual void OnShowPlot() = 0;
+        virtual void OnShowPlotDemo() = 0;
 
         virtual void startGa(ga_params_t) = 0;
         virtual void setVelocidade(unsigned) = 0;
@@ -44,6 +47,9 @@ namespace GUI
         [[nodiscard]] virtual bool isShowHelp() const = 0;
         [[nodiscard]] virtual string getDeadReason() const = 0;
         [[nodiscard]] virtual const ipc::GaStatus& getCurrentStatus() const = 0;
+        [[nodiscard]] virtual bool isShowDemo() const = 0;
+        [[nodiscard]] virtual bool isShowPlot() const = 0;
+        [[nodiscard]] virtual bool isShowPlotDemo() const = 0;
     };
 
     using IGaBox2dViewPtr = std::shared_ptr<IGaBox2dView>;

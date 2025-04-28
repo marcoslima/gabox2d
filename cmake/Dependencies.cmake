@@ -221,3 +221,37 @@ if(POLICY CMP0167)
 endif()
 find_package(Boost REQUIRED COMPONENTS iostreams system)
 target_link_libraries(${LIBRARY_NAME} Boost::iostreams)
+
+
+
+################################################################################
+# ░▒▓█▓▒░▒▓██████████████▓▒░░▒▓███████▓▒░░▒▓█▓▒░      ░▒▓██████▓▒░▒▓████████▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░
+# ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓████████▓▒░▒▓██████▓▒░  ░▒▓█▓▒░
+set(IMPLOT_PATH ${CMAKE_CURRENT_BINARY_DIR}/implot)
+# Clone the ImPlot library from its GitHub repository
+IF (NOT EXISTS "${IMPLOT_PATH}")
+    message(STATUS ">>>>> Cloning ImPlot library into ${IMPLOT_PATH}")
+    execute_process(
+            COMMAND git clone https://github.com/epezent/implot.git ${IMPLOT_PATH}
+    )
+ELSE ()
+    message(STATUS ">>>>> Pulling ImPlot library at ${IMPLOT_PATH}")
+    execute_process(
+            COMMAND git fetch
+            WORKING_DIRECTORY ${IMPLOT_PATH}
+    )
+ENDIF ()
+target_include_directories(imgui PUBLIC ${IMPLOT_PATH})
+set(IMPLOT_SOURCES
+        ${IMPLOT_PATH}/implot.cpp
+        ${IMPLOT_PATH}/implot_items.cpp
+        ${IMPLOT_PATH}/implot_demo.cpp
+        ${IMPLOT_PATH}/implot.h
+        ${IMPLOT_PATH}/implot_internal.h
+)
+target_sources(${LIBRARY_NAME} PUBLIC ${IMPLOT_SOURCES})
